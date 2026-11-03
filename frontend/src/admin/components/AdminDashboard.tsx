@@ -188,7 +188,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           )}
 
           {activeSection === 'content' && (
-            <PageContentEditor />
+            <PageContentEditor onNavigateToSection={(sec) => setActiveSection(sec as any)} />
           )}
 
           {activeSection === 'rfq-orders' && (
