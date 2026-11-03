@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
+  Home,
+  ShoppingBag,
   Sparkles,
   Package,
   DollarSign,
@@ -74,7 +76,11 @@ type EditorTab =
   | 'footer'
   | 'single-product';
 
-export const PageContentEditor: React.FC = () => {
+interface PageContentEditorProps {
+  onNavigateToSection?: (section: string) => void;
+}
+
+export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigateToSection }) => {
   const { siteSettings, updateSiteSettings, products, updateProduct } = useStore();
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [productSaveSuccess, setProductSaveSuccess] = useState(false);
@@ -296,15 +302,15 @@ export const PageContentEditor: React.FC = () => {
     }
   };
 
-  const tabs: { id: EditorTab; label: string; icon: React.ElementType; desc: string }[] = [
-    { id: 'logo', label: 'Logo & Brand', icon: Recycle, desc: 'Visual identity & favicon' },
-    { id: 'navbar', label: 'Navbar & Banner', icon: Megaphone, desc: 'Header bar & CTA' },
-    { id: 'versatility', label: 'Versatility & Cards', icon: Layers, desc: 'Feature value cards' },
-    { id: 'about', label: 'About Us & Team', icon: Users, desc: 'Company story & leadership' },
-    { id: 'contact', label: 'Contact & Facilities', icon: Phone, desc: 'Locations & sales lines' },
-    { id: 'shop', label: 'Homepage Shop & Banners', icon: Tag, desc: 'Hero banner, trust bar & headings' },
-    { id: 'footer', label: 'Footer & Legal', icon: Globe, desc: 'Links, copyright & badges' },
-    { id: 'single-product', label: 'Single Product Page', icon: Package, desc: 'Specs, gallery & policies' },
+  const tabs: { id: EditorTab; label: string; pageRoute: string; icon: React.ElementType; desc: string }[] = [
+    { id: 'versatility', label: '1. Home Page', pageRoute: '/', icon: Home, desc: 'Home story, value cards & versatility banner' },
+    { id: 'about', label: '2. About Us Page', pageRoute: '/#about', icon: Users, desc: 'Corporate narrative, mission, team & stats' },
+    { id: 'shop', label: '3. Shop Page', pageRoute: '/#shop', icon: ShoppingBag, desc: 'Hero panoramic banner, trust badges & headings' },
+    { id: 'contact', label: '4. Contact Us Page', pageRoute: '/#contact', icon: Phone, desc: 'Corona address, phones, emails & Google Map' },
+    { id: 'single-product', label: '5. Single Product Page', pageRoute: '/#product-detail', icon: Package, desc: 'Single product template, specs & stock' },
+    { id: 'footer', label: '6. Legal & Footer Page', pageRoute: '/#footer', icon: Globe, desc: 'Terms & conditions, privacy, newsletter & copyright' },
+    { id: 'navbar', label: '7. Header & Navbar', pageRoute: '/', icon: Megaphone, desc: 'Top announcement marquee & header buttons' },
+    { id: 'logo', label: '8. Logo & Branding', pageRoute: '/', icon: Recycle, desc: 'Visual brand logo & website favicon' },
   ];
 
   return (
