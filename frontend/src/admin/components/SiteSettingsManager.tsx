@@ -2016,17 +2016,17 @@ return () => clearTimeout(timer);
               )}
 
               {/* Modal Actions */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-slate-100 flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsSocialModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+                  className="w-full xs:w-auto justify-center px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                  className="w-full xs:w-auto justify-center px-5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer shadow-md text-center"
                 >
                   <Check className="w-4 h-4" />
                   <span>{editingSocialLink ? 'Update Channel' : 'Add Channel'}</span>
