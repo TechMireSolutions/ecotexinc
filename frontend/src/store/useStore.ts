@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Product, CategoryItem, Order, QuoteSubmission, SiteSettings, CartItem } from '../types';
 import { PRODUCTS } from '../data/products';
-import { BASE_URL } from '../services/apiService';
+import { BASE_URL, apiService } from '../services/apiService';
 
 export interface HeroConfig {
   title: string;
@@ -522,6 +522,13 @@ const loadLocal = <T>(key: string, fallback: T): T => {
   }
 };
 
+// Helper to get admin Bearer token headers for protected API requests
+const getAuthHeaders = (): Record<string, string> => {
+  if (typeof window === 'undefined') return {};
+  const token = localStorage.getItem('ecotex_admin_token') || sessionStorage.getItem('ecotex_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 // Helper to save to localStorage
 const saveLocal = (key: string, val: any) => {
   if (typeof window === 'undefined') return;
@@ -706,50 +713,44 @@ export const useStore = create<StoreState>((set, get) => ({
     const cleanEmail = email.trim().toLowerCase();
     const cleanPass = password.trim();
 
-    // Verification against master credentials or backend
+    if (!cleanEmail || !cleanPass) {
+      return { success: false, error: 'Email and password are required.' };
+    }
+
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: cleanEmail, password: cleanPass })
       });
+
       if (res.ok) {
         const data = await res.json();
-        const user = { name: data.user.name || 'Executive Director', email: data.user.email || cleanEmail, role: 'Super Admin' };
-        const token = data.token || `token-${Date.now()}`;
+        const user = { name: data.user?.name || 'Executive Director', email: data.user?.email || cleanEmail, role: data.user?.role || 'Super Admin' };
+        const token = data.token;
 
-        if (rememberMe) {
-          localStorage.setItem('ecotex_admin_token', token);
-          localStorage.setItem('ecotex_admin_user', JSON.stringify(user));
-        } else {
-          sessionStorage.setItem('ecotex_admin_token', token);
-          sessionStorage.setItem('ecotex_admin_user', JSON.stringify(user));
+        if (typeof window !== 'undefined') {
+          if (rememberMe) {
+            localStorage.setItem('ecotex_admin_token', token);
+            localStorage.setItem('ecotex_admin_user', JSON.stringify(user));
+          } else {
+            sessionStorage.setItem('ecotex_admin_token', token);
+            sessionStorage.setItem('ecotex_admin_user', JSON.stringify(user));
+          }
         }
 
         set({ isAuthenticated: true, adminToken: token, adminUser: user });
         return { success: true };
-      }
-    } catch {}
-
-    // Fallback Client Auth
-    if (
-      (cleanEmail === 'admin@ecotexinc.com' || cleanEmail === 'admin') &&
-      (cleanPass === 'admin123' || cleanPass === 'admin' || cleanPass === 'ecotex2026')
-    ) {
-      const user = { name: 'Operations Director', email: 'admin@ecotexinc.com', role: 'Super Admin' };
-      const token = `auth-session-${Date.now()}`;
-      if (rememberMe) {
-        localStorage.setItem('ecotex_admin_token', token);
-        localStorage.setItem('ecotex_admin_user', JSON.stringify(user));
       } else {
-        sessionStorage.setItem('ecotex_admin_token', token);
-        sessionStorage.setItem('ecotex_admin_user', JSON.stringify(user));
+        const errorData = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.message || errorData.error || 'Access Denied: Invalid administrator credentials.'
+        };
       }
-      set({ isAuthenticated: true, adminToken: token, adminUser: user });
-      return { success: true };
+    } catch (networkErr) {
+      return { success: false, error: 'Cannot connect to authentication server. Please check your connection.' };
     }
-
-    return { success: false, error: 'Invalid administrator email or password.' };
   },
 
   logout: () => {
@@ -786,7 +787,7 @@ export const useStore = create<StoreState>((set, get) => ({
       // Sync with server if online
       fetch(`${BASE_URL}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ heroConfig: newConfig })
       }).catch(() => {});
       return { heroConfig: newConfig };
@@ -796,17 +797,31 @@ export const useStore = create<StoreState>((set, get) => ({
   // Live Server Data Synchronization
   fetchSettings: async () => {
     try {
-      const res = await fetch(`${BASE_URL}/settings`);
-      if (res.ok) {
-        const serverSettings = await res.json();
-        if (serverSettings && typeof serverSettings === 'object' && Object.keys(serverSettings).length > 0) {
-          set((state) => {
-            const merged = { ...state.siteSettings, ...serverSettings };
-            saveLocal('site_settings', merged);
-            return { siteSettings: merged };
-          });
-          return serverSettings;
-        }
+      const serverSettings = await apiService.getSettings();
+      if (serverSettings && typeof serverSettings === 'object' && Object.keys(serverSettings).length > 0) {
+        set((state) => {
+          const merged = { ...state.siteSettings, ...serverSettings };
+          saveLocal('site_settings', merged);
+          let updatedHero = { ...state.heroConfig };
+          if (serverSettings.heroConfig) {
+            updatedHero = { ...updatedHero, ...serverSettings.heroConfig };
+          }
+          if (serverSettings.heroTitle) {
+            updatedHero.title = serverSettings.heroTitle;
+          }
+          if (serverSettings.heroSubtitle) {
+            updatedHero.subtitle = serverSettings.heroSubtitle;
+          }
+          if (serverSettings.heroButtonText) {
+            updatedHero.ctaText = serverSettings.heroButtonText;
+          }
+          if (serverSettings.heroBackgroundImage) {
+            updatedHero.backgroundImage = serverSettings.heroBackgroundImage;
+          }
+          saveLocal('hero_config', updatedHero);
+          return { siteSettings: merged, heroConfig: updatedHero };
+        });
+        return serverSettings;
       }
     } catch (err) {
       console.warn('Could not fetch server settings:', err);
@@ -817,13 +832,13 @@ export const useStore = create<StoreState>((set, get) => ({
   fetchAllData: async () => {
     try {
       const [settingsRes, prodRes, catRes, ordsRes, qtsRes, statsRes, msgsRes] = await Promise.allSettled([
-        fetch(`${BASE_URL}/settings`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/products`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/categories`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/orders`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/quotes`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/stats`).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${BASE_URL}/messages`).then((r) => (r.ok ? r.json() : null)),
+        apiService.getSettings(),
+        apiService.getProducts(),
+        apiService.getCategories(),
+        apiService.getOrders(),
+        apiService.getQuotes(),
+        apiService.getStats(),
+        apiService.getMessages(),
       ]);
 
       if (settingsRes.status === 'fulfilled' && settingsRes.value) {
@@ -832,14 +847,27 @@ export const useStore = create<StoreState>((set, get) => ({
           set((state) => {
             const merged = { ...state.siteSettings, ...serverSettings };
             saveLocal('site_settings', merged);
-            let updatedHero = state.heroConfig;
+            let updatedHero = { ...state.heroConfig };
             if (serverSettings.heroConfig) {
-              updatedHero = { ...state.heroConfig, ...serverSettings.heroConfig };
-              saveLocal('hero_config', updatedHero);
+              updatedHero = { ...updatedHero, ...serverSettings.heroConfig };
             }
-            let updatedImages = state.siteImages;
+            if (serverSettings.heroTitle) {
+              updatedHero.title = serverSettings.heroTitle;
+            }
+            if (serverSettings.heroSubtitle) {
+              updatedHero.subtitle = serverSettings.heroSubtitle;
+            }
+            if (serverSettings.heroButtonText) {
+              updatedHero.ctaText = serverSettings.heroButtonText;
+            }
+            if (serverSettings.heroBackgroundImage) {
+              updatedHero.backgroundImage = serverSettings.heroBackgroundImage;
+            }
+            saveLocal('hero_config', updatedHero);
+
+            let updatedImages = { ...state.siteImages };
             if (serverSettings.siteImages) {
-              updatedImages = { ...state.siteImages, ...serverSettings.siteImages };
+              updatedImages = { ...updatedImages, ...serverSettings.siteImages };
               saveLocal('site_images', updatedImages);
             }
             return { siteSettings: merged, heroConfig: updatedHero, siteImages: updatedImages };
@@ -943,7 +971,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('site_settings', newSettings);
       fetch(`${BASE_URL}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(newSettings)
       }).catch((err) => {
         console.warn('Failed to persist settings to API:', err);
@@ -958,7 +986,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('site_images', updatedImages);
       fetch(`${BASE_URL}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ siteImages: updatedImages })
       }).catch(() => {});
       return { siteImages: updatedImages };
@@ -976,7 +1004,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('products', updated);
       fetch(`${BASE_URL}/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(newProduct)
       }).catch(() => {});
       return { products: updated };
@@ -1001,7 +1029,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('products', updated);
       fetch(`${BASE_URL}/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(updates)
       }).catch(() => {});
       return { products: updated };
@@ -1012,7 +1040,10 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => {
       const updated = state.products.filter((p) => p.id !== id);
       saveLocal('products', updated);
-      fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetch(`${BASE_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      }).catch(() => {});
       return { products: updated };
     });
   },
@@ -1030,7 +1061,10 @@ export const useStore = create<StoreState>((set, get) => ({
         };
       });
       saveLocal('products', updated);
-      fetch(`${BASE_URL}/products/${id}/toggle-stock`, { method: 'PATCH' }).catch(() => {});
+      fetch(`${BASE_URL}/products/${id}/toggle-stock`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeaders() },
+      }).catch(() => {});
       return { products: updated };
     });
   },
@@ -1052,7 +1086,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('categories', updated);
       fetch(`${BASE_URL}/categories`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(newCat)
       }).catch(() => {});
       return { categories: updated };
@@ -1065,7 +1099,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('categories', updated);
       fetch(`${BASE_URL}/categories/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(updates)
       }).catch(() => {});
       return { categories: updated };
@@ -1076,7 +1110,10 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => {
       const updated = state.categories.filter((c) => c.id !== id);
       saveLocal('categories', updated);
-      fetch(`${BASE_URL}/categories/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetch(`${BASE_URL}/categories/${id}`, {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      }).catch(() => {});
       return { categories: updated };
     });
   },
@@ -1106,7 +1143,9 @@ export const useStore = create<StoreState>((set, get) => ({
   // Orders & Quotes Fetching
   fetchOrders: async () => {
     try {
-      const res = await fetch(`${BASE_URL}/orders`);
+      const res = await fetch(`${BASE_URL}/orders`, {
+        headers: { ...getAuthHeaders() },
+      });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -1144,7 +1183,9 @@ export const useStore = create<StoreState>((set, get) => ({
 
   fetchQuotes: async () => {
     try {
-      const res = await fetch(`${BASE_URL}/quotes`);
+      const res = await fetch(`${BASE_URL}/quotes`, {
+        headers: { ...getAuthHeaders() },
+      });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -1306,7 +1347,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('orders', updated);
       fetch(`${BASE_URL}/orders/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(updates)
       }).catch(() => {});
       return { orders: updated };
@@ -1319,7 +1360,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('orders', updated);
       fetch(`${BASE_URL}/orders/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ status })
       }).catch(() => {});
       return { orders: updated };
@@ -1330,7 +1371,10 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => {
       const updated = state.orders.filter((o) => o.id !== id);
       saveLocal('orders', updated);
-      fetch(`${BASE_URL}/orders/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetch(`${BASE_URL}/orders/${id}`, {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      }).catch(() => {});
       return {
         orders: updated,
         analytics: {
@@ -1393,7 +1437,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('quotes', updated);
       fetch(`${BASE_URL}/quotes/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(updates)
       }).catch(() => {});
       return { quotes: updated };
@@ -1406,7 +1450,7 @@ export const useStore = create<StoreState>((set, get) => ({
       saveLocal('quotes', updated);
       fetch(`${BASE_URL}/quotes/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ status })
       }).catch(() => {});
       return { quotes: updated };
@@ -1417,7 +1461,10 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => {
       const updated = state.quotes.filter((q) => q.id !== id);
       saveLocal('quotes', updated);
-      fetch(`${BASE_URL}/quotes/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetch(`${BASE_URL}/quotes/${id}`, {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      }).catch(() => {});
       return {
         quotes: updated,
         analytics: {

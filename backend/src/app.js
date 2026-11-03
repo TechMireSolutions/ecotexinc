@@ -49,6 +49,7 @@ try {
   }
 } catch (_) {}
 app.use('/uploads', express.static(config.paths.uploadsDir));
+app.use('/admin/uploads', express.static(config.paths.uploadsDir));
 
 // Fallback upload paths
 const frontendPublicUploads = fs.existsSync(path.join(config.paths.root, '..', 'frontend', 'public', 'uploads'))
@@ -56,10 +57,12 @@ const frontendPublicUploads = fs.existsSync(path.join(config.paths.root, '..', '
   : path.join(config.paths.root, '..', 'ecotex-inc-frontend', 'public', 'uploads');
 if (fs.existsSync(frontendPublicUploads)) {
   app.use('/uploads', express.static(frontendPublicUploads));
+  app.use('/admin/uploads', express.static(frontendPublicUploads));
 }
 
-// Mount Core API router under /api
+// Mount Core API router under both /api and /admin/api (cPanel subpath compatibility)
 app.use('/api', apiRouter);
+app.use('/admin/api', apiRouter);
 
 // Serve Frontend SPA build if available
 const distPath = fs.existsSync(config.paths.frontendDist)
@@ -70,7 +73,7 @@ if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
 
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    if (req.path.startsWith('/api') || req.path.startsWith('/admin/api') || req.path.startsWith('/uploads')) {
       return next();
     }
     res.sendFile(path.join(distPath, 'index.html'));
@@ -87,8 +90,9 @@ if (fs.existsSync(distPath)) {
   });
 }
 
-// 404 for unmatched /api routes
+// 404 for unmatched API routes
 app.use('/api/*', notFoundHandler);
+app.use('/admin/api/*', notFoundHandler);
 
 // Global Error Handler
 app.use(errorHandler);

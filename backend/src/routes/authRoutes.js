@@ -7,6 +7,6 @@ export const authRouter = express.Router();
 
 authRouter.post('/login', authLimiter, login);
 authRouter.get('/me', requireAuth, getMe);
-authRouter.put('/credentials', updateCredentials);
+authRouter.put('/credentials', requireAuth, updateCredentials);
 
 export default authRouter;

@@ -11,17 +11,40 @@ export async function getSettings(req, res) {
   }
 }
 
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object' || Array.isArray(source)) {
+    return source;
+  }
+  const result = { ...(target || {}) };
+  for (const key of Object.keys(source)) {
+    const srcVal = source[key];
+    const tgtVal = result[key];
+    if (
+      srcVal &&
+      typeof srcVal === 'object' &&
+      !Array.isArray(srcVal) &&
+      tgtVal &&
+      typeof tgtVal === 'object' &&
+      !Array.isArray(tgtVal)
+    ) {
+      result[key] = deepMerge(tgtVal, srcVal);
+    } else {
+      result[key] = srcVal;
+    }
+  }
+  return result;
+}
+
 export async function updateSettings(req, res) {
   try {
     const updates = req.body || {};
     let updatedSettings = null;
 
     await updateDb((db) => {
-      db.settings = {
-        ...(db.settings || {}),
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      const current = db.settings || {};
+      const merged = deepMerge(current, updates);
+      merged.updatedAt = new Date().toISOString();
+      db.settings = merged;
       updatedSettings = db.settings;
       return db;
     });

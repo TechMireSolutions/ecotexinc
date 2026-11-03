@@ -1,6 +1,6 @@
 import process from 'process';
 import config from '../config/index.js';
-import { getDb } from '../database/db.js';
+import { getDb, getActiveDbProvider } from '../database/db.js';
 
 export function getHealth(req, res) {
   const memory = process.memoryUsage();
@@ -23,14 +23,15 @@ export function getHealth(req, res) {
     },
     database: {
       status: 'connected',
-      provider: config.databaseUrl ? 'Neon PostgreSQL (Cloud)' : 'Local Atomic Store',
-      type: 'PostgreSQL + High-Performance Unified Store',
+      provider: getActiveDbProvider(),
+      type: 'Production Unified Store',
       records: {
         products: db.products?.length || 0,
         categories: db.categories?.length || 0,
         orders: db.orders?.length || 0,
         quotes: db.quotes?.length || 0,
         testimonials: db.testimonials?.length || 0,
+        customerMessages: db.customerMessages?.length || 0,
       },
     },
   });

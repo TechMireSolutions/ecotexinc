@@ -18,6 +18,7 @@ import { AdminDashboard } from './admin/components/AdminDashboard';
 import { AdminLogin } from './admin/AdminLogin';
 import { useStore } from './store/useStore';
 import { ActiveSection, Product } from './types';
+import { useLiveStorefront } from './hooks/useLiveStorefront';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<ActiveSection>('home');
@@ -26,6 +27,9 @@ export default function App() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quoteProductId, setQuoteProductId] = useState<string>('prod-1');
   const [cartInitialStep, setCartInitialStep] = useState<'cart' | 'checkout'>('cart');
+
+  // Dynamic live storefront synchronization (/admin/api/settings & /admin/api/products)
+  useLiveStorefront();
 
   // Zustand Global Store Integration
   const { 
@@ -43,11 +47,6 @@ export default function App() {
     logout,
     siteSettings
   } = useStore();
-
-  // Synchronize settings & live database from backend server on mount
-  useEffect(() => {
-    useStore.getState().fetchAllData();
-  }, []);
 
   // Dynamically update document favicon in browser tab
   useEffect(() => {

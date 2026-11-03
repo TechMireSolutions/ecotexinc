@@ -13,16 +13,20 @@ interface BiteStyleHeroProps {
 export const BiteStyleHero: React.FC<BiteStyleHeroProps> = ({
   onNavigateToShop
 }) => {
-  const { heroConfig } = useStore();
+  const { heroConfig, siteSettings } = useStore();
+
+  const activeTitle = heroConfig?.title || siteSettings?.heroTitle || "It's time to\npack better.";
+  const activeSubtitle = heroConfig?.subtitle || siteSettings?.heroSubtitle || "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.";
+  const activeCtaText = heroConfig?.ctaText || siteSettings?.heroButtonText || 'Shop Now';
 
   // Parse title for line breaks and highlighting
-  const titleLines = (heroConfig.title || "It's time to\npack better.").split('\n');
+  const titleLines = activeTitle.split('\n');
 
   // Determine active background image: defaults to home-hero-bg.jpg unless explicitly set to 'none'
   const currentBgImage = 
-    heroConfig.backgroundImage === 'none' 
+    (heroConfig?.backgroundImage === 'none' || siteSettings?.heroBackgroundImage === 'none')
       ? null 
-      : (heroConfig.backgroundImage || '/images/home-hero-bg.jpg');
+      : (heroConfig?.backgroundImage || siteSettings?.heroBackgroundImage || '/images/home-hero-bg.jpg');
 
 
 
@@ -94,7 +98,7 @@ export const BiteStyleHero: React.FC<BiteStyleHeroProps> = ({
             transition={{ duration: 0.8, delay: 0.3 }}
             className="mt-4 sm:mt-7 text-sm sm:text-lg md:text-xl text-white/90 leading-relaxed max-w-xl font-normal drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]"
           >
-            {heroConfig.subtitle}
+            {activeSubtitle}
           </motion.p>
 
           {/* Button */}
@@ -117,7 +121,7 @@ export const BiteStyleHero: React.FC<BiteStyleHeroProps> = ({
                 className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] pointer-events-none"
               />
 
-              <span className="relative z-10 font-bold">{heroConfig.ctaText || 'Shop Now'}</span>
+              <span className="relative z-10 font-bold">{activeCtaText}</span>
               
               <div className="relative z-10 bg-white/20 p-1.5 rounded-full group-hover:bg-white/30 transition-colors">
                 <ArrowRight className="w-5 h-5 text-white" />

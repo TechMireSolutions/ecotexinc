@@ -9,7 +9,6 @@ import settingsRouter from './settingsRoutes.js';
 import testimonialsRouter from './testimonialsRoutes.js';
 import statsRouter from './statsRoutes.js';
 import uploadRouter from './uploadRoutes.js';
-import resetRouter from './resetRoutes.js';
 import messagesRouter from './messagesRoutes.js';
 
 export const apiRouter = express.Router();
@@ -25,7 +24,6 @@ apiRouter.use('/settings', settingsRouter);
 apiRouter.use('/testimonials', testimonialsRouter);
 apiRouter.use('/stats', statsRouter);
 apiRouter.use('/upload', uploadRouter);
-apiRouter.use('/reset', resetRouter);
 apiRouter.use('/messages', messagesRouter);
 
 export default apiRouter;

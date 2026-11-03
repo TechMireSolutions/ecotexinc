@@ -8,13 +8,15 @@ import {
   deleteProduct,
 } from '../controllers/productsController.js';
 
+import { requireAuth } from '../middleware/authMiddleware.js';
+
 export const productsRouter = express.Router();
 
 productsRouter.get('/', getAllProducts);
 productsRouter.get('/:id', getProductById);
-productsRouter.post('/', createProduct);
-productsRouter.put('/:id', updateProduct);
-productsRouter.patch('/:id/toggle-stock', toggleStock);
-productsRouter.delete('/:id', deleteProduct);
+productsRouter.post('/', requireAuth, createProduct);
+productsRouter.put('/:id', requireAuth, updateProduct);
+productsRouter.patch('/:id/toggle-stock', requireAuth, toggleStock);
+productsRouter.delete('/:id', requireAuth, deleteProduct);
 
 export default productsRouter;

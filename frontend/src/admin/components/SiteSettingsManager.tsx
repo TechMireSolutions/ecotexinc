@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { SiteSettings, LogoConfig, OrderNotificationsConfig, ShippingConfig, FooterConfig } from '../../types';
-import { BASE_URL } from '../../services/apiService';
+import { BASE_URL, apiService } from '../../services/apiService';
 
 interface SiteSettingsManagerProps {
   onLogout?: () => void;
@@ -94,19 +94,18 @@ export const SiteSettingsManager: React.FC<SiteSettingsManagerProps> = ({ onLogo
   const faviconFileInputRef = useRef<HTMLInputElement>(null);
   const [faviconUploading, setFaviconUploading] = useState(false);
 
-  // Keep form data synced if store settings load or update externally
+  const isInitialized = useRef(false);
   useEffect(() => {
-    if (siteSettings) {
+    if (!isInitialized.current && siteSettings && Object.keys(siteSettings).length > 0) {
       setFormData(prev => ({
         ...prev,
         ...siteSettings,
-        siteTitle: siteSettings.siteTitle || prev.siteTitle || 'Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags',
-        metaDescription: siteSettings.metaDescription || prev.metaDescription || 'Vertically integrated manufacturer of circular non-woven polypropylene bags, compostable blends, and reusable commercial textiles. Direct from Corona, CA.',
         logoConfig: {
           ...prev.logoConfig,
           ...(siteSettings.logoConfig || {})
         }
       }));
+      isInitialized.current = true;
     }
   }, [siteSettings]);
 
@@ -277,15 +276,16 @@ return () => clearTimeout(timer);
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
-      // 1. Update Global Zustand Store and LocalStorage
-      updateSiteSettings(formData);
+      // 1. Persist to API Server atomically
+      const updated = await apiService.updateSettings(formData);
 
-      // 2. Persist to API Server
-      const res = await fetch(`${BASE_URL}/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      // 2. Update Global Zustand Store and LocalStorage
+      updateSiteSettings(updated || formData);
+
+      // 3. Dispatch live storefront update
+      window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
+        detail: { settings: updated || formData }
+      }));
 
       // 3. Immediately reflect siteTitle and favicon in the current browser tab
       if (formData.siteTitle) {
@@ -411,16 +411,7 @@ return () => clearTimeout(timer);
         </div>
 
         {/* Global Save Button */}
-        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto shrink-0">
-          <button
-            type="button"
-            onClick={() => setFormData(siteSettings)}
-            className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 py-2.5 sm:py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
-
+        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto shrink-0 justify-end">
           <button
             type="button"
             onClick={handleSaveSettings}
@@ -586,13 +577,6 @@ return () => clearTimeout(timer);
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>{faviconUploading ? 'Uploading...' : 'Upload File'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleLogoConfigChange('faviconUrl', '/favicon.ico')}
-                      className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-semibold cursor-pointer"
-                    >
-                      Reset Default
                     </button>
                   </div>
                   <p className="text-[10px] text-slate-400">Supports .ico, .png, .svg, .webp</p>

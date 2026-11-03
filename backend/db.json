@@ -552,10 +552,13 @@
       "id": "t-shirt",
       "tag": "REUSABLE",
       "count": "12 Models",
-      "image": "/images/bag-green.png",
+      "image": "/uploads/arman-1793430150796-ycmwn.webp",
       "label": "T-Shirt Bags",
       "subtitle": "High-Volume Retail",
-      "description": "High-tensile vest-handle grocery & supermarket bags engineered for high load bearing and fast automated packaging."
+      "description": "High-tensile vest-handle grocery & supermarket bags engineered for high load bearing and fast automated packaging.",
+      "size": "",
+      "gsm": "",
+      "updatedAt": "2026-10-31T07:02:34.048Z"
     },
     {
       "id": "non-woven",
@@ -605,6 +608,1077 @@
     }
   ],
   "orders": [
+    {
+      "id": "ECX-579758",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:30:50.912Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T08:30:50.912Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T08:30:50.912Z"
+        }
+      },
+      "updatedAt": "2026-10-31T08:30:50.920Z"
+    },
+    {
+      "id": "ECX-363461",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:30:47.765Z",
+      "items": [
+        {
+          "productId": "prod-1793435447713",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T08:30:47.765Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T08:30:47.765Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-314149",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:28:16.310Z",
+      "items": [
+        {
+          "productId": "prod-1793435296257",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T08:28:16.310Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T08:28:16.310Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-148257",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:26:56.939Z",
+      "items": [
+        {
+          "productId": "prod-1793435216880",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T08:26:56.939Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T08:26:56.939Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-775633",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T07:16:50.940Z",
+      "items": [
+        {
+          "productId": "prod-1793431010885",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T07:16:50.940Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T07:16:50.940Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-455957",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:56:26.123Z",
+      "items": [
+        {
+          "productId": "prod-1793429786049",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T06:56:26.123Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T06:56:26.123Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-514299",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:31:19.417Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T06:31:19.417Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T06:31:19.417Z"
+        }
+      },
+      "updatedAt": "2026-10-31T06:31:19.425Z"
+    },
+    {
+      "id": "ECX-219895",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:31:15.968Z",
+      "items": [
+        {
+          "productId": "prod-1793428275913",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T06:31:15.968Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T06:31:15.968Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-600649",
+      "buyerName": "Global Markets Group",
+      "customerName": "Global Markets Group",
+      "companyName": "Global Markets LLC",
+      "customerCompany": "Global Markets LLC",
+      "email": "procurement@globalmarkets.com",
+      "customerEmail": "procurement@globalmarkets.com",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 25,
+      "shipping": 10,
+      "total": 35,
+      "totalAmount": 35,
+      "status": "Pending",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:30:25.083Z",
+      "items": [
+        {
+          "productId": "prod-1793428225031",
+          "productName": "Inventory Test Bag",
+          "name": "Inventory Test Bag",
+          "quantity": 50,
+          "unitPrice": 0.5,
+          "price": 0.5,
+          "totalPrice": 25,
+          "color": "#4E9F76",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T06:30:25.083Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T06:30:25.083Z"
+        }
+      }
+    },
+    {
+      "id": "ECX-771302",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:58:08.037Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:58:08.037Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:58:08.037Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:58:08.045Z"
+    },
+    {
+      "id": "ECX-650807",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:43:20.092Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:43:20.092Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:43:20.092Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:43:20.100Z"
+    },
+    {
+      "id": "ECX-493113",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:43:02.886Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:43:02.886Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:43:02.886Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:43:02.893Z"
+    },
+    {
+      "id": "ECX-527479",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:41:45.627Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:41:45.627Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:41:45.627Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:41:45.636Z"
+    },
+    {
+      "id": "ECX-411658",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:41:23.457Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:41:23.457Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:41:23.457Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:41:23.465Z"
+    },
+    {
+      "id": "ECX-912551",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:37:01.798Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:37:01.798Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:37:01.798Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:37:01.809Z"
+    },
+    {
+      "id": "ECX-161590",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:30:48.048Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:30:48.048Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:30:48.048Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:30:48.061Z"
+    },
+    {
+      "id": "ECX-554041",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:22:51.032Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:22:51.032Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:22:51.032Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:22:51.040Z"
+    },
+    {
+      "id": "ECX-858805",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:18:50.236Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:18:50.237Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:18:50.237Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:18:50.250Z"
+    },
+    {
+      "id": "ECX-193646",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:17:19.982Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T05:17:19.982Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T05:17:19.982Z"
+        }
+      },
+      "updatedAt": "2026-10-31T05:17:19.991Z"
+    },
+    {
+      "id": "ECX-273064",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T04:59:28.695Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T04:59:28.695Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T04:59:28.695Z"
+        }
+      },
+      "updatedAt": "2026-10-31T04:59:28.705Z"
+    },
+    {
+      "id": "ECX-560927",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T04:54:29.413Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-31T04:54:29.413Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-31T04:54:29.413Z"
+        }
+      },
+      "updatedAt": "2026-10-31T04:54:29.423Z"
+    },
+    {
+      "id": "ECX-204180",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-10-30",
+      "createdAt": "2026-10-30T06:03:12.680Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-10-30T06:03:12.680Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-10-30T06:03:12.680Z"
+        }
+      },
+      "updatedAt": "2026-10-30T06:03:12.686Z"
+    },
     {
       "id": "ECX-615695",
       "zip": "75820",
@@ -1982,6 +3056,336 @@
   ],
   "quotes": [
     {
+      "id": "RFQ-3876",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:30:50.928Z"
+    },
+    {
+      "id": "RFQ-6268",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:30:47.787Z"
+    },
+    {
+      "id": "RFQ-5831",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:28:16.334Z"
+    },
+    {
+      "id": "RFQ-7362",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T08:26:56.967Z"
+    },
+    {
+      "id": "RFQ-9122",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T07:16:50.968Z"
+    },
+    {
+      "id": "RFQ-8171",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:56:26.170Z"
+    },
+    {
+      "id": "RFQ-6045",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:31:19.432Z"
+    },
+    {
+      "id": "RFQ-5055",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:31:15.995Z"
+    },
+    {
+      "id": "RFQ-5007",
+      "name": "Elena Rostova",
+      "company": "Nordic Clean Retail",
+      "email": "elena@nordicclean.se",
+      "phone": "(555) 000-0000",
+      "category": "compostable",
+      "volume": "50,000 units",
+      "printing": "4-Color Continuous Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T06:30:25.110Z"
+    },
+    {
+      "id": "RFQ-2533",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:58:08.052Z"
+    },
+    {
+      "id": "RFQ-7480",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:43:20.105Z"
+    },
+    {
+      "id": "RFQ-8845",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:43:02.898Z"
+    },
+    {
+      "id": "RFQ-6345",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:41:45.643Z"
+    },
+    {
+      "id": "RFQ-1806",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:41:23.471Z"
+    },
+    {
+      "id": "RFQ-2398",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:37:01.835Z"
+    },
+    {
+      "id": "RFQ-7225",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:30:48.068Z"
+    },
+    {
+      "id": "RFQ-1059",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:22:51.052Z"
+    },
+    {
+      "id": "RFQ-9014",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:18:50.261Z"
+    },
+    {
+      "id": "RFQ-8779",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T05:17:19.997Z"
+    },
+    {
+      "id": "RFQ-6457",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T04:59:28.714Z"
+    },
+    {
+      "id": "RFQ-6594",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-31",
+      "createdAt": "2026-10-31T04:54:29.433Z"
+    },
+    {
+      "id": "RFQ-1904",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-10-30",
+      "createdAt": "2026-10-30T06:03:12.691Z"
+    },
+    {
       "id": "RFQ-5030",
       "date": "2026-10-22",
       "name": "Procurement Director",
@@ -2279,27 +3683,27 @@
   ],
   "settings": {
     "email": "orders@ecotexinc.com",
-    "phone": "(951) 555-ECOTEX",
+    "phone": "+1 (951) 450-9773",
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-10-28T07:09:05.882Z",
-    "aboutStory": "Founded with a dedication to manufacturing excellence, Ecotex operates state-of-the-art ultrasonic welding and automated flexographic printing facilities in California and Karachi.",
+    "updatedAt": "2026-11-03T05:45:40.624Z",
+    "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
       "badge": "ECO CHOICE",
       "title": "Grab It Before\nIt's Gone!",
       "enabled": true,
-      "subtitle": "High-volume supermarket & retail carry-out bags engineered for high load bearing",
-      "productId": "eco-tshirt-grocery",
+      "subtitle": "100% plant-based Bio-PLA flat carrier with reinforced oval die-cut handle",
+      "productId": "eco-dcut-heavy",
       "stockText": "Ready for Immediate Dispatch",
       "buttonText": "SHOP THE DEAL",
-      "offerPrice": 0.18,
+      "offerPrice": 0.55,
       "timerHours": 8,
-      "customImage": "/images/bag-green.png",
+      "customImage": "/images/bag-orange.png",
       "timerMinutes": 12,
       "timerSeconds": 45,
-      "originalPrice": 0.26,
+      "originalPrice": 0.8,
       "stockProgressPercent": 78
     },
     "esgMetrics": {
@@ -2309,9 +3713,15 @@
       "recyclablePercent": "100%"
     },
     "heroConfig": {
-      "title": "It's time to\npack better.",
-      "ctaText": "Shop Now",
+      "title": "It's time to pack better.",
       "subtitle": "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
+      "ctaText": "Shop Now",
+      "badgeDoctor": "Recommended by doctors",
+      "badgeTrust": "Trusted by 21,000+ People",
+      "productImage": "/images/bag-black.png",
+      "backgroundImage": "/uploads/2-removebg-preview-1793429998607-r8g8y.png",
+      "showcasePrice": 0.25,
+      "casePackSize": 1000,
       "variants": [
         {
           "id": "v1",
@@ -2361,13 +3771,7 @@
           "image": "/images/bag-green.png",
           "colorName": "New Custom Colorway"
         }
-      ],
-      "badgeTrust": "Trusted by 21,000+ People",
-      "badgeDoctor": "Recommended by doctors",
-      "casePackSize": 1000,
-      "productImage": "/images/bag-black.png",
-      "showcasePrice": 0.25,
-      "backgroundImage": "/uploads/Gemini_Generated_Image_syieb6s-1793100472147-uspvk.jpg"
+      ]
     },
     "logoConfig": {
       "subtitle": "Sustainable Packaging",
@@ -2464,10 +3868,10 @@
       "catalogSubtitle": "Explore our full manufacturing catalog of certified eco-friendly industrial & retail packaging with wholesale pricing tiers."
     },
     "siteImages": {
-      "heroBag": "/images/bite-hero-product.png",
-      "aboutHero": "/images/versatility-banner-bg.jpg",
+      "heroBag": "/images/bag-black.png",
+      "facilityPhoto": "/uploads/ecotextwebsiteimages-1793430074803-1gp0u.png",
       "shopBanner": "/images/bag-green.png",
-      "facilityPhoto": "/images/versatility-banner-bg.jpg"
+      "aboutHero": "/images/versatility-banner-bg.jpg"
     },
     "aboutConfig": {
       "heroTitle": "About Us",
@@ -2479,7 +3883,7 @@
           "name": "Rashid Mahmood",
           "role": "Managing Director & Founder",
           "email": "rashid@ecotexinc.com",
-          "image": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=85",
+          "image": "/uploads/zohair-1793431128020-almvg.webp",
           "linkedin": "#"
         },
         {
@@ -2488,7 +3892,7 @@
           "name": "Farah Al-Sayed",
           "role": "Head of Quality & Materials Engineering",
           "email": "farah@ecotexinc.com",
-          "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=85",
+          "image": "/uploads/hassan-1793431137185-1elzc.webp",
           "linkedin": "#"
         },
         {
@@ -2497,14 +3901,24 @@
           "name": "Marcus Vance",
           "role": "Chief Sustainability Officer",
           "email": "marcus@ecotexinc.com",
-          "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=85",
+          "image": "/uploads/ghazi-1793431145992-g8bqr.webp",
           "linkedin": "#"
+        },
+        {
+          "id": "tm-1793431151834-tww1",
+          "name": "New Executive Member",
+          "role": "Director of Packaging Solutions",
+          "bio": "Leading sustainable packaging engineering and client supply chain sustainability.",
+          "image": "/uploads/mohibbahi-1793431185684-rupb0.webp",
+          "email": "bhfbyuhfbhsd@gmail.com",
+          "linkedin": "https://linkedin.com",
+          "twitter": ""
         }
       ],
-      "founderImage": "/uploads/codexplussitedesignbycodexteam-1791351637582-j2lxw.png",
+      "founderImage": "/uploads/dayan-1793430087526-km8h2.webp",
       "heroSubtitle": "A sustainable future for packaging. Engineered with purpose, manufactured for impact.",
       "missionQuote": "We engineered our circular manufacturing framework around a simple premise: commercial packaging can protect goods and elevate brands without ever polluting our natural world.",
-      "workshopImage": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85",
+      "workshopImage": "/uploads/WhatsAppImage2026-08-13at43718-1793430094725-kh8tn.jpg",
       "storyParagraph1": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
       "storyParagraph2": "From our corporate headquarters in California to state-of-the-art automated manufacturing facilities, every product is subjected to rigorous tensile testing, automated ultrasonic seam welding, and non-toxic water-based printing. We empower grocery retailers, boutique lifestyle brands, and logistics operations across the globe to achieve zero-waste compliance with full chain-of-custody audit trails.",
       "whyChooseUsTitle": "Why Choose Us",
@@ -2537,7 +3951,7 @@
       "whyChooseUsSubtitle": "We combine German ultrasonic welding machinery, ISO 9001 certified batch audits, and non-toxic soy formulations to deliver high-capacity packaging engineered to outlast disposable plastic."
     },
     "companyName": "Ecotex Inc.",
-    "aboutMission": "Empowering commercial enterprises and supermarket chains with certified non-woven and compostable packaging that drastically reduces carbon footprints without sacrificing load capacity.",
+    "aboutMission": "We engineered our circular manufacturing framework around a simple premise: commercial packaging can protect goods and elevate brands without ever polluting our natural world.",
     "announcement": "🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility",
     "footerConfig": {
       "tagline": "Direct manufacturer of certified circular non-woven, compostable bio-PLA, and insulated wholesale packaging for global commercial enterprise.",
@@ -2546,7 +3960,7 @@
       "newsletterBgImage": "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1600&q=80",
       "newsletterSubtitle": "Receive direct mill pricing updates, material innovation whitepapers, and California SB 54 regulatory packaging briefs."
     },
-    "heroSubtitle": "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
+    "heroSubtitle": "memememmememe",
     "navbarConfig": {
       "phoneDisplay": "(951) 555-ECOTEX",
       "ctaButtonText": "START SH",
@@ -2557,7 +3971,7 @@
     "supportEmail": "orders@ecotexinc.com",
     "contactConfig": {
       "email": "orders@ecotexinc.com",
-      "phone": "(951) 555-ECOTEX",
+      "phone": "+1 (951) 450-9773",
       "headline": "Let’s Engineer Your Sustainable Wholesale Packaging Solution",
       "twitterUrl": "https://twitter.com",
       "facebookUrl": "https://facebook.com",
@@ -2574,7 +3988,7 @@
     "heroButtonText": "Shop Now",
     "leadTimeCustom": "10-14 Business Days",
     "minOrderNotice": "Free pallet freight on continental US orders over $1,000",
-    "secondaryPhone": "+92 332 8784015",
+    "secondaryPhone": "+1 (951) 450-9773",
     "whatsappNumber": "+1 (951) 450-9773",
     "copyrightNotice": "Copyright 2026 © Ecotex Inc. All rights reserved.",
     "facilityAddress": "1200 Industrial Parkway, Corona, CA 92881",
@@ -2586,7 +4000,7 @@
       "freeFreightThreshold": 1000
     },
     "versatilityConfig": {
-      "bannerImage": "/images/versatility-banner-bg.jpg",
+      "bannerImage": "/uploads/ecotextwebsiteimages-1793430074803-1gp0u.png",
       "bannerTitle": "Exploring The Versatility of Non-Woven PP Bags",
       "featureCards": [
         {
@@ -2671,7 +4085,62 @@
           "title": "Pure Mechanical & Biological Recovery"
         }
       ]
-    }
+    },
+    "facilitiesConfig": {
+      "title": "State-of-the-Art Manufacturing & Fulfillment Facilities",
+      "subtitle": "Dual-continental operations combining California wholesale fulfillment with high-speed automated manufacturing mills.",
+      "storySnippet": "From automated ultrasonic welding to high-definition 8-color flexographic printing, our facilities are engineered for maximum circularity and zero-landfill compliance.",
+      "annualCapacity": "50,000,000+ Units / Year",
+      "certificationsMetric": "ISO 9001:2015 & ASTM D6400",
+      "activeLinesMetric": "14 High-Speed Extrusion Lines",
+      "showOnHomepage": true,
+      "bannerImage": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1400&q=85",
+      "hubs": [
+        {
+          "name": "Corona Distribution & Testing Hub",
+          "tag": "US Headquarters & Fulfillment",
+          "address": "1200 Industrial Parkway, Corona, CA 92881",
+          "capabilities": [
+            "Same-Day Pallet Dispatch",
+            "ASTM Tensile Testing Lab",
+            "Custom Sample Prototyping"
+          ],
+          "image": "/uploads/70-1793430113598-w5yry.png",
+          "googleMapsUrl": "https://maps.google.com/?q=1200+Industrial+Parkway,+Corona,+CA+92881"
+        },
+        {
+          "name": "Primary Manufacturing Plant",
+          "tag": "Heavy Industrial Production",
+          "address": "Sector 15, Korangi Industrial Area, Karachi, PK",
+          "capabilities": [
+            "Automated Ultrasonic Welding",
+            "8-Color Flexographic Printing",
+            "Virgin PP & Bio-PLA Extrusion"
+          ],
+          "image": "/uploads/WhatsAppImage2026-07-25at12495-1793430119368-2st5d.webp",
+          "googleMapsUrl": "https://maps.google.com/?q=Korangi+Industrial+Area+Karachi"
+        }
+      ]
+    },
+    "shippingConfig": {
+      "freeShippingThreshold": 1000,
+      "standardShippingRate": 50,
+      "expressShippingRate": 120,
+      "estimatedTransitDays": "3-5 Business Days (Continental US)",
+      "freightCarrier": "Direct LTL Pallet Freight (FedEx Freight / R+L Carriers / Old Dominion)",
+      "shippingPolicyNotice": "All wholesale pallet orders ship FOB Corona, CA warehouse. Shrink-wrapped with corner guards on 40x48 heat-treated pallets.",
+      "warehouseHub": "Corona Distribution & Fulfillment Center, 1200 Industrial Parkway, Corona, CA 92881",
+      "localPickupAvailable": true,
+      "sampleDispatchNotice": "Free fabric swatches & physical sample bags dispatched within 24 hours via USPS Priority Mail."
+    },
+    "currencySymbol": "$",
+    "currencyCode": "USD",
+    "taxRatePercent": 0,
+    "taxExemptionNotice": "Valid California resale certificate required at checkout for wholesale sales tax exemption.",
+    "guaranteeNotice": "100% Quality & Defect Replacement Guarantee within 30 days of shipment receipt.",
+    "sampleKitPolicy": "Complimentary fabric swatch ring and sample bags available for enterprise retail procurement.",
+    "version": 11,
+    "heroBackgroundImage": "/uploads/2-removebg-preview-1793429998607-r8g8y.png"
   },
   "testimonials": [
     {

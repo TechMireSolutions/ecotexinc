@@ -1,11 +1,69 @@
 import { Product, Order, QuoteSubmission, SiteSettings, CategoryItem, CustomerThread } from '../types';
 
-export const BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+export const resolveBaseUrl = (): string => {
+  // 1. Explicit environment variable if provided
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+  }
+  if (typeof process !== 'undefined' && process.env?.VITE_API_URL) {
+    return process.env.VITE_API_URL.replace(/\/+$/, '');
+  }
+  // 2. Browser runtime detection: on live domain or subpath, backend is hosted under /admin
+  if (typeof window !== 'undefined') {
+    const { hostname, pathname } = window.location;
+    if (hostname === 'ecotexinc.com' || hostname.endsWith('.ecotexinc.com') || pathname.startsWith('/admin')) {
+      return '/admin/api';
+    }
+  }
+  // 3. Default to /admin/api matching cPanel Express application architecture
+  return '/admin/api';
+};
 
-function getAuthHeaders(): Record<string, string> {
+export const BASE_URL = resolveBaseUrl();
+
+export function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   const token = localStorage.getItem('ecotex_admin_token') || sessionStorage.getItem('ecotex_admin_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Resilient JSON fetcher:
+ * 1. Queries primary URL (/admin/api by default).
+ * 2. Checks content-type so HTML SPA fallbacks (e.g. index.html) are detected.
+ * 3. Tries alternate endpoint (/api vs /admin/api) if primary fails.
+ */
+export async function safeFetchJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const primaryUrl = `${BASE_URL}${cleanEndpoint}`;
+  const fallbackUrl = BASE_URL.includes('/admin/api')
+    ? `/api${cleanEndpoint}`
+    : `/admin/api${cleanEndpoint}`;
+
+  const attempt = async (url: string): Promise<T> => {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} from ${url}`);
+    }
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error(`Expected JSON but received ${contentType} from ${url}`);
+    }
+    return res.json() as Promise<T>;
+  };
+
+  try {
+    return await attempt(primaryUrl);
+  } catch (primaryErr) {
+    if (fallbackUrl !== primaryUrl) {
+      try {
+        return await attempt(fallbackUrl);
+      } catch {
+        throw primaryErr;
+      }
+    }
+    throw primaryErr;
+  }
 }
 
 export interface DashboardStats {
@@ -46,32 +104,23 @@ export const apiService = {
 
   // 1. Stats
   async getStats(): Promise<DashboardStats> {
-
-    const res = await fetch(`${BASE_URL}/stats`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    return res.json();
+    return safeFetchJson<DashboardStats>('/stats');
   },
 
   // 2. Products
   async getProducts(category?: string): Promise<Product[]> {
-    const url = category && category !== 'all' 
-      ? `${BASE_URL}/products?category=${encodeURIComponent(category)}`
-      : `${BASE_URL}/products`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch products');
-    return res.json();
+    const query = category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
+    return safeFetchJson<Product[]>(`/products${query}`);
   },
 
   async getProduct(id: string): Promise<Product> {
-    const res = await fetch(`${BASE_URL}/products/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch product');
-    return res.json();
+    return safeFetchJson<Product>(`/products/${id}`);
   },
 
   async createProduct(product: Partial<Product>): Promise<Product> {
     const res = await fetch(`${BASE_URL}/products`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(product),
     });
     if (!res.ok) throw new Error('Failed to create product');
@@ -81,7 +130,7 @@ export const apiService = {
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
     const res = await fetch(`${BASE_URL}/products/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update product');
@@ -91,6 +140,7 @@ export const apiService = {
   async toggleStock(id: string): Promise<Product> {
     const res = await fetch(`${BASE_URL}/products/${id}/toggle-stock`, {
       method: 'PATCH',
+      headers: { ...getAuthHeaders() },
     });
     if (!res.ok) throw new Error('Failed to toggle stock');
     return res.json();
@@ -99,6 +149,7 @@ export const apiService = {
   async deleteProduct(id: string): Promise<{ success: boolean }> {
     const res = await fetch(`${BASE_URL}/products/${id}`, {
       method: 'DELETE',
+      headers: { ...getAuthHeaders() },
     });
     if (!res.ok) throw new Error('Failed to delete product');
     return res.json();
@@ -106,15 +157,13 @@ export const apiService = {
 
   // 3. Categories
   async getCategories(): Promise<CategoryItem[]> {
-    const res = await fetch(`${BASE_URL}/categories`);
-    if (!res.ok) throw new Error('Failed to fetch categories');
-    return res.json();
+    return safeFetchJson<CategoryItem[]>('/categories');
   },
 
   async createCategory(category: Partial<CategoryItem>): Promise<CategoryItem> {
     const res = await fetch(`${BASE_URL}/categories`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(category),
     });
     if (!res.ok) throw new Error('Failed to create category');
@@ -124,7 +173,7 @@ export const apiService = {
   async updateCategory(id: string, updates: Partial<CategoryItem>): Promise<CategoryItem> {
     const res = await fetch(`${BASE_URL}/categories/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update category');
@@ -134,6 +183,7 @@ export const apiService = {
   async deleteCategory(id: string): Promise<{ success: boolean }> {
     const res = await fetch(`${BASE_URL}/categories/${id}`, {
       method: 'DELETE',
+      headers: { ...getAuthHeaders() },
     });
     if (!res.ok) throw new Error('Failed to delete category');
     return res.json();
@@ -141,9 +191,9 @@ export const apiService = {
 
   // 4. Orders
   async getOrders(): Promise<Order[]> {
-    const res = await fetch(`${BASE_URL}/orders`);
-    if (!res.ok) throw new Error('Failed to fetch orders');
-    return res.json();
+    return safeFetchJson<Order[]>('/orders', {
+      headers: { ...getAuthHeaders() },
+    });
   },
 
   async createOrder(order: Partial<Order>): Promise<Order> {
@@ -159,7 +209,7 @@ export const apiService = {
   async updateOrder(id: string, updates: Partial<Order>): Promise<Order> {
     const res = await fetch(`${BASE_URL}/orders/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update order');
@@ -169,7 +219,7 @@ export const apiService = {
   async updateOrderStatus(id: string, status: string): Promise<Order> {
     const res = await fetch(`${BASE_URL}/orders/${id}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ status }),
     });
     if (!res.ok) throw new Error('Failed to update order status');
@@ -179,6 +229,7 @@ export const apiService = {
   async deleteOrder(id: string): Promise<{ success: boolean }> {
     const res = await fetch(`${BASE_URL}/orders/${id}`, {
       method: 'DELETE',
+      headers: { ...getAuthHeaders() },
     });
     if (!res.ok) throw new Error('Failed to delete order');
     return res.json();
@@ -186,9 +237,9 @@ export const apiService = {
 
   // 5. Quotes / RFQs
   async getQuotes(): Promise<QuoteSubmission[]> {
-    const res = await fetch(`${BASE_URL}/quotes`);
-    if (!res.ok) throw new Error('Failed to fetch quotes');
-    return res.json();
+    return safeFetchJson<QuoteSubmission[]>('/quotes', {
+      headers: { ...getAuthHeaders() },
+    });
   },
 
   async createQuote(quote: Partial<QuoteSubmission>): Promise<QuoteSubmission> {
@@ -204,7 +255,7 @@ export const apiService = {
   async updateQuote(id: string, updates: Partial<QuoteSubmission>): Promise<QuoteSubmission> {
     const res = await fetch(`${BASE_URL}/quotes/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update quote');
@@ -214,7 +265,7 @@ export const apiService = {
   async updateQuoteStatus(id: string, status: string): Promise<QuoteSubmission> {
     const res = await fetch(`${BASE_URL}/quotes/${id}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ status }),
     });
     if (!res.ok) throw new Error('Failed to update quote status');
@@ -224,6 +275,7 @@ export const apiService = {
   async deleteQuote(id: string): Promise<{ success: boolean }> {
     const res = await fetch(`${BASE_URL}/quotes/${id}`, {
       method: 'DELETE',
+      headers: { ...getAuthHeaders() },
     });
     if (!res.ok) throw new Error('Failed to delete quote');
     return res.json();
@@ -231,35 +283,22 @@ export const apiService = {
 
   // 6. Settings
   async getSettings(): Promise<SiteSettings> {
-    const res = await fetch(`${BASE_URL}/settings`);
-    if (!res.ok) throw new Error('Failed to fetch settings');
-    return res.json();
+    return safeFetchJson<SiteSettings>('/settings');
   },
 
   async updateSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
     const res = await fetch(`${BASE_URL}/settings`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(settings),
     });
     if (!res.ok) throw new Error('Failed to update settings');
     return res.json();
   },
 
-  // 7. Reset Database
-  async resetDatabase(): Promise<{ success: boolean; message: string }> {
-    const res = await fetch(`${BASE_URL}/reset`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error('Failed to reset database');
-    return res.json();
-  },
-
-  // 8. Messages
+  // 7. Messages
   async getMessages(): Promise<CustomerThread[]> {
-    const res = await fetch(`${BASE_URL}/messages`);
-    if (!res.ok) throw new Error('Failed to fetch messages');
-    return res.json();
+    return safeFetchJson<CustomerThread[]>('/messages');
   },
 
   async saveMessageThread(thread: CustomerThread): Promise<{ success: boolean; thread: CustomerThread }> {

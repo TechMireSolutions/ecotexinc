@@ -8,13 +8,15 @@ import {
   deleteOrder,
 } from '../controllers/ordersController.js';
 
+import { requireAuth } from '../middleware/authMiddleware.js';
+
 export const ordersRouter = express.Router();
 
-ordersRouter.get('/', getAllOrders);
+ordersRouter.get('/', requireAuth, getAllOrders);
 ordersRouter.get('/:id', getOrderById);
 ordersRouter.post('/', createOrder);
-ordersRouter.put('/:id', updateOrder);
-ordersRouter.patch('/:id/status', updateOrderStatus);
-ordersRouter.delete('/:id', deleteOrder);
+ordersRouter.put('/:id', requireAuth, updateOrder);
+ordersRouter.patch('/:id/status', requireAuth, updateOrderStatus);
+ordersRouter.delete('/:id', requireAuth, deleteOrder);
 
 export default ordersRouter;

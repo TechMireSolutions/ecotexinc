@@ -37,3 +37,6 @@ Thumbs.db
 # Local backups
 *_git_backup*/
 .git_backups/
+
+# Test artifacts
+*test-pixel-*.png

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home,
   Sliders, 
@@ -25,17 +25,57 @@ import {
   Globe,
   Clock,
   ThumbsUp,
-  HelpCircle
+  HelpCircle,
+  Linkedin,
+  Twitter,
+  ChevronUp,
+  ChevronDown,
+  User
 } from 'lucide-react';
 import { useStore, HeroConfig } from '../../store/useStore';
+import { apiService } from '../../services/apiService';
 import { ImageUploader } from './ImageUploader';
 import { 
   VersatilityConfig, 
   AboutConfig, 
   ContactConfig, 
   FacilitiesConfig, 
-  SiteSettings 
+  SiteSettings,
+  TeamMemberConfig 
 } from '../../types';
+
+const DEFAULT_TEAM_MEMBERS: TeamMemberConfig[] = [
+  {
+    id: 'tm1',
+    name: 'Rashid Mahmood',
+    role: 'Managing Director & Founder',
+    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=85',
+    bio: 'Pioneered circular non-woven manufacturing across North America and South Asia with over two decades in sustainable polymer engineering.',
+    linkedin: '#',
+    twitter: '#',
+    email: 'rashid@ecotexinc.com'
+  },
+  {
+    id: 'tm2',
+    name: 'Farah Al-Sayed',
+    role: 'Head of Quality & Materials Engineering',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=85',
+    bio: 'Leads our ASTM D6400 biodegradable testing laboratories and Global Recycled Standard (GRS) chain-of-custody compliance.',
+    linkedin: '#',
+    twitter: '#',
+    email: 'farah@ecotexinc.com'
+  },
+  {
+    id: 'tm3',
+    name: 'Marcus Vance',
+    role: 'Chief Sustainability Officer',
+    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=85',
+    bio: 'Oversees enterprise carbon reduction accounting and California SB 270 / SB 54 regulatory packaging compliance.',
+    linkedin: '#',
+    twitter: '#',
+    email: 'marcus@ecotexinc.com'
+  }
+];
 
 type HomepageTab = 
   | 'all'
@@ -111,7 +151,9 @@ export const HomepageManager: React.FC<HomepageManagerProps> = () => {
       ],
       teamSectionTitle: 'Meet Our Team',
       teamSectionSubtitle: 'The experts behind global sustainable packaging.',
-      teamMembers: []
+      teamMembers: (siteSettings?.aboutConfig?.teamMembers && siteSettings.aboutConfig.teamMembers.length > 0)
+        ? siteSettings.aboutConfig.teamMembers
+        : DEFAULT_TEAM_MEMBERS
     }
   );
 
@@ -163,81 +205,149 @@ export const HomepageManager: React.FC<HomepageManagerProps> = () => {
     }
   );
 
-  // Keep state in sync if store updates externally
+  const isInitialized = useRef(false);
   useEffect(() => {
-    if (heroConfig) setLocalHero(heroConfig);
-  }, [heroConfig]);
+    if (!isInitialized.current && siteSettings && Object.keys(siteSettings).length > 0) {
+      if (siteSettings.heroConfig || (heroConfig && heroConfig.title)) {
+        setLocalHero(siteSettings.heroConfig || heroConfig);
+      }
+      if (siteSettings.versatilityConfig) {
+        setLocalVersatility(siteSettings.versatilityConfig);
+      }
+      if (siteSettings.aboutConfig) {
+        setLocalAbout({
+          ...siteSettings.aboutConfig,
+          teamMembers: (siteSettings.aboutConfig.teamMembers && siteSettings.aboutConfig.teamMembers.length > 0)
+            ? siteSettings.aboutConfig.teamMembers
+            : DEFAULT_TEAM_MEMBERS
+        });
+      }
+      if (siteSettings.facilitiesConfig) {
+        setLocalFacilities(siteSettings.facilitiesConfig);
+      }
+      if (siteSettings.contactConfig) {
+        setLocalContact(siteSettings.contactConfig);
+      }
+      isInitialized.current = true;
+    }
+  }, [siteSettings, heroConfig]);
 
-  useEffect(() => {
-    if (siteSettings?.versatilityConfig) setLocalVersatility(siteSettings.versatilityConfig);
-    if (siteSettings?.aboutConfig) setLocalAbout(siteSettings.aboutConfig);
-    if (siteSettings?.facilitiesConfig) setLocalFacilities(siteSettings.facilitiesConfig);
-    if (siteSettings?.contactConfig) setLocalContact(siteSettings.contactConfig);
-  }, [siteSettings]);
-
-  // Save all homepage changes to store and localStorage
-  const handleSaveAll = () => {
-    // 1. Update Hero
-    updateHeroConfig(localHero);
-
-    // 2. Update Site Settings with all sub-configs
-    const updatedSettings: Partial<SiteSettings> = {
-      heroTitle: localHero.title || siteSettings.heroTitle,
-      heroSubtitle: localHero.subtitle || siteSettings.heroSubtitle,
-      facilityAddress: localContact.facilityAddress,
-      plantAddress: localContact.plantAddress,
-      email: localContact.email,
-      phone: localContact.phone,
-      secondaryPhone: localContact.secondaryPhone,
-      aboutTitle: localAbout.storyTitle || siteSettings.aboutTitle,
-      aboutMission: localAbout.missionQuote || siteSettings.aboutMission,
-      aboutStory: localAbout.storyParagraph1 || siteSettings.aboutStory,
-      versatilityConfig: localVersatility,
-      aboutConfig: localAbout,
-      facilitiesConfig: localFacilities,
-      contactConfig: localContact
+  // Team Member Management Handlers
+  const handleAddTeamMember = () => {
+    const newMember: TeamMemberConfig = {
+      id: `tm-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: 'New Executive Member',
+      role: 'Director of Packaging Solutions',
+      bio: 'Leading sustainable packaging engineering and client supply chain sustainability.',
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+      email: 'team@ecotexinc.com',
+      linkedin: 'https://linkedin.com',
+      twitter: ''
     };
-
-    updateSiteSettings(updatedSettings);
-
-    // Also update bannerImage in siteImages if changed
-    if (localVersatility.bannerImage) {
-      updateSiteImage('facilityPhoto', localVersatility.bannerImage);
-    }
-
-    // Trigger cross-window live update
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
-        detail: { hero: localHero, settings: updatedSettings }
-      }));
-    }
-
-    setSaveSuccess(true);
-    setToastMessage('All Homepage sections updated & published live!');
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setToastMessage(null);
-    }, 3500);
+    setLocalAbout(prev => ({
+      ...prev,
+      teamMembers: [...(prev.teamMembers || []), newMember]
+    }));
   };
 
-  const handleResetToDefault = () => {
-    if (!window.confirm('Reset all homepage sections back to factory defaults? Any unsaved edits will be discarded.')) return;
-    
-    setLocalHero({
-      title: "It's time to\npack better.",
-      subtitle: "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
-      ctaText: "Shop Now",
-      badgeDoctor: "",
-      badgeTrust: "",
-      productImage: "/images/bag-green.png",
-      backgroundImage: "/images/home-hero-bg.jpg",
-      showcasePrice: 0.25,
-      casePackSize: 1000,
-      variants: []
+  const handleUpdateTeamMember = (index: number, updates: Partial<TeamMemberConfig>) => {
+    setLocalAbout(prev => {
+      const current = [...(prev.teamMembers || [])];
+      if (current[index]) {
+        current[index] = { ...current[index], ...updates };
+      }
+      return { ...prev, teamMembers: current };
     });
+  };
 
-    setToastMessage('Homepage drafts reset to default. Click Save to publish.');
-    setTimeout(() => setToastMessage(null), 3500);
+  const handleDeleteTeamMember = (index: number) => {
+    const current = localAbout.teamMembers || [];
+    const memberName = current[index]?.name || 'this team member';
+    if (!window.confirm(`Are you sure you want to remove ${memberName}?`)) return;
+    setLocalAbout(prev => ({
+      ...prev,
+      teamMembers: (prev.teamMembers || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleMoveTeamMember = (index: number, direction: 'up' | 'down') => {
+    setLocalAbout(prev => {
+      const current = [...(prev.teamMembers || [])];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= current.length) return prev;
+      const [moved] = current.splice(index, 1);
+      current.splice(targetIndex, 0, moved);
+      return { ...prev, teamMembers: current };
+    });
+  };
+
+  // Save all homepage changes atomically to backend and store
+  const handleSaveAll = async () => {
+    try {
+      const fullSettingsPayload: Partial<SiteSettings> = {
+        ...siteSettings,
+        heroTitle: localHero.title || siteSettings?.heroTitle || '',
+        heroSubtitle: localHero.subtitle || siteSettings?.heroSubtitle || '',
+        heroButtonText: localHero.ctaText || siteSettings?.heroButtonText || 'Shop Now',
+        heroBackgroundImage: localHero.backgroundImage || '',
+        heroConfig: localHero,
+        versatilityConfig: localVersatility,
+        aboutConfig: localAbout,
+        facilitiesConfig: localFacilities,
+        contactConfig: localContact,
+        facilityAddress: localContact.facilityAddress,
+        plantAddress: localContact.plantAddress,
+        email: localContact.email,
+        phone: localContact.phone,
+        secondaryPhone: localContact.secondaryPhone,
+        aboutTitle: localAbout.storyTitle || siteSettings?.aboutTitle,
+        aboutMission: localAbout.missionQuote || siteSettings?.aboutMission,
+        aboutStory: localAbout.storyParagraph1 || siteSettings?.aboutStory,
+        siteImages: {
+          ...(siteSettings?.siteImages || {}),
+          ...(siteImages || {}),
+          facilityPhoto: localVersatility.bannerImage || siteImages?.facilityPhoto || '',
+          heroBag: localHero.productImage || siteImages?.heroBag || ''
+        }
+      };
+
+      // 1. Send single atomic PUT request to backend
+      const saved = await apiService.updateSettings(fullSettingsPayload);
+
+      // 2. Atomically update Zustand store with confirmed saved data
+      useStore.setState((state) => ({
+        siteSettings: { ...state.siteSettings, ...saved },
+        heroConfig: localHero,
+        siteImages: fullSettingsPayload.siteImages || state.siteImages
+      }));
+
+      // 3. Persist to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('ecotex_site_settings', JSON.stringify(saved));
+          localStorage.setItem('ecotex_hero_config', JSON.stringify(localHero));
+          if (fullSettingsPayload.siteImages) {
+            localStorage.setItem('ecotex_site_images', JSON.stringify(fullSettingsPayload.siteImages));
+          }
+        } catch (_) {}
+
+        // 4. Trigger cross-window live update
+        window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
+          detail: { hero: localHero, settings: saved }
+        }));
+      }
+
+      setSaveSuccess(true);
+      setToastMessage('All Homepage sections updated & published live!');
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setToastMessage(null);
+      }, 3500);
+    } catch (err) {
+      console.error('Failed to save homepage sections:', err);
+      setToastMessage('Failed to save sections. Please check connection.');
+      setTimeout(() => setToastMessage(null), 3500);
+    }
   };
 
   const tabs: { id: HomepageTab; label: string; desc: string; icon: React.ElementType; badge?: string }[] = [
@@ -274,16 +384,6 @@ export const HomepageManager: React.FC<HomepageManagerProps> = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={handleResetToDefault}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition-all cursor-pointer"
-            title="Reset to default text and images"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Defaults</span>
-          </button>
-
           <a
             href="/"
             target="_blank"
@@ -836,6 +936,259 @@ export const HomepageManager: React.FC<HomepageManagerProps> = () => {
                 onChange={(newUrl) => setLocalAbout({ ...localAbout, workshopImage: newUrl })}
                 aspectRatio="portrait"
               />
+            </div>
+
+            {/* ========================================================
+                LEADERSHIP & VISION: MEET OUR TEAM (DYNAMIC MANAGEMENT)
+               ======================================================== */}
+            <div className="pt-6 border-t border-slate-200 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-[#4E9F76]/20 text-[#166534]">
+                      <Users className="w-4 h-4" />
+                    </span>
+                    <span className="text-xs font-black uppercase tracking-wider text-[#166534]">
+                      Leadership & Vision
+                    </span>
+                  </div>
+                  <h4 className="text-base font-black text-[#0f172a] mt-1">
+                    Meet Our Team Members Roster
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Website ke About page par show hone wale leadership team members add, edit ya delete karein.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddTeamMember}
+                  className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#15803d] text-white text-xs font-bold transition-all shadow-md hover:scale-[1.02] active:scale-98 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add New Team Member</span>
+                </button>
+              </div>
+
+              {/* Headings for Team Section on Storefront */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50/70 border border-slate-200">
+                <div>
+                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                    Team Section Badge / Tagline
+                  </label>
+                  <input
+                    type="text"
+                    value={localAbout.teamSectionTitle || 'MEET OUR TEAM'}
+                    onChange={(e) => setLocalAbout({ ...localAbout, teamSectionTitle: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#4E9F76]"
+                    placeholder="MEET OUR TEAM"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                    Team Section Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={localAbout.teamSectionSubtitle || 'The experts behind global sustainable packaging.'}
+                    onChange={(e) => setLocalAbout({ ...localAbout, teamSectionSubtitle: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#4E9F76]"
+                    placeholder="The experts behind global sustainable packaging."
+                  />
+                </div>
+              </div>
+
+              {/* Members Cards List */}
+              <div className="space-y-5">
+                {(localAbout.teamMembers || []).length === 0 ? (
+                  <div className="text-center py-10 px-4 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50">
+                    <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                    <p className="text-sm font-bold text-slate-700">Abhi tak koi team member add nahi kiya gaya</p>
+                    <p className="text-xs text-slate-400 mt-1">Naya member shamil karne ke liye 'Add New Team Member' button par click karein.</p>
+                    <button
+                      type="button"
+                      onClick={handleAddTeamMember}
+                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#166534] text-white text-xs font-bold hover:bg-[#15803d] cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add First Member</span>
+                    </button>
+                  </div>
+                ) : (
+                  (localAbout.teamMembers || []).map((member, idx) => (
+                    <div 
+                      key={member.id || idx} 
+                      className="p-5 sm:p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-4 hover:border-[#B2E2C5] transition-all"
+                    >
+                      {/* Member Card Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-7 h-7 rounded-xl bg-[#dcfce7] text-[#166534] font-mono font-bold text-xs flex items-center justify-center">
+                            #{idx + 1}
+                          </span>
+                          <div>
+                            <span className="font-bold text-sm text-[#0f172a] block">
+                              {member.name || 'Untitled Member'}
+                            </span>
+                            <span className="text-xs text-[#166534] font-semibold">
+                              {member.role || 'Designation'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleMoveTeamMember(idx, 'up')}
+                              className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-xs cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ChevronUp className="w-4 h-4" />
+                            </button>
+                          )}
+                          {idx < (localAbout.teamMembers || []).length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleMoveTeamMember(idx, 'down')}
+                              className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-xs cursor-pointer"
+                              title="Move Down"
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTeamMember(idx)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Card Body: Photo Uploader + Form Inputs */}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                        {/* Photo Column with Mini Preview */}
+                        <div className="lg:col-span-4 space-y-3">
+                          <ImageUploader
+                            label="Member Portrait Photo"
+                            description="Upload high quality portrait photo (3:4 ratio)."
+                            value={member.image}
+                            onChange={(newUrl) => handleUpdateTeamMember(idx, { image: newUrl })}
+                            aspectRatio="portrait"
+                          />
+
+                          {/* Mini Storefront Preview Card */}
+                          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                              Live Storefront Preview
+                            </span>
+                            <div className="relative w-28 mx-auto aspect-[3/4] rounded-xl overflow-hidden bg-slate-200 shadow-sm border border-slate-300">
+                              <img 
+                                src={member.image || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80'} 
+                                alt=""
+                                className="w-full h-full object-cover object-top grayscale"
+                              />
+                            </div>
+                            <p className="font-bold text-xs text-[#0f172a] mt-2 truncate">{member.name || 'Name'}</p>
+                            <p className="text-[11px] text-[#166534] font-medium truncate">{member.role || 'Role'}</p>
+                          </div>
+                        </div>
+
+                        {/* Fields Column */}
+                        <div className="lg:col-span-8 space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                Full Name *
+                              </label>
+                              <input
+                                type="text"
+                                value={member.name}
+                                onChange={(e) => handleUpdateTeamMember(idx, { name: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76]"
+                                placeholder="e.g. Rashid Mahmood"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                Role / Title *
+                              </label>
+                              <input
+                                type="text"
+                                value={member.role}
+                                onChange={(e) => handleUpdateTeamMember(idx, { role: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#166534] bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76]"
+                                placeholder="e.g. Managing Director & Founder"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                                <Mail className="w-3 h-3 text-slate-400" />
+                                <span>Email Address</span>
+                              </label>
+                              <input
+                                type="email"
+                                value={member.email || ''}
+                                onChange={(e) => handleUpdateTeamMember(idx, { email: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76]"
+                                placeholder="name@ecotexinc.com"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                                <Linkedin className="w-3 h-3 text-slate-400" />
+                                <span>LinkedIn URL</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={member.linkedin || ''}
+                                onChange={(e) => handleUpdateTeamMember(idx, { linkedin: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76]"
+                                placeholder="https://linkedin.com/in/..."
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+                                <Twitter className="w-3 h-3 text-slate-400" />
+                                <span>Twitter / X</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={member.twitter || ''}
+                                onChange={(e) => handleUpdateTeamMember(idx, { twitter: e.target.value })}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76]"
+                                placeholder="https://twitter.com/..."
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Short Bio / Credentials (Optional)
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={member.bio || ''}
+                              onChange={(e) => handleUpdateTeamMember(idx, { bio: e.target.value })}
+                              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#4E9F76] leading-relaxed"
+                              placeholder="Brief bio or engineering background..."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>

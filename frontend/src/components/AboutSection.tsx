@@ -188,7 +188,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
 
             {/* Large Section Title */}
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#0f172a] uppercase leading-[1.08] mb-8">
-              {aConfig?.storyTitle || 'We Are Ecotex'}
+              {aConfig?.storyTitle || currentSettings?.aboutTitle || 'We Are Ecotex'}
             </h2>
 
             {/* Intro Quote / Lead Paragraph */}

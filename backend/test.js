@@ -119,8 +119,24 @@ async function runTests() {
       if (!Array.isArray(res.body)) throw new Error('Expected array of products');
     });
 
-    // 6. Products Create
-    await test('POST /api/products creates a new packaging model', async () => {
+    // 6. Security Check: Unauthenticated mutation blocked
+    await test('POST /api/products returns 401 Unauthorized without token', async () => {
+      const res = await request('POST', '/products', { name: 'Hacker Bag' });
+      if (res.status !== 401) throw new Error(`Expected 401 Unauthorized, got ${res.status}`);
+    });
+
+    await test('PUT /api/settings returns 401 Unauthorized without token', async () => {
+      const res = await request('PUT', '/settings', { tagline: 'Hacked' });
+      if (res.status !== 401) throw new Error(`Expected 401 Unauthorized, got ${res.status}`);
+    });
+
+    await test('PUT /api/auth/credentials returns 401 Unauthorized without token', async () => {
+      const res = await request('PUT', '/auth/credentials', { password: 'hacked_password' });
+      if (res.status !== 401) throw new Error(`Expected 401 Unauthorized, got ${res.status}`);
+    });
+
+    // 7. Products Create (Authenticated)
+    await test('POST /api/products creates a new packaging model with auth token', async () => {
       const res = await request('POST', '/products', {
         name: 'Automated Test Non-Woven Tote',
         category: 'non-woven',
@@ -128,32 +144,38 @@ async function runTests() {
         pricePerUnit: 0.35,
         moq: 1000,
         gsm: 90,
+      }, {
+        Authorization: `Bearer ${authToken}`,
       });
       if (res.status !== 201) throw new Error(`Expected 201, got ${res.status}: ${JSON.stringify(res.body)}`);
       if (!res.body.id) throw new Error('Product created without id');
       testProductId = res.body.id;
     });
 
-    // 7. Products Toggle Stock
+    // 8. Products Toggle Stock (Authenticated)
     await test('PATCH /api/products/:id/toggle-stock toggles availability', async () => {
-      const res = await request('PATCH', `/products/${testProductId}/toggle-stock`);
+      const res = await request('PATCH', `/products/${testProductId}/toggle-stock`, null, {
+        Authorization: `Bearer ${authToken}`,
+      });
       if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
     });
 
-    // 8. Products Delete
+    // 9. Products Delete (Authenticated)
     await test('DELETE /api/products/:id deletes created test product', async () => {
-      const res = await request('DELETE', `/products/${testProductId}`);
+      const res = await request('DELETE', `/products/${testProductId}`, null, {
+        Authorization: `Bearer ${authToken}`,
+      });
       if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
     });
 
-    // 9. Categories
+    // 10. Categories
     await test('GET /api/categories returns packaging categories', async () => {
       const res = await request('GET', '/categories');
       if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
       if (!Array.isArray(res.body)) throw new Error('Expected categories array');
     });
 
-    // 10. Orders Creation
+    // 11. Orders Creation (Public for customers)
     await test('POST /api/orders creates a commercial purchase order', async () => {
       const res = await request('POST', '/orders', {
         buyerName: 'Enterprise Test Buyer',
@@ -167,16 +189,18 @@ async function runTests() {
       testOrderId = res.body.id;
     });
 
-    // 11. Order Status Update
-    await test('PATCH /api/orders/:id/status updates order status', async () => {
+    // 12. Order Status Update (Authenticated)
+    await test('PATCH /api/orders/:id/status updates order status with auth token', async () => {
       const res = await request('PATCH', `/orders/${testOrderId}/status`, {
         status: 'In Production',
+      }, {
+        Authorization: `Bearer ${authToken}`,
       });
       if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
       if (res.body.status !== 'In Production') throw new Error('Status not updated');
     });
 
-    // 12. Quotes Creation
+    // 13. Quotes Creation (Public for customers)
     await test('POST /api/quotes submits custom volume RFQ', async () => {
       const res = await request('POST', '/quotes', {
         name: 'Procurement Director',
@@ -189,13 +213,15 @@ async function runTests() {
       testQuoteId = res.body.id;
     });
 
-    // 13. Settings Read & Update
+    // 14. Settings Read & Update (Authenticated)
     await test('GET & PUT /api/settings manages site configuration', async () => {
       const getRes = await request('GET', '/settings');
       if (getRes.status !== 200) throw new Error(`Expected 200, got ${getRes.status}`);
 
       const putRes = await request('PUT', '/settings', {
         tagline: 'Certified Sustainable Wholesale Packaging Direct From Manufacturer',
+      }, {
+        Authorization: `Bearer ${authToken}`,
       });
       if (putRes.status !== 200) throw new Error(`Expected 200, got ${putRes.status}`);
     });

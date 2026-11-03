@@ -32,6 +32,7 @@ import {
   Check
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { apiService } from '../../services/apiService';
 import { DYE_COLORS } from '../../data/colors';
 import {
   SiteSettings,
@@ -250,8 +251,12 @@ export const PageContentEditor: React.FC = () => {
   const [activeTab, setActiveTab] = useState<EditorTab>('logo');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const isInitialized = React.useRef(false);
   useEffect(() => {
-    setFormData(siteSettings);
+    if (!isInitialized.current && siteSettings && Object.keys(siteSettings).length > 0) {
+      setFormData(siteSettings);
+      isInitialized.current = true;
+    }
   }, [siteSettings]);
 
   const hasUnpublishedChanges = JSON.stringify(formData) !== JSON.stringify(siteSettings);
@@ -260,203 +265,27 @@ export const PageContentEditor: React.FC = () => {
     setFormData(siteSettings);
   };
 
-  const handleSave = (e?: React.FormEvent) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    updateSiteSettings(formData);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
-  };
-
-  const handleResetToDefaults = () => {
-    if (!window.confirm('Reset all custom component content back to factory defaults?')) return;
-
-    const defaultSettings: SiteSettings = {
-      companyName: 'Ecotex Inc.',
-      tagline: 'Certified Sustainable Wholesale Packaging Direct From Manufacturer',
-      heroTitle: "It's time to pack better.",
-      heroSubtitle: "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
-      heroButtonText: 'Shop Now',
-      announcement: '🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility',
-      announcementActive: true,
-      phone: '(951) 555-ECOTEX',
-      secondaryPhone: '+1 (951) 450-9773',
-      email: 'orders@ecotexinc.com',
-      facilityAddress: '1200 Industrial Parkway, Corona, CA 92881',
-      plantAddress: 'Sector 15, Korangi Industrial Area, Karachi, PK',
-      minOrderNotice: 'Free pallet freight on continental US orders over $1,000',
-      leadTimeBlank: '2-4 Business Days',
-      leadTimeCustom: '10-14 Business Days',
-      aboutTitle: 'Engineered For Durability. Designed For Circularity.',
-      aboutMission: 'Empowering commercial enterprises and supermarket chains with certified non-woven and compostable packaging that drastically reduces carbon footprints without sacrificing load capacity.',
-      aboutStory: 'Founded with a dedication to manufacturing excellence, Ecotex operates state-of-the-art ultrasonic welding and automated flexographic printing facilities in California and Karachi.',
-      footerTagline: 'One stop solution for your enterprise packaging needs.',
-      copyrightNotice: 'Copyright 2026 © Ecotex Inc. All rights reserved.',
-      esgMetrics: {
-        plasticDisplaced: '50M+',
-        carbonReduction: '-84%',
-        reusableTrips: '125+',
-        recyclablePercent: '100%'
-      },
-      logoConfig: {
-        wordmarkPrefix: 'ECO',
-        wordmarkSuffix: 'TEX',
-        badgeText: 'INC.',
-        subtitle: 'Sustainable Packaging',
-        customLogoUrl: '',
-        faviconUrl: ''
-      },
-      navbarConfig: {
-        announcementText: '🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility',
-        announcementActive: true,
-        ctaButtonText: 'START SHOP',
-        phoneDisplay: '(951) 555-ECOTEX'
-      },
-      versatilityConfig: {
-        sustainableFashionTitle: 'Sustainable Fashion For A Greener Tomorrow',
-        sustainableFashionSubtitle: 'Discover our eco-friendly bags made from sustainable materials. Join the movement to reduce environmental impact without compromising style!',
-        featureCards: [
-          { id: 'vc1', title: 'Eco-Friendly', description: 'Non-woven polypropylene bags are considered eco-friendly because they are reusable and can replace single-use plastic bags.' },
-          { id: 'vc2', title: 'Durable', description: 'These bags are known for their strength and durability. They can withstand multiple uses and are capable of carrying heavy loads.' },
-          { id: 'vc3', title: 'Customizable', description: 'Non-woven polypropylene bags can be easily customized with various designs, colors, and logos, making them a popular choice.' },
-          { id: 'vc4', title: 'Breathable', description: 'The fabric structure allows air circulation, making it ideal for retail garments, food produce, and everyday merchandise.' }
-        ],
-        bannerTitle: 'Exploring The Versatility of Non-Woven PP Bags',
-        bannerSubtitle: 'Dive deeper into the various styles, sizes, and designs available in non-woven polypropylene bags.',
-        bannerButtonText: 'View Collection',
-        bannerImage: '/images/versatility-banner-bg.jpg',
-        bottomTrustBadges: [
-          'Fast Turnaround Times',
-          'A friendly, open and honest service',
-          'Ethical and Fairly Traded Products',
-          'Expert Customer Service'
-        ]
-      },
-      sustainabilityConfig: {
-        metrics: {
-          plasticDisplaced: '50M+',
-          carbonReduction: '-84%',
-          reusableTrips: '125+',
-          recyclablePercent: '100%'
-        },
-        circularSteps: [
-          { step: '01', title: 'Responsible Material Sourcing', desc: 'Utilizing certified post-industrial virgin PP regrind, non-GMO corn-derived PLA resins, and reclaimed apparel cut-offs.' },
-          { step: '02', title: 'Ultrasonic Zero-Solvent Welding', desc: 'Sonic molecular excitation bonds fabric panels with unbreakable tensile strength without toxic glues or volatile emissions.' },
-          { step: '03', title: 'Extended Multi-Year Lifecycle', desc: 'Engineered to withstand 125+ heavy shopping cycles, each tote displaces hundreds of single-use polybags from city landfills.' },
-          { step: '04', title: 'Pure Mechanical & Biological Recovery', desc: '100% pelletized back into polymer pellets at end-of-life, while our bio line returns to soil biomass within 90-180 days.' }
-        ]
-      },
-      aboutConfig: {
-        heroTitle: 'About Us',
-        heroSubtitle: 'A sustainable future for packaging. Engineered with purpose, manufactured for impact.',
-        heroBgImage: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=2000&q=85',
-        missionQuote: 'We engineered our circular manufacturing framework around a simple premise: commercial packaging can protect goods and elevate brands without ever polluting our natural world.',
-        storyParagraph1: 'Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.',
-        storyParagraph2: 'From our corporate headquarters in California to state-of-the-art automated manufacturing facilities, every product is subjected to rigorous tensile testing, automated ultrasonic seam welding, and non-toxic water-based printing. We empower grocery retailers, boutique lifestyle brands, and logistics operations across the globe to achieve zero-waste compliance with full chain-of-custody audit trails.',
-        founderImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=85',
-        workshopImage: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85',
-        whyChooseUsTitle: 'Why Choose Us',
-        whyChooseUsSubtitle: 'We combine German ultrasonic welding machinery, ISO 9001 certified batch audits, and non-toxic soy formulations to deliver high-capacity packaging engineered to outlast disposable plastic.',
-        whyChooseUsFeatures: [
-          { title: '100% Recyclable Fabrics', description: 'Manufactured with virgin and pre-consumer polypropylene, lab-certified for 125+ reuse cycles.' },
-          { title: 'Easy to Customize', description: 'Flexible sizing, ultrasonic handle sealing, custom gusset depths, and pantone-matched dyed fabrics.' },
-          { title: '24/7 B2B Global Support', description: 'Dedicated enterprise account directors for national retail chains, grocers, and FMCG brands.' },
-          { title: 'Free Sample Verification', description: 'Physical pre-production specimen kits dispatched within 48 hours for tensile testing and color sign-off.' },
-          { title: 'High-Definition Flexo Print', description: 'Zero-VOC soy and water-based ink flexography delivering photo-sharp photographic brand imprints.' },
-          { title: 'Rapid Turnaround Times', description: 'Immediate dispatch for unbranded warehouse inventory and accelerated 10-14 day custom printed delivery.' }
-        ],
-        teamMembers: [
-          {
-            id: 'tm1',
-            name: 'Rashid Mahmood',
-            role: 'Managing Director & Founder',
-            bio: 'Pioneered circular non-woven manufacturing across North America and South Asia with over two decades in sustainable polymer engineering.',
-            image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=85',
-            email: 'rashid@ecotexinc.com',
-            linkedin: '#'
-          },
-          {
-            id: 'tm2',
-            name: 'Farah Al-Sayed',
-            role: 'Head of Quality & Materials Engineering',
-            bio: 'Leads our ASTM D6400 biodegradable testing laboratories and Global Recycled Standard (GRS) chain-of-custody compliance.',
-            image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=85',
-            email: 'farah@ecotexinc.com',
-            linkedin: '#'
-          },
-          {
-            id: 'tm3',
-            name: 'Marcus Vance',
-            role: 'Chief Sustainability Officer',
-            bio: 'Oversees enterprise carbon reduction accounting and California SB 270 / SB 54 regulatory packaging compliance.',
-            image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=85',
-            email: 'marcus@ecotexinc.com',
-            linkedin: '#'
-          }
-        ]
-      },
-      contactConfig: {
-        headline: 'Let’s Engineer Your Sustainable Wholesale Packaging Solution',
-        email: 'orders@ecotexinc.com',
-        phone: '(951) 555-ECOTEX',
-        secondaryPhone: '+1 (951) 450-9773',
-        facilityAddress: '1200 Industrial Parkway, Corona, CA 92881',
-        plantAddress: 'Sector 15, Korangi Industrial Area, Karachi, PK',
-        facebookUrl: 'https://facebook.com',
-        instagramUrl: 'https://instagram.com',
-        twitterUrl: 'https://twitter.com',
-        linkedinUrl: 'https://linkedin.com'
-      },
-      footerConfig: {
-        newsletterTitle: 'Subscribe To Our Quarterly Newsletter',
-        newsletterSubtitle: 'Receive direct mill pricing updates, material innovation whitepapers, and California SB 54 regulatory packaging briefs.',
-        newsletterBgImage: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1600&q=80',
-        tagline: 'Direct manufacturer of certified circular non-woven, compostable bio-PLA, and insulated wholesale packaging for global commercial enterprise.',
-        copyrightNotice: 'Copyright 2026 © Ecotex Inc. All rights reserved.'
-      },
-      quoteCalcConfig: {
-        plateFee: 120,
-        freeFreightThreshold: 1000,
-        leadTimeBlank: '2-4 Business Days',
-        leadTimeCustom: '10-14 Business Days'
-      },
-      shopConfig: {
-        catalogTitle: 'Wholesale Catalog & Mill Collections',
-        catalogSubtitle: 'Explore our full manufacturing catalog of certified eco-friendly industrial & retail packaging with wholesale pricing tiers.',
-        testimonials: [
-          {
-            id: 'rev1',
-            quote: "Switching our 42 regional grocery locations to Ecotex loop bags cut packaging overhead by 28% while exceeding state single-use mandates.",
-            author: "Elena Vasquez",
-            role: "VP Supply Chain",
-            company: "SunWest Markets California",
-            rating: 5,
-            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-          },
-          {
-            id: 'rev2',
-            quote: "The custom gold flexo printing on their black matte totes gave our boutique clients an unmistakable luxury feel that shoppers reuse every single day.",
-            author: "Marcus Vance",
-            role: "Creative Director",
-            company: "Artisan Living Brands NY",
-            rating: 5,
-            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"
-          }
-        ],
-        galleryImages: [
-          { url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80', caption: 'High-Speed Automated Ultrasonic Welder' },
-          { url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80', caption: 'Virgin Non-Woven Polypropylene Rolls' },
-          { url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80', caption: 'Cleanroom ISO Quality Testing' },
-          { url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=600&q=80', caption: 'Palletized Container Shipments' },
-          { url: 'https://images.unsplash.com/photo-1580983218765-f663bec07b37?auto=format&fit=crop&w=600&q=80', caption: 'Precision Handle Box-Stitch Detail' },
-          { url: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=600&q=80', caption: 'Export-Grade Custom Cartons' }
-        ]
-      }
-    };
-
-    setFormData(defaultSettings);
-    updateSiteSettings(defaultSettings);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    setIsSaving(true);
+    try {
+      const updated = await apiService.updateSettings(formData);
+      updateSiteSettings(updated || formData);
+      window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
+        detail: { settings: updated || formData }
+      }));
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+      updateSiteSettings(formData);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs: { id: EditorTab; label: string; icon: React.ElementType; desc: string }[] = [
@@ -514,14 +343,6 @@ export const PageContentEditor: React.FC = () => {
               <span>Discard Changes</span>
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleResetToDefaults}
-            className="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-all cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Defaults</span>
-          </button>
           <button
             type="button"
             onClick={() => handleSave()}
@@ -2866,13 +2687,6 @@ export const PageContentEditor: React.FC = () => {
               Discard Changes
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleResetToDefaults}
-            className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0"
-          >
-            Reset All
-          </button>
           <button
             type="button"
             onClick={() => handleSave()}

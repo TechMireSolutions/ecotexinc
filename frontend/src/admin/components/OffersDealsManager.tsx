@@ -145,13 +145,6 @@ export const OffersDealsManager: React.FC = () => {
     setTimeout(() => setSaveSuccess(false), 2500);
   };
 
-  const handleResetToDefault = () => {
-    if (!window.confirm('Reset Offer Product & Deal settings to factory defaults?')) return;
-    setFormData(DEFAULT_DEAL_CONFIG);
-    updateSiteSettings({
-      dealConfig: DEFAULT_DEAL_CONFIG
-    });
-  };
 
   // Filtered products for selector
   const filteredProducts = useMemo(() => {
@@ -201,14 +194,6 @@ export const OffersDealsManager: React.FC = () => {
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
-          <button
-            type="button"
-            onClick={handleResetToDefault}
-            className="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors flex items-center gap-2 cursor-pointer shadow-2xs"
-          >
-            <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-            <span>Reset Defaults</span>
-          </button>
 
           <button
             type="button"
@@ -863,7 +848,7 @@ export const OffersDealsManager: React.FC = () => {
                 className="text-xs text-rose-600 hover:text-rose-700 hover:underline font-bold self-start sm:self-auto flex items-center gap-1 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset to catalog image</span>
+                <span>Use Catalog Image</span>
               </button>
             )}
           </div>

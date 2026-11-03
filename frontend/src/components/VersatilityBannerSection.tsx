@@ -21,20 +21,21 @@ export const VersatilityBannerSection: React.FC<VersatilityBannerSectionProps> =
   onNavigateToContact
 }) => {
   const { siteSettings, siteImages } = useStore();
-  const vConfig = siteSettings?.versatilityConfig || {
-    sustainableFashionTitle: 'Sustainable Fashion For A Greener Tomorrow',
-    sustainableFashionSubtitle: 'Discover our eco-friendly bags made from sustainable materials. Join the movement to reduce environmental impact without compromising style!',
-    featureCards: [
+  const v = siteSettings?.versatilityConfig;
+  const vConfig = {
+    sustainableFashionTitle: v?.sustainableFashionTitle || 'Sustainable Fashion For A Greener Tomorrow',
+    sustainableFashionSubtitle: v?.sustainableFashionSubtitle || 'Discover our eco-friendly bags made from sustainable materials. Join the movement to reduce environmental impact without compromising style!',
+    featureCards: (v?.featureCards && v.featureCards.length > 0) ? v.featureCards : [
       { id: 'vc1', title: 'Eco-Friendly', description: 'Non-woven polypropylene bags are considered eco-friendly because they are reusable and can replace single-use plastic bags.' },
       { id: 'vc2', title: 'Durable', description: 'These bags are known for their strength and durability. They can withstand multiple uses and are capable of carrying heavy loads.' },
       { id: 'vc3', title: 'Customizable', description: 'Non-woven polypropylene bags can be easily customized with various designs, colors, and logos, making them a popular choice.' },
       { id: 'vc4', title: 'Breathable', description: 'The fabric structure allows air circulation, making it ideal for retail garments, food produce, and everyday merchandise.' }
     ],
-    bannerTitle: 'Exploring The Versatility of Non-Woven PP Bags',
-    bannerSubtitle: 'Dive deeper into the various styles, sizes, and designs available in non-woven polypropylene bags.',
-    bannerButtonText: 'View Collection',
-    bannerImage: siteImages?.facilityPhoto || '/images/versatility-banner-bg.jpg',
-    bottomTrustBadges: [
+    bannerTitle: v?.bannerTitle || 'Exploring The Versatility of Non-Woven PP Bags',
+    bannerSubtitle: v?.bannerSubtitle || 'Dive deeper into the various styles, sizes, and designs available in non-woven polypropylene bags.',
+    bannerButtonText: v?.bannerButtonText || 'View Collection',
+    bannerImage: v?.bannerImage || siteImages?.facilityPhoto || '/images/versatility-banner-bg.jpg',
+    bottomTrustBadges: (v?.bottomTrustBadges && v.bottomTrustBadges.length > 0) ? v.bottomTrustBadges : [
       'Fast Turnaround Times',
       'A friendly, open and honest service',
       'Ethical and Fairly Traded Products',
@@ -42,7 +43,7 @@ export const VersatilityBannerSection: React.FC<VersatilityBannerSectionProps> =
     ]
   };
 
-  const bannerBg = siteImages?.facilityPhoto || vConfig.bannerImage || '/images/versatility-banner-bg.jpg';
+  const bannerBg = vConfig.bannerImage || siteImages?.facilityPhoto || '/images/versatility-banner-bg.jpg';
 
   // SVG icons mapping for the 4 feature cards
   const featureIcons = [

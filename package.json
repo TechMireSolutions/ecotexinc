@@ -14,7 +14,11 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
     "build": "npm run build --prefix frontend",
+    "start": "node backend/index.js",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "npm run test --prefix frontend",
     "test:backend": "npm run test --prefix backend",
+    "check": "npm run lint --prefix frontend && npm run test",
     "start:backend": "npm run start --prefix backend"
   },
   "keywords": [

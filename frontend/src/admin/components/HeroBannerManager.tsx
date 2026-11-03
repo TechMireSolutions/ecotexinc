@@ -14,6 +14,7 @@ import {
   Undo2
 } from 'lucide-react';
 import { useStore, HeroConfig } from '../../store/useStore';
+import { apiService } from '../../services/apiService';
 import { ImageUploader } from './ImageUploader';
 
 export const HeroBannerManager: React.FC = () => {
@@ -26,39 +27,54 @@ export const HeroBannerManager: React.FC = () => {
   const [localHero, setLocalHero] = useState<HeroConfig>(heroConfig);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Sync draft state if external store changes and user has no unsaved draft
+  const isInitialized = React.useRef(false);
   useEffect(() => {
-    setLocalHero(heroConfig);
+    if (!isInitialized.current && heroConfig && Object.keys(heroConfig).length > 0) {
+      setLocalHero(heroConfig);
+      isInitialized.current = true;
+    }
   }, [heroConfig]);
 
   // Check if current draft has unpublished edits
   const hasUnpublishedChanges = JSON.stringify(localHero) !== JSON.stringify(heroConfig);
 
-  const handleSaveAll = () => {
-    updateHeroConfig(localHero);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+  const handleSaveAll = async () => {
+    try {
+      const payload = {
+        heroConfig: localHero,
+        heroTitle: localHero.title,
+        heroSubtitle: localHero.subtitle,
+        heroButtonText: localHero.ctaText,
+        heroBackgroundImage: localHero.backgroundImage
+      };
+
+      const saved = await apiService.updateSettings(payload);
+
+      useStore.setState((state) => ({
+        siteSettings: { ...state.siteSettings, ...saved },
+        heroConfig: localHero
+      }));
+
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('ecotex_hero_config', JSON.stringify(localHero));
+          localStorage.setItem('ecotex_site_settings', JSON.stringify(saved));
+        } catch (_) {}
+
+        window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
+          detail: { hero: localHero, settings: saved }
+        }));
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err) {
+      console.error('Failed to save hero banner:', err);
+    }
   };
 
   const handleDiscardDraft = () => {
     setLocalHero(heroConfig);
-  };
-
-  const handleResetToDefault = () => {
-    if (!window.confirm('Reset hero section copy and images back to factory default?')) return;
-    const defaultHero: HeroConfig = {
-      title: "It's time to\npack better.",
-      subtitle: "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
-      ctaText: "Shop Now",
-      badgeDoctor: "",
-      badgeTrust: "",
-      productImage: "/images/bag-green.png",
-      backgroundImage: "/images/home-hero-bg.jpg",
-      showcasePrice: 0.25,
-      casePackSize: 1000,
-      variants: []
-    };
-    setLocalHero(defaultHero);
   };
 
   // Preset bag images
@@ -123,13 +139,6 @@ export const HeroBannerManager: React.FC = () => {
             </button>
           )}
 
-          <button
-            onClick={handleResetToDefault}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-[#0f172a] hover:bg-slate-50 text-xs font-bold transition-all cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Defaults</span>
-          </button>
 
           <button
             onClick={handleSaveAll}

@@ -3,6 +3,13 @@ import path from 'path';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
 import defaultData from './defaultData.js';
+import {
+  initMysqlSchema,
+  loadAllCollectionsFromMysql,
+  saveCollectionToMysql,
+  saveAllCollectionsToMysql,
+  isMysqlActive,
+} from './mysql.js';
 import { 
   initNeonSchema, 
   loadAllCollectionsFromNeon, 
@@ -12,39 +19,64 @@ import {
 
 let memoryDb = null;
 let writeQueue = Promise.resolve();
+let activeProvider = 'Local Atomic Store (db.json)';
+
+export function getActiveDbProvider() {
+  return activeProvider;
+}
 
 /**
- * Initializes database from Neon PostgreSQL or disk backup/default seed
+ * Initializes database from MySQL, Neon PostgreSQL, or disk backup/default seed
  */
 export async function initDb() {
   try {
-    let neonLoaded = null;
+    let cloudLoaded = null;
 
-    // 1. Attempt connection and initialization from Neon PostgreSQL
-    try {
-      if (config.databaseUrl) {
-        logger.info('Connecting to Neon PostgreSQL cloud database...');
-        await initNeonSchema();
-        neonLoaded = await loadAllCollectionsFromNeon();
-        if (neonLoaded && Object.keys(neonLoaded).length > 0) {
-          logger.info('Successfully loaded persistent collections from Neon PostgreSQL.');
+    // 1. Attempt connection and initialization from MySQL (if configured)
+    if (config.mysql && config.mysql.database && config.mysql.user) {
+      try {
+        logger.info(`Connecting to MySQL database [${config.mysql.database}] on ${config.mysql.host}:${config.mysql.port}...`);
+        await initMysqlSchema();
+        cloudLoaded = await loadAllCollectionsFromMysql();
+        if (cloudLoaded && Object.keys(cloudLoaded).length > 0) {
+          activeProvider = `MySQL (${config.mysql.database})`;
+          logger.info(`Successfully loaded persistent collections from MySQL database [${config.mysql.database}].`);
+        } else {
+          activeProvider = `MySQL (${config.mysql.database})`;
+          logger.info('MySQL connected. Collections will be seeded to MySQL.');
         }
+      } catch (mysqlErr) {
+        logger.warn('MySQL connection warning (will fall back to next provider):', mysqlErr.message || mysqlErr);
       }
-    } catch (neonErr) {
-      logger.warn('Neon PostgreSQL connection warning (will fall back to local store if needed):', neonErr.message || neonErr);
     }
 
-    if (neonLoaded && Object.keys(neonLoaded).length > 0) {
+    // 2. Attempt connection and initialization from Neon PostgreSQL (if MySQL not used)
+    if (!cloudLoaded && config.databaseUrl) {
+      try {
+        logger.info('Connecting to Neon PostgreSQL cloud database...');
+        await initNeonSchema();
+        const neonLoaded = await loadAllCollectionsFromNeon();
+        if (neonLoaded && Object.keys(neonLoaded).length > 0) {
+          cloudLoaded = neonLoaded;
+          activeProvider = 'Neon PostgreSQL (Cloud)';
+          logger.info('Successfully loaded persistent collections from Neon PostgreSQL.');
+        }
+      } catch (neonErr) {
+        logger.warn('Neon PostgreSQL connection warning (will fall back to local store if needed):', neonErr.message || neonErr);
+      }
+    }
+
+    if (cloudLoaded && Object.keys(cloudLoaded).length > 0) {
       // Validate and structure loaded collections
       memoryDb = {
-        products: Array.isArray(neonLoaded.products) ? neonLoaded.products : defaultData.products,
-        categories: Array.isArray(neonLoaded.categories) ? neonLoaded.categories : defaultData.categories,
-        orders: Array.isArray(neonLoaded.orders) ? neonLoaded.orders : defaultData.orders,
-        quotes: Array.isArray(neonLoaded.quotes) ? neonLoaded.quotes : defaultData.quotes,
-        settings: neonLoaded.settings && typeof neonLoaded.settings === 'object' ? neonLoaded.settings : defaultData.settings,
-        testimonials: Array.isArray(neonLoaded.testimonials) ? neonLoaded.testimonials : defaultData.testimonials,
-        adminAuth: neonLoaded.adminAuth && typeof neonLoaded.adminAuth === 'object' ? neonLoaded.adminAuth : defaultData.adminAuth,
-        customerMessages: Array.isArray(neonLoaded.customerMessages) ? neonLoaded.customerMessages : (defaultData.customerMessages || []),
+        products: Array.isArray(cloudLoaded.products) ? cloudLoaded.products : defaultData.products,
+        categories: Array.isArray(cloudLoaded.categories) ? cloudLoaded.categories : defaultData.categories,
+        orders: Array.isArray(cloudLoaded.orders) ? cloudLoaded.orders : defaultData.orders,
+        quotes: Array.isArray(cloudLoaded.quotes) ? cloudLoaded.quotes : defaultData.quotes,
+        settings: cloudLoaded.settings && typeof cloudLoaded.settings === 'object' ? cloudLoaded.settings : defaultData.settings,
+        testimonials: Array.isArray(cloudLoaded.testimonials) ? cloudLoaded.testimonials : defaultData.testimonials,
+        adminAuth: cloudLoaded.adminAuth && typeof cloudLoaded.adminAuth === 'object' ? cloudLoaded.adminAuth : defaultData.adminAuth,
+        customerMessages: Array.isArray(cloudLoaded.customerMessages) ? cloudLoaded.customerMessages : (defaultData.customerMessages || []),
       };
 
       // Keep local disk mirror synchronized
@@ -75,15 +107,21 @@ export async function initDb() {
 
       await writeToDiskAtomic(memoryDb).catch(() => {});
 
-      // Seed to Neon PostgreSQL if connection available
-      if (config.databaseUrl) {
+      // Seed to MySQL if connection active
+      if (isMysqlActive()) {
+        saveAllCollectionsToMysql(memoryDb).catch((err) => {
+          logger.warn('Could not seed initial collections to MySQL:', err.message || err);
+        });
+      }
+      // Or seed to Neon PostgreSQL if connection available
+      else if (config.databaseUrl) {
         saveAllCollectionsToNeon(memoryDb).catch((err) => {
           logger.warn('Could not seed initial collections to Neon:', err.message || err);
         });
       }
     }
 
-    logger.info(`Database initialized successfully. Collections: [products: ${memoryDb.products.length}, categories: ${memoryDb.categories.length}, orders: ${memoryDb.orders.length}, quotes: ${memoryDb.quotes.length}, messages: ${memoryDb.customerMessages.length}]`);
+    logger.info(`Database initialized successfully [Provider: ${activeProvider}]. Collections: [products: ${memoryDb.products.length}, categories: ${memoryDb.categories.length}, orders: ${memoryDb.orders.length}, quotes: ${memoryDb.quotes.length}, messages: ${memoryDb.customerMessages.length}]`);
 
     // Create startup safety backup
     await backupDb();
@@ -160,7 +198,11 @@ export function saveDb(newData) {
   writeQueue = writeQueue
     .then(async () => {
       await writeToDiskAtomic(memoryDb);
-      if (config.databaseUrl) {
+      if (isMysqlActive()) {
+        await saveAllCollectionsToMysql(newData).catch((err) => {
+          logger.warn('Failed to sync changes to MySQL:', err.message || err);
+        });
+      } else if (config.databaseUrl) {
         await saveAllCollectionsToNeon(newData).catch((err) => {
           logger.warn('Failed to sync changes to Neon PostgreSQL:', err.message || err);
         });
@@ -186,7 +228,11 @@ export async function updateDb(updater) {
           memoryDb = updated;
         }
         await writeToDiskAtomic(memoryDb);
-        if (config.databaseUrl) {
+        if (isMysqlActive()) {
+          saveAllCollectionsToMysql(memoryDb).catch((err) => {
+            logger.warn('Failed to sync update to MySQL:', err.message || err);
+          });
+        } else if (config.databaseUrl) {
           saveAllCollectionsToNeon(memoryDb).catch((err) => {
             logger.warn('Failed to sync update to Neon PostgreSQL:', err.message || err);
           });
@@ -214,22 +260,11 @@ export async function backupDb() {
   }
 }
 
-/**
- * Resets database to factory defaults
- */
-export async function resetDb() {
-  await backupDb();
-  memoryDb = JSON.parse(JSON.stringify(defaultData));
-  await writeToDiskAtomic(memoryDb);
-  logger.info('Database has been reset to factory defaults.');
-  return memoryDb;
-}
-
 export default {
   initDb,
   getDb,
   saveDb,
   updateDb,
   backupDb,
-  resetDb,
+  getActiveDbProvider,
 };

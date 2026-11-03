@@ -7,14 +7,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootBackendDir = path.resolve(__dirname, '..', '..');
 
-dotenv.config({ path: path.join(rootBackendDir, '.env') });
+// Load root .env if present, followed by backend/.env (allowing override)
+const rootEnvPath = path.resolve(rootBackendDir, '..', '.env');
+const backendEnvPath = path.join(rootBackendDir, '.env');
+
+if (fs.existsSync(rootEnvPath)) {
+  dotenv.config({ path: rootEnvPath });
+}
+if (fs.existsSync(backendEnvPath)) {
+  dotenv.config({ path: backendEnvPath, override: true });
+}
 
 export const config = Object.freeze({
   env: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
   port: parseInt(process.env.PORT || '3001', 10),
   host: process.env.HOST || '0.0.0.0',
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_W3FynXtmqlc5@ep-sparkling-band-b4621xgb-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+
+  // MySQL Database Configuration
+  mysql: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.DB_USER || '',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || '',
+    ssl: process.env.DB_SSL === 'true',
+  },
+
+  // PostgreSQL Configuration (Alternative cloud provider)
+  databaseUrl: process.env.DATABASE_URL || '',
   
   jwt: {
     secret: process.env.JWT_SECRET || 'ecotex_default_secret_key_change_me_in_prod',
