@@ -23,7 +23,7 @@
       "createdAt": "2026-10-27T07:33:45.681Z",
       "ecoImpact": "Displaces up to 250 single-use plastic carrier bags per unit lifetime.",
       "pcsPerBox": 201,
-      "updatedAt": "2026-10-28T09:14:33.821Z",
+      "updatedAt": "2026-11-03T12:01:44.756Z",
       "dimensions": "12\"W x 14\"H x 4\"D",
       "description": "High tensile enterprise carrier bag manufactured for supermarkets, boutique retail, and trade exhibitions.",
       "volumeTiers": [
@@ -50,18 +50,73 @@
       ],
       "availableColors": [
         {
+          "id": "col-0",
+          "name": "Eco Green",
           "hex": "#86C59E",
-          "name": "Eco Green"
+          "stockQuantity": 25
         },
         {
+          "id": "col-1",
+          "name": "Pure White",
           "hex": "#FFFFFF",
-          "name": "Pure White"
+          "stockQuantity": 25
         },
         {
+          "id": "col-2",
+          "name": "Deep Slate",
           "hex": "#0f172a",
-          "name": "Deep Slate"
+          "stockQuantity": 25
         }
-      ]
+      ],
+      "originalPrice": 0.31,
+      "retailPricePerUnit": 0.36,
+      "retailOriginalPrice": 0.45,
+      "retailMinBoxes": 15,
+      "retailMaxBoxes": 15,
+      "wholesaleMoq": 20,
+      "wholesaleMinBoxes": 20,
+      "colorStock": {
+        "col-0": 25,
+        "eco green": 25,
+        "col-1": 25,
+        "pure white": 25,
+        "col-2": 25,
+        "deep slate": 25
+      },
+      "rating": 4.9,
+      "articleNo": "EP-PROD-1",
+      "volumeNo": "80 GSM LUXURY",
+      "galleryImages": [
+        "/images/bag-blue.png",
+        "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=85",
+        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=85",
+        "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1000&q=85"
+      ],
+      "brandName": "ECOTEX INC.",
+      "fabricDetails": "80 GSM Virgin Non-Woven Polypropylene",
+      "handles": "Ultrasonic Thermal Welded Loops",
+      "printingMethod": "High-Precision Flexographic / Gravure Custom Imprint",
+      "compliance": "Certified California SB 270 & ASTM D6400",
+      "packingDetails": "Export-Grade Heavy Duty Corrugated Cartons",
+      "guaranteedFabric": "100% Virgin Grade Recyclable Polypropylene",
+      "enrouteQuality": "Enroute to Quality Standard",
+      "recommendedPrint": "High-Precision Flexographic Custom Imprint",
+      "trustBadge1": "Fast Delivery",
+      "trustBadge2": "Secure Store",
+      "trustBadge3": "Easy Return",
+      "retailPolicyText": "Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.",
+      "wholesalePolicyText": "Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).",
+      "outOfStockNotice": "Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.",
+      "checkoutButtonText": "→ Express Checkout",
+      "outOfStockButtonText": "Purchases Temporarily Closed (Sold Out)",
+      "retailTabLabel": "Retail Order",
+      "wholesaleTabLabel": "Wholesale Order",
+      "specsHeading": "Description",
+      "relatedTag": "Explore More Options",
+      "relatedTitle": "Related Products",
+      "relatedSubtitle": "Frequently ordered together or alternative sizing options for your business.",
+      "relatedBackBtnText": "View Full Catalog",
+      "retailQuantity": 15
     },
     {
       "id": "prod-1791786437631",
@@ -3687,7 +3742,7 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-11-03T05:45:40.624Z",
+    "updatedAt": "2026-11-03T11:52:30.900Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
@@ -3782,6 +3837,27 @@
       "wordmarkSuffix": "TEX"
     },
     "shopConfig": {
+      "showHeroBanner": true,
+      "heroBannerBadge": "LIMITED TIME ONLY",
+      "heroBannerTitle": "Shop More,\nSave More.",
+      "heroBannerSubtitle": "Discover amazing deals on your favorite sustainable products & eco-friendly essentials.",
+      "heroBannerBtnText": "EXPLORE COLLECTION",
+      "heroBannerImage": "/uploads/Gemini_Generated_Image_afbs1pa-1793705274029-xaa4t.jpg",
+      "heroBannerDiscountBadge": "UP TO 50% OFF",
+      "valueProp1Title": "Best Prices",
+      "valueProp1Subtitle": "Guaranteed",
+      "valueProp2Title": "Secure",
+      "valueProp2Subtitle": "Payments",
+      "valueProp3Title": "Fast Delivery",
+      "valueProp3Subtitle": "Worldwide",
+      "trustBar1Title": "Free Shipping",
+      "trustBar1Subtitle": "On orders over $75",
+      "trustBar2Title": "Easy Returns",
+      "trustBar2Subtitle": "30-day returns",
+      "trustBar3Title": "Premium Quality",
+      "trustBar3Subtitle": "100% original products",
+      "trustBar4Title": "24/7 Support",
+      "trustBar4Subtitle": "We're here to help",
       "catalogTitle": "Wholesale Catalog & Mill Collections",
       "testimonials": [
         {
@@ -3958,7 +4034,24 @@
       "copyrightNotice": "Copyright 2026 © Ecotex Inc. All rights reserved.",
       "newsletterTitle": "Subscribe To Our Quarterly Newsletter",
       "newsletterBgImage": "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1600&q=80",
-      "newsletterSubtitle": "Receive direct mill pricing updates, material innovation whitepapers, and California SB 54 regulatory packaging briefs."
+      "newsletterSubtitle": "Receive direct mill pricing updates, material innovation whitepapers, and California SB 54 regulatory packaging briefs.",
+      "socialLinks": [
+        {
+          "id": "soc-1",
+          "name": "TikTok",
+          "url": "https://linkedin.com"
+        },
+        {
+          "id": "soc-3",
+          "name": "Facebook",
+          "url": "https://facebook.com"
+        },
+        {
+          "id": "soc-4",
+          "name": "Instagram",
+          "url": "https://instagram.com"
+        }
+      ]
     },
     "heroSubtitle": "memememmememe",
     "navbarConfig": {
@@ -4171,8 +4264,8 @@
   "adminAuth": {
     "name": "Operations Director",
     "email": "admin@ecotexinc.com",
-    "password": "$2b$10$iBHBjq7FIXLGMLgIFqYKuODGuYosSj13./b/QUaAYux/te4JDp2Bi",
-    "updatedAt": "2026-10-22T06:52:25.961Z"
+    "password": "$2b$10$HtESuCvIClkb0LIcwkiSSOL9t84TJ4My8A5aJj8ddgkMNGTRlEpW.",
+    "updatedAt": "2026-11-03T11:42:44.915Z"
   },
   "customerMessages": [
     {

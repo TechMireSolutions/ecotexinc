@@ -209,6 +209,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Sparkles className="w-4 h-4 text-[#B2E2C5] shrink-0" />
               <span>Customize Hero 3D Showcase</span>
             </button>
+            <button
+              onClick={() => onNavigateToSection('shop-banner')}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-white font-bold text-xs transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4 text-emerald-300 shrink-0" />
+              <span>Edit Shop Page Banner</span>
+            </button>
           </div>
         </div>
 

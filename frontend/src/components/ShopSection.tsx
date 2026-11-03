@@ -326,7 +326,16 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
   const displayedProducts = isHome ? featuredArrivals : sortedProducts;
 
   const scrollToCategories = () => {
-    categoriesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (categoriesRef.current) {
+      categoriesRef.current.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      const catalog = document.getElementById('shop-categories-section') || document.querySelector('section[id*="product"]') || document.querySelector('main');
+      if (catalog) {
+        catalog.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 600, behavior: 'smooth' });
+      }
+    }
   };
 
   const handleCategorySelect = (categoryId: string) => {
@@ -352,7 +361,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       {/* ========================================================
           1. FULL-WIDTH EDGE-TO-EDGE HERO BANNER (STARTS AT TOP OF SHOP PAGE)
          ======================================================== */}
-      {showHero && (
+      {showHero && (siteSettings?.shopConfig?.showHeroBanner !== false) && (
         <section className="relative w-full bg-gradient-to-r from-[#051a0e] via-[#0a2c17] to-[#04150a] text-white overflow-hidden shadow-xl border-b border-emerald-950/80">
           
           {/* Ambient Studio Lighting Glows */}

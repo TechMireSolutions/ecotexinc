@@ -16,7 +16,8 @@ import {
   Settings,
   FolderTree,
   Flame,
-  Home
+  Home,
+  ShoppingBag
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
@@ -24,6 +25,7 @@ export type AdminSection =
   | 'overview'
   | 'homepage'
   | 'hero'
+  | 'shop-banner'
   | 'categories'
   | 'products'
   | 'offers'
@@ -56,6 +58,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const navItems: { id: AdminSection; label: string; icon: React.ElementType; badge?: string | number }[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'homepage', label: 'Homepage', icon: Home, badge: 'All Sections' },
+    { id: 'shop-banner', label: 'Shop Page Banner', icon: ShoppingBag, badge: 'Hero' },
     { id: 'categories', label: 'Categories', icon: FolderTree, badge: categories.filter(c => c.id !== 'all').length || categories.length },
     { id: 'products', label: 'Products & Single Pages', icon: Package, badge: products.length },
     { id: 'offers', label: 'Special Offers & Deals', icon: Flame, badge: 'HOT' },

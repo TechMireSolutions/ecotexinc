@@ -63,21 +63,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     { url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1000&q=85', label: 'Production Detail' }
   ];
 
-  // Wholesale minimum order quantity starts at 5 boxes and goes in multiples of 5
-  const wholesaleMoq = 5;
+  const wholesaleMoq = product.wholesaleMinBoxes || product.wholesaleMoq || 5;
+  const wholesaleMaxBoxes = product.wholesaleMaxBoxes;
+  const retailFixedQty = product.retailQuantity || 15;
   const pcsPerBox = product.pcsPerBox || 200;
   const isOutOfStock = product.inStock === false || (typeof product.stockQuantity === 'number' && product.stockQuantity <= 0);
   const availableStock = typeof product.stockQuantity === 'number' ? product.stockQuantity : (product.inStock !== false ? 50 : 0);
 
-  const minQuantity = orderType === 'wholesale' ? wholesaleMoq : 1;
-  const maxQuantity = orderType === 'retail' ? Math.min(5, availableStock) : availableStock;
+  const minQuantity = orderType === 'retail' ? retailFixedQty : wholesaleMoq;
+  const maxQuantity = orderType === 'retail' ? Math.min(retailFixedQty, availableStock) : (wholesaleMaxBoxes ? Math.min(wholesaleMaxBoxes, availableStock) : availableStock);
   const [moqWarning, setMoqWarning] = useState<string | null>(null);
 
   // Sync state when product changes or orderType toggles
   useEffect(() => {
     setActiveImageIndex(0);
     setMoqWarning(null);
-    setQuantity(orderType === 'retail' ? Math.min(1, availableStock) : Math.min(wholesaleMoq, availableStock));
+    setQuantity(orderType === 'retail' ? Math.min(retailFixedQty, availableStock) : Math.min(wholesaleMoq, availableStock));
   }, [product, orderType, wholesaleMoq, availableStock]);
 
   // Escape key to close
@@ -100,7 +101,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       if (quantity >= maxQuantity) {
         setMoqWarning(maxQuantity < 5 
           ? `Stock limit reached: only ${availableStock} boxes available in stock.`
-          : 'Retail orders are limited to a maximum of 5 boxes. For larger orders, please switch to Wholesale Order.');
+          : `Retail orders are fixed at exactly ${retailFixedQty} boxes.`);
         setTimeout(() => setMoqWarning(null), 4000);
         return;
       }
@@ -520,7 +521,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     </span>
                     {orderType === 'retail' ? (
                       <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                        1 – 5 Boxes
+                        Fixed: {retailFixedQty} Boxes
                       </span>
                     ) : (
                       <span className="text-[10px] font-semibold text-[#166534] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">

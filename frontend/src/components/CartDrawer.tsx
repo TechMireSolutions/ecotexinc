@@ -410,8 +410,9 @@ Notification automatically generated via EcoTex Storefront.`;
 
                           const isWholesaleItem = item.orderType === 'wholesale' || (!item.orderType && (item.quantity > 5 || (item.quantity % 5 === 0 && item.unitPrice <= (item.product.pricePerUnit || 0.35))));
                           const availableStock = typeof item.product.stockQuantity === 'number' ? item.product.stockQuantity : (item.product.inStock !== false ? 50 : 0);
-                          const minQty = isWholesaleItem ? 5 : 1;
-                          const maxQty = isWholesaleItem ? availableStock : Math.min(5, availableStock);
+                          const retailFixed = item.product.retailQuantity || 15;
+                                const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : retailFixed;
+                                const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : Math.min(retailFixed, availableStock);
                           const isAtMin = item.quantity <= minQty;
                           const isAtMax = item.quantity >= maxQty;
 

@@ -6,5 +6,6 @@ export { DashboardOverview } from './components/DashboardOverview';
 export { HeroBannerManager } from './components/HeroBannerManager';
 export { ProductCatalogManager } from './components/ProductCatalogManager';
 export { PageContentEditor } from './components/PageContentEditor';
+export { ShopBannerManager } from './components/ShopBannerManager';
 export { RfqOrdersInbox } from './components/RfqOrdersInbox';
 export { MediaLibraryManager } from './components/MediaLibraryManager';

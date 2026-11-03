@@ -3687,7 +3687,7 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-10-31T08:30:50.937Z",
+    "updatedAt": "2026-11-03T05:45:40.624Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
@@ -3782,6 +3782,27 @@
       "wordmarkSuffix": "TEX"
     },
     "shopConfig": {
+      "showHeroBanner": true,
+      "heroBannerBadge": "LIMITED TIME ONLY",
+      "heroBannerTitle": "Shop More,\nSave More!",
+      "heroBannerSubtitle": "Discover amazing deals on your favorite sustainable products & eco-friendly essentials.",
+      "heroBannerBtnText": "EXPLORE COLLECTION",
+      "heroBannerImage": "/images/shop-hero-podium.jpg",
+      "heroBannerDiscountBadge": "UP TO 50% OFF",
+      "valueProp1Title": "Best Prices",
+      "valueProp1Subtitle": "Guaranteed",
+      "valueProp2Title": "Secure",
+      "valueProp2Subtitle": "Payments",
+      "valueProp3Title": "Fast Delivery",
+      "valueProp3Subtitle": "Worldwide",
+      "trustBar1Title": "Free Shipping",
+      "trustBar1Subtitle": "On orders over $75",
+      "trustBar2Title": "Easy Returns",
+      "trustBar2Subtitle": "30-day returns",
+      "trustBar3Title": "Premium Quality",
+      "trustBar3Subtitle": "100% original products",
+      "trustBar4Title": "24/7 Support",
+      "trustBar4Subtitle": "We're here to help",
       "catalogTitle": "Wholesale Catalog & Mill Collections",
       "testimonials": [
         {

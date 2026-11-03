@@ -109,9 +109,13 @@ export const PageContentEditor: React.FC = () => {
         originalPrice: activeSelectedProduct.originalPrice || Math.round((activeSelectedProduct.pricePerUnit || 59.99) * 1.25 * 100) / 100,
         retailPricePerUnit: activeSelectedProduct.retailPricePerUnit !== undefined && activeSelectedProduct.retailPricePerUnit > 0 ? activeSelectedProduct.retailPricePerUnit : Math.round((activeSelectedProduct.pricePerUnit || 59.99) * 1.45 * 100) / 100,
         retailOriginalPrice: activeSelectedProduct.retailOriginalPrice !== undefined && activeSelectedProduct.retailOriginalPrice > 0 ? activeSelectedProduct.retailOriginalPrice : Math.round((activeSelectedProduct.retailPricePerUnit || (activeSelectedProduct.pricePerUnit || 59.99) * 1.45) * 1.25 * 100) / 100,
-        retailMaxBoxes: activeSelectedProduct.retailMaxBoxes || 5,
+        retailQuantity: activeSelectedProduct.retailQuantity || 15,
+        retailMinBoxes: activeSelectedProduct.retailQuantity || 15,
+        retailMaxBoxes: activeSelectedProduct.retailQuantity || 15,
         pcsPerBox: activeSelectedProduct.pcsPerBox || 200,
-        wholesaleMoq: activeSelectedProduct.wholesaleMoq || 5,
+        wholesaleMoq: activeSelectedProduct.wholesaleMinBoxes || activeSelectedProduct.wholesaleMoq || 5,
+        wholesaleMinBoxes: activeSelectedProduct.wholesaleMinBoxes || activeSelectedProduct.wholesaleMoq || 5,
+        wholesaleMaxBoxes: activeSelectedProduct.wholesaleMaxBoxes,
         stockQuantity: activeSelectedProduct.stockQuantity !== undefined ? activeSelectedProduct.stockQuantity : 50,
         availableColors: (activeSelectedProduct.availableColors && activeSelectedProduct.availableColors.length > 0)
           ? activeSelectedProduct.availableColors.map((c, i) => ({
@@ -198,9 +202,13 @@ export const PageContentEditor: React.FC = () => {
       originalPrice: Math.max(0.01, Number(pdpForm.originalPrice) || 74.99),
       retailPricePerUnit: Math.max(0.01, Number(pdpForm.retailPricePerUnit) || 86.99),
       retailOriginalPrice: Math.max(0.01, Number(pdpForm.retailOriginalPrice) || 108.73),
-      retailMaxBoxes: Math.max(1, Number(pdpForm.retailMaxBoxes) || 5),
+      retailQuantity: Math.max(1, Number(pdpForm.retailQuantity) || 15),
+      retailMinBoxes: Math.max(1, Number(pdpForm.retailQuantity) || 15),
+      retailMaxBoxes: Math.max(1, Number(pdpForm.retailQuantity) || 15),
       pcsPerBox: Math.max(1, Number(pdpForm.pcsPerBox) || 200),
-      wholesaleMoq: Math.max(1, Number(pdpForm.wholesaleMoq) || 5),
+      wholesaleMoq: Math.max(1, Number(pdpForm.wholesaleMoq || pdpForm.wholesaleMinBoxes) || 5),
+      wholesaleMinBoxes: Math.max(1, Number(pdpForm.wholesaleMinBoxes || pdpForm.wholesaleMoq) || 5),
+      wholesaleMaxBoxes: pdpForm.wholesaleMaxBoxes ? Math.max(1, Number(pdpForm.wholesaleMaxBoxes)) : undefined,
       stockQuantity: finalStock,
       availableColors: (pdpForm.availableColors || []).map((c: any) => ({
         id: c.id || ('col-' + Math.random().toString(36).substring(2, 7)),
@@ -1992,7 +2000,7 @@ export const PageContentEditor: React.FC = () => {
                           </strong>
                         </div>
                         <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          MOQ: {pdpForm.wholesaleMoq || 5} Boxes
+                          MOQ: {pdpForm.wholesaleMoq || 5} Boxes{pdpForm.wholesaleMaxBoxes ? ' · Max: ' + pdpForm.wholesaleMaxBoxes + ' Boxes' : ''}
                         </span>
                       </div>
 
@@ -2077,7 +2085,7 @@ export const PageContentEditor: React.FC = () => {
                           </strong>
                         </div>
                         <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Max: {pdpForm.retailMaxBoxes || 5} Boxes
+                          Fixed: {pdpForm.retailQuantity || 15} Boxes
                         </span>
                       </div>
 

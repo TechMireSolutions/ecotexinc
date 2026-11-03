@@ -7,6 +7,7 @@ import { AdminTopBar } from './AdminTopBar';
 import { DashboardOverview } from './DashboardOverview';
 import { HomepageManager } from './HomepageManager';
 import { HeroBannerManager } from './HeroBannerManager';
+import { ShopBannerManager } from './ShopBannerManager';
 import { CategoriesManager } from './CategoriesManager';
 import { ProductCatalogManager } from './ProductCatalogManager';
 import { OffersDealsManager } from './OffersDealsManager';
@@ -75,6 +76,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'overview': return 'Operations Dashboard';
       case 'homepage': return 'Homepage Master CMS';
       case 'hero': return 'Hero 3D Showcase';
+      case 'shop-banner': return 'Shop Page Hero Banner & Showcase';
       case 'categories': return 'Product Categories';
       case 'products': return 'Products Catalog';
       case 'offers': return 'Special Offers & Deals';
@@ -167,6 +169,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {activeSection === 'hero' && (
             <HeroBannerManager />
+          )}
+
+          {activeSection === 'shop-banner' && (
+            <ShopBannerManager onViewShop={onBackToSite} />
           )}
 
           {activeSection === 'categories' && (

@@ -78,7 +78,7 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       
-      if (path === '/admin' || path === '/admin/' || path === '/admin/login' || hash === '#admin') {
+      if (path === '/admin' || path === '/admin/' || path === '/admin/login' || path === '/admin-login' || path === '/adminlogin' || hash === '#admin') {
         setActiveSection('admin');
       }
     };
@@ -123,9 +123,9 @@ export default function App() {
   };
 
   // Dedicated Enterprise Custom CMS Admin Dashboard (Protected by Auth)
-  if (activeSection === 'admin' || (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin'))) {
+  if (activeSection === 'admin' || (typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname === '/admin-login' || window.location.pathname === '/adminlogin'))) {
     const isAuthed = checkAuth();
-    const isExplicitLoginRoute = typeof window !== 'undefined' && window.location.pathname === '/admin/login';
+    const isExplicitLoginRoute = typeof window !== 'undefined' && (window.location.pathname === '/admin/login' || window.location.pathname === '/admin-login' || window.location.pathname === '/adminlogin');
 
     if (!isAuthed || isExplicitLoginRoute) {
       return (

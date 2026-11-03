@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Home,
+  ShoppingBag,
   Sliders, 
   Sparkles, 
   Layers, 
@@ -90,7 +91,7 @@ interface HomepageManagerProps {
   onNavigateToSection?: (section: string) => void;
 }
 
-export const HomepageManager: React.FC<HomepageManagerProps> = () => {
+export const HomepageManager: React.FC<HomepageManagerProps> = ({ onNavigateToSection }) => {
   const { 
     heroConfig, 
     updateHeroConfig, 
@@ -481,6 +482,24 @@ export const HomepageManager: React.FC<HomepageManagerProps> = () => {
                 );
               })}
             </nav>
+
+            {onNavigateToSection && (
+              <div className="pt-3 mt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => onNavigateToSection('shop-banner')}
+                  className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#051a0e] to-[#0a2c17] text-white hover:brightness-110 transition-all text-xs font-bold shadow-md cursor-pointer border border-emerald-900/50"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                    <span>Shop Page Banner</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FF5722] text-white">
+                    Edit
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 

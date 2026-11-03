@@ -30,10 +30,19 @@ import {
   Search,
   CheckCircle2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  Trash2,
+  Edit2,
+  X,
+  Twitter,
+  Facebook,
+  Linkedin,
+  Instagram,
+  Youtube
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { SiteSettings, LogoConfig, OrderNotificationsConfig, ShippingConfig, FooterConfig } from '../../types';
+import { SiteSettings, LogoConfig, OrderNotificationsConfig, ShippingConfig, FooterConfig, SocialLinkItem } from '../../types';
 import { BASE_URL, apiService } from '../../services/apiService';
 
 interface SiteSettingsManagerProps {
@@ -74,6 +83,125 @@ export const SiteSettingsManager: React.FC<SiteSettingsManagerProps> = ({ onLogo
   });
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('identity');
+
+  // Dynamic Social Media Modal & Form State
+  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
+  const [editingSocialLink, setEditingSocialLink] = useState<SocialLinkItem | null>(null);
+  const [socialFormName, setSocialFormName] = useState('');
+  const [socialFormUrl, setSocialFormUrl] = useState('');
+  const [socialFormError, setSocialFormError] = useState<string | null>(null);
+
+  // Derive dynamic list of social links from footerConfig or seed from legacy keys
+  const currentSocialLinks: SocialLinkItem[] = React.useMemo(() => {
+    if (Array.isArray(formData.footerConfig?.socialLinks)) {
+      return formData.footerConfig.socialLinks;
+    }
+    const list: SocialLinkItem[] = [];
+    const fc = formData.footerConfig || {};
+    const cc = formData.contactConfig || {};
+    if (fc.socialLinkedin || cc.linkedinUrl) list.push({ id: 'soc-1', name: 'LinkedIn', url: fc.socialLinkedin || cc.linkedinUrl || 'https://linkedin.com' });
+    if (fc.socialTwitter || cc.twitterUrl) list.push({ id: 'soc-2', name: 'Twitter / X', url: fc.socialTwitter || cc.twitterUrl || 'https://twitter.com' });
+    if (fc.socialFacebook || cc.facebookUrl) list.push({ id: 'soc-3', name: 'Facebook', url: fc.socialFacebook || cc.facebookUrl || 'https://facebook.com' });
+    if (fc.socialInstagram || cc.instagramUrl) list.push({ id: 'soc-4', name: 'Instagram', url: fc.socialInstagram || cc.instagramUrl || 'https://instagram.com' });
+    if (fc.socialYoutube) list.push({ id: 'soc-5', name: 'YouTube', url: fc.socialYoutube || 'https://youtube.com' });
+    return list;
+  }, [formData.footerConfig, formData.contactConfig]);
+
+  const handleOpenAddSocial = () => {
+    setEditingSocialLink(null);
+    setSocialFormName('');
+    setSocialFormUrl('https://');
+    setSocialFormError(null);
+    setIsSocialModalOpen(true);
+  };
+
+  const handleOpenEditSocial = (link: SocialLinkItem) => {
+    setEditingSocialLink(link);
+    setSocialFormName(link.name);
+    setSocialFormUrl(link.url);
+    setSocialFormError(null);
+    setIsSocialModalOpen(true);
+  };
+
+  const handleDeleteSocial = (id: string) => {
+    const updated = currentSocialLinks.filter(l => l.id !== id);
+    handleFooterChange('socialLinks', updated);
+    const updatedConfig = {
+      ...formData,
+      footerConfig: {
+        ...(formData.footerConfig || {}),
+        socialLinks: updated
+      }
+    };
+    updateSiteSettings(updatedConfig);
+    apiService.updateSettings(updatedConfig).catch(() => {});
+    setSaveToast({
+      show: true,
+      message: 'Social link removed successfully!',
+      type: 'success'
+    });
+  };
+
+  const handleSaveSocialLink = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = socialFormName.trim();
+    let url = socialFormUrl.trim();
+
+    if (!name) {
+      setSocialFormError('Please enter a platform name (e.g. Instagram, WhatsApp).');
+      return;
+    }
+    if (!url || url === 'https://' || url === 'http://') {
+      setSocialFormError('Please enter a valid channel or profile link URL.');
+      return;
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    let updated: SocialLinkItem[];
+    if (editingSocialLink && editingSocialLink.id) {
+      updated = currentSocialLinks.map(l => l.id === editingSocialLink.id ? { ...l, name, url } : l);
+    } else {
+      updated = [...currentSocialLinks, { id: 'soc-' + Date.now(), name, url }];
+    }
+
+    handleFooterChange('socialLinks', updated);
+    const updatedConfig = {
+      ...formData,
+      footerConfig: {
+        ...(formData.footerConfig || {}),
+        socialLinks: updated
+      }
+    };
+    updateSiteSettings(updatedConfig);
+    apiService.updateSettings(updatedConfig).catch(() => {});
+    setIsSocialModalOpen(false);
+    setSaveToast({
+      show: true,
+      message: `Social link "${name}" saved and updated live!`,
+      type: 'success'
+    });
+  };
+
+  const getSocialIcon = (name: string, url: string) => {
+    const n = (name || '').toLowerCase();
+    const u = (url || '').toLowerCase();
+    if (n.includes('tiktok') || u.includes('tiktok')) {
+      return (
+        <svg className="w-4 h-4 fill-current text-slate-900" viewBox="0 0 24 24">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.67 6.34 6.34 0 0 0 9.35 22a6.33 6.33 0 0 0 6.32-6.33V9.17a8.28 8.28 0 0 0 4.84 1.55v-3.5a4.85 4.85 0 0 1-.92-.53z" />
+        </svg>
+      );
+    }
+    if (n.includes('whatsapp') || u.includes('whatsapp') || u.includes('wa.me')) return <Phone className="w-4 h-4 text-[#25d366]" />;
+    if (n.includes('linkedin') || u.includes('linkedin')) return <Linkedin className="w-4 h-4 text-[#0077b5]" />;
+    if (n.includes('twitter') || n.includes('x.com') || u.includes('twitter') || u.includes('x.com')) return <Twitter className="w-4 h-4 text-[#1da1f2]" />;
+    if (n.includes('facebook') || u.includes('facebook')) return <Facebook className="w-4 h-4 text-[#1877f2]" />;
+    if (n.includes('instagram') || u.includes('instagram')) return <Instagram className="w-4 h-4 text-[#e4405f]" />;
+    if (n.includes('youtube') || u.includes('youtube')) return <Youtube className="w-4 h-4 text-[#ff0000]" />;
+    return <Globe className="w-4 h-4 text-[#166534]" />;
+  };
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveToast, setSaveToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
@@ -1442,79 +1570,101 @@ return () => clearTimeout(timer);
             </div>
           </div>
 
-          {/* Section 4: Social Channels */}
-          <div className="border border-slate-100 rounded-2xl p-5 bg-slate-50/50 space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#166534]" />
-              <span>Social Media Channel Links</span>
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Section 4: Social Channels (Dynamic with Add Modal Popup) */}
+          <div className="border border-slate-200/90 rounded-3xl p-5 sm:p-6 bg-slate-50/60 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  LinkedIn Profile URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.socialLinkedin ?? formData.contactConfig?.linkedinUrl ?? 'https://linkedin.com'}
-                  onChange={(e) => handleFooterChange('socialLinkedin', e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
-                  placeholder="https://linkedin.com/company/ecotexinc"
-                />
+                <h4 className="text-sm font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <Globe className="w-4.5 h-4.5 text-[#166534]" />
+                  <span>Social Media Channel Links</span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-[#166534] border border-emerald-200">
+                    {currentSocialLinks.length} Configured
+                  </span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Manually add, edit, or remove your official social media app links.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Twitter / X URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.socialTwitter ?? formData.contactConfig?.twitterUrl ?? 'https://twitter.com'}
-                  onChange={(e) => handleFooterChange('socialTwitter', e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
-                  placeholder="https://twitter.com/ecotexinc"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Facebook Page URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.socialFacebook ?? formData.contactConfig?.facebookUrl ?? 'https://facebook.com'}
-                  onChange={(e) => handleFooterChange('socialFacebook', e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
-                  placeholder="https://facebook.com/ecotexinc"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Instagram Profile URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.socialInstagram ?? formData.contactConfig?.instagramUrl ?? 'https://instagram.com'}
-                  onChange={(e) => handleFooterChange('socialInstagram', e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
-                  placeholder="https://instagram.com/ecotexinc"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  YouTube Channel URL
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.socialYoutube ?? 'https://youtube.com'}
-                  onChange={(e) => handleFooterChange('socialYoutube', e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
-                  placeholder="https://youtube.com/@ecotexinc"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={handleOpenAddSocial}
+                className="px-4 py-2 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.98] self-start sm:self-auto shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Social Media Link</span>
+              </button>
             </div>
+
+            {/* List / Cards of Social Media Channels */}
+            {currentSocialLinks.length === 0 ? (
+              <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-slate-300 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-slate-700">No social media links added yet</h5>
+                  <p className="text-[11px] text-slate-400">Click &ldquo;Add Social Media Link&rdquo; to add your channels (e.g. Instagram, TikTok, WhatsApp, LinkedIn).</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleOpenAddSocial}
+                  className="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#166534] border border-emerald-200 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add First Channel</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {currentSocialLinks.map((link) => (
+                  <div
+                    key={link.id}
+                    className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-[#166534]/60 transition-all flex items-center justify-between gap-3 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        {getSocialIcon(link.name, link.url)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-slate-900 truncate flex items-center gap-1.5">
+                          <span>{link.name}</span>
+                        </div>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] text-slate-400 hover:text-[#166534] font-medium truncate flex items-center gap-1 block transition-colors"
+                          title={link.url}
+                        >
+                          <span className="truncate">{link.url}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditSocial(link)}
+                        className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                        title="Edit link"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSocial(link.id)}
+                        className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Delete link"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Section 5: Legal & Copyright Notices */}
@@ -1756,6 +1906,136 @@ return () => clearTimeout(timer);
         </div>
 
       </div>
+      {/* ADD / EDIT SOCIAL MEDIA MODAL POPUP */}
+      {isSocialModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+          <div 
+            className="fixed inset-0"
+            onClick={() => setIsSocialModalOpen(false)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md p-6 z-10 animate-scaleUp space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-[#166534] flex items-center justify-center shrink-0">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900">
+                    {editingSocialLink ? 'Edit Social Media Link' : 'Add Social Media Link'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Enter the app name and your channel or profile link URL.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsSocialModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick App Preset Chips */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Quick Preset App Select:
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { name: 'Instagram', prefix: 'https://instagram.com/' },
+                  { name: 'LinkedIn', prefix: 'https://linkedin.com/company/' },
+                  { name: 'WhatsApp', prefix: 'https://wa.me/' },
+                  { name: 'Twitter / X', prefix: 'https://x.com/' },
+                  { name: 'Facebook', prefix: 'https://facebook.com/' },
+                  { name: 'YouTube', prefix: 'https://youtube.com/@' },
+                  { name: 'TikTok', prefix: 'https://tiktok.com/@' },
+                  { name: 'Pinterest', prefix: 'https://pinterest.com/' },
+                  { name: 'Telegram', prefix: 'https://t.me/' }
+                ].map(p => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    onClick={() => {
+                      setSocialFormName(p.name);
+                      if (!socialFormUrl || socialFormUrl === 'https://') {
+                        setSocialFormUrl(p.prefix);
+                      }
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer border ${
+                      socialFormName.toLowerCase() === p.name.toLowerCase()
+                        ? 'bg-[#166534] text-white border-[#166534]'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveSocialLink} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Social Media App Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={socialFormName}
+                  onChange={(e) => setSocialFormName(e.target.value)}
+                  placeholder="e.g. Instagram, TikTok, WhatsApp, LinkedIn"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-800 focus:bg-white focus:border-[#166534] focus:outline-none"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Profile / Channel Link URL *
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={socialFormUrl}
+                  onChange={(e) => setSocialFormUrl(e.target.value)}
+                  placeholder="https://instagram.com/yourbrand"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 focus:bg-white focus:border-[#166534] focus:outline-none font-medium"
+                />
+              </div>
+
+              {socialFormError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{socialFormError}</span>
+                </div>
+              )}
+
+              {/* Modal Actions */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsSocialModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{editingSocialLink ? 'Update Channel' : 'Add Channel'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -27,6 +27,10 @@ export interface Product {
   pricePerUnit: number; // base bulk price for 1,000+ units
   moq: number; // minimum order quantity
   wholesaleMoq?: number; // wholesale minimum order quantity
+  wholesaleMinBoxes?: number; // wholesale minimum boxes allowed (MOQ)
+  wholesaleMaxBoxes?: number; // wholesale maximum boxes allowed
+  retailQuantity?: number; // fixed retail order quantity in boxes (e.g. 15)
+  retailMinBoxes?: number; // retail minimum boxes allowed
   pcsPerBox?: number; // number of pieces inside 1 box (dynamic pack size e.g. 200, 500 pcs/box)
   stockQuantity?: number; // Available inventory count in boxes (0 means out of stock)
   colorStock?: Record<string, number>; // Inventory count in boxes per color variant
@@ -301,6 +305,13 @@ export interface ShippingConfig {
   sampleDispatchNotice?: string;
 }
 
+export interface SocialLinkItem {
+  id: string;
+  name: string;
+  url: string;
+  icon?: string;
+}
+
 export interface FooterConfig {
   newsletterTitle: string;
   newsletterSubtitle?: string;
@@ -312,6 +323,7 @@ export interface FooterConfig {
   col1Title?: string;
   col2Title?: string;
   col3Title?: string;
+  socialLinks?: SocialLinkItem[];
   socialTwitter?: string;
   socialFacebook?: string;
   socialLinkedin?: string;
@@ -345,6 +357,7 @@ export interface ShopConfig {
   testimonials: TestimonialConfig[];
   galleryImages?: { url: string; caption: string }[];
   // Home Page Shop Hero Banner
+  showHeroBanner?: boolean;
   heroBannerBadge?: string;
   heroBannerTitle?: string;
   heroBannerSubtitle?: string;

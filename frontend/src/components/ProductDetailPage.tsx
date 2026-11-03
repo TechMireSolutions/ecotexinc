@@ -81,8 +81,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [addedToast, setAddedToast] = useState(false);
 
   // Dynamic Wholesale MOQ & Retail Limits from Product Settings
-  const wholesaleMoq = product.wholesaleMoq || 5;
-  const retailMaxBoxes = product.retailMaxBoxes || 5;
+  const wholesaleMoq = product.wholesaleMinBoxes || product.wholesaleMoq || 5;
+  const wholesaleMaxBoxes = product.wholesaleMaxBoxes;
+  const retailFixedQty = product.retailQuantity || 15;
   const pcsPerBox = product.pcsPerBox || 200;
 
   // Fully dynamic product colors list from product configuration
@@ -145,14 +146,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const availableStock = activeColorStock;
   const isOutOfStock = product.inStock === false || isColorOutOfStock;
 
-  const minQuantity = orderType === 'wholesale' ? wholesaleMoq : 1;
-  const maxQuantity = orderType === 'retail' ? Math.min(retailMaxBoxes, availableStock) : availableStock;
+  const minQuantity = orderType === 'retail' ? retailFixedQty : wholesaleMoq;
+  const maxQuantity = orderType === 'retail' ? Math.min(retailFixedQty, availableStock) : (wholesaleMaxBoxes ? Math.min(wholesaleMaxBoxes, availableStock) : availableStock);
   const [moqWarning, setMoqWarning] = useState<string | null>(null);
 
   const handleSelectColor = (c: ProductColorVariant) => {
     setSelectedColor(c);
     const newStock = getColorStock(c.id || c.name);
-    const newMax = orderType === 'retail' ? Math.min(retailMaxBoxes, newStock) : newStock;
+    const newMax = orderType === 'retail' ? Math.min(retailFixedQty, newStock) : newStock;
     if (newStock <= 0) {
       setQuantity(0);
       setMoqWarning(`${c.name} is currently out of stock.`);
@@ -165,7 +166,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       } else if (quantity < minQuantity && newStock >= minQuantity) {
         setQuantity(minQuantity);
       } else if (quantity === 0 && newStock > 0) {
-        setQuantity(orderType === 'retail' ? 1 : Math.min(wholesaleMoq, newStock));
+        setQuantity(orderType === 'retail' ? Math.min(retailFixedQty, newStock) : Math.min(wholesaleMoq, newStock));
       }
     }
   };
@@ -179,7 +180,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     if (curStock <= 0) {
       setQuantity(0);
     } else {
-      setQuantity(orderType === 'retail' ? Math.min(1, curStock) : Math.min(wholesaleMoq, curStock));
+      setQuantity(orderType === 'retail' ? Math.min(retailFixedQty, curStock) : Math.min(wholesaleMoq, curStock));
     }
   }, [product, orderType, wholesaleMoq]);
 
@@ -311,6 +312,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         setTimeout(() => setMoqWarning(null), 4000);
         return;
       }
+      if (wholesaleMaxBoxes && quantity > wholesaleMaxBoxes) {
+        setMoqWarning(`Wholesale maximum order quantity is ${wholesaleMaxBoxes} boxes.`);
+        setQuantity(wholesaleMaxBoxes);
+        setTimeout(() => setMoqWarning(null), 4000);
+        return;
+      }
       if (quantity % 5 !== 0) {
         const rounded = Math.min(availableStock, Math.ceil(quantity / 5) * 5);
         setMoqWarning(`Wholesale orders must be in multiples of 5. Updated to ${rounded} boxes.`);
@@ -319,11 +326,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         return;
       }
     }
-    if (orderType === 'retail' && quantity > retailMaxBoxes) {
-      setMoqWarning(`Retail orders are limited to a maximum of ${retailMaxBoxes} boxes. Please switch to Wholesale Order for larger quantities.`);
-      setQuantity(Math.min(retailMaxBoxes, availableStock));
-      setTimeout(() => setMoqWarning(null), 4000);
-      return;
+    if (orderType === 'retail') {
+      if (quantity !== retailFixedQty) {
+        setMoqWarning(`Retail order quantity is fixed at ${retailFixedQty} boxes (neither less nor more).`);
+        setQuantity(retailFixedQty);
+        setTimeout(() => setMoqWarning(null), 4000);
+        return;
+      }
     }
     setMoqWarning(null);
     onAddToCart(product, selectedColor.name, quantity, orderType);
@@ -358,11 +367,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         return;
       }
     }
-    if (orderType === 'retail' && quantity > retailMaxBoxes) {
-      setMoqWarning(`Retail orders are limited to a maximum of ${retailMaxBoxes} boxes. Please switch to Wholesale Order for larger quantities.`);
-      setQuantity(Math.min(retailMaxBoxes, availableStock));
-      setTimeout(() => setMoqWarning(null), 4000);
-      return;
+    if (orderType === 'retail') {
+      if (quantity !== retailFixedQty) {
+        setMoqWarning(`Retail order quantity is fixed at ${retailFixedQty} boxes (neither less nor more).`);
+        setQuantity(retailFixedQty);
+        setTimeout(() => setMoqWarning(null), 4000);
+        return;
+      }
     }
     setMoqWarning(null);
     if (onExpressCheckout) {
@@ -722,11 +733,11 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   </span>
                   {orderType === 'retail' ? (
                     <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                      1 – {retailMaxBoxes} Boxes
+                      Fixed: {retailFixedQty} Boxes
                     </span>
                   ) : (
                     <span className="text-[10px] font-semibold text-[#166534] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                      Multiples of {wholesaleMoq}
+                      Min: {wholesaleMoq}{wholesaleMaxBoxes ? ' · Max: ' + wholesaleMaxBoxes : ''} (Multiples of 5)
                     </span>
                   )}
                 </div>
@@ -741,7 +752,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 <div className={`w-full sm:w-44 h-12 rounded-xl border border-slate-300 bg-white flex items-center justify-between px-2 shadow-xs ${isOutOfStock ? 'opacity-50 pointer-events-none bg-slate-50' : ''}`}>
                   <button
                     type="button"
-                    disabled={isOutOfStock || quantity <= minQuantity}
+                    disabled={isOutOfStock || orderType === 'retail' || quantity <= minQuantity}
                     onClick={handleDecrement}
                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                       isOutOfStock || quantity <= minQuantity
@@ -756,6 +767,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   <input
                     type="number"
                     disabled={isOutOfStock}
+                    readOnly={orderType === 'retail'}
                     step={orderType === 'wholesale' ? 5 : 1}
                     min={minQuantity}
                     max={maxQuantity}
@@ -770,7 +782,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                           setQuantity(maxQuantity);
                           setMoqWarning(
                             orderType === 'retail'
-                              ? `Retail orders are limited to a maximum of ${retailMaxBoxes} boxes. For bulk orders, please select Wholesale Order.`
+                              ? `Retail orders are fixed at exactly ${retailFixedQty} boxes.`
                               : `Stock limit reached: only ${availableStock} boxes available in stock.`
                           );
                           setTimeout(() => setMoqWarning(null), 4000);
@@ -801,7 +813,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   />
                   <button
                     type="button"
-                    disabled={isOutOfStock || quantity >= maxQuantity}
+                    disabled={isOutOfStock || orderType === 'retail' || quantity >= maxQuantity}
                     onClick={handleIncrement}
                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                       isOutOfStock || quantity >= maxQuantity

@@ -131,6 +131,22 @@ export const ProductCatalogManager: React.FC = () => {
     { label: 'PLA Bio Jar', url: '/images/bite-hero-product.png' }
   ];
 
+  // Floating toast feedback
+  const [saveToast, setSaveToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
+
+  useEffect(() => {
+    if (saveToast.show) {
+      const timer = setTimeout(() => {
+        setSaveToast(prev => ({ ...prev, show: false }));
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [saveToast.show]);
+
   // Comprehensive Form State (All Single Product Page Elements)
   const [formData, setFormData] = useState({
     name: '',
@@ -141,9 +157,13 @@ export const ProductCatalogManager: React.FC = () => {
     originalPrice: 74.99,
     retailPricePerUnit: 86.99,
     retailOriginalPrice: 108.73,
-    retailMaxBoxes: 5,
+    retailQuantity: 15,
+    retailMinBoxes: 15,
+    retailMaxBoxes: 15,
     moq: 1000,
     wholesaleMoq: 5,
+    wholesaleMinBoxes: 5,
+    wholesaleMaxBoxes: undefined as number | undefined,
     pcsPerBox: 200,
     stockQuantity: 50,
     availableColors: DEFAULT_PALETTE.map(c => ({ ...c })) as ProductColorVariant[],
@@ -237,9 +257,13 @@ export const ProductCatalogManager: React.FC = () => {
       originalPrice: 74.99,
       retailPricePerUnit: 86.99,
       retailOriginalPrice: 108.73,
-      retailMaxBoxes: 5,
+      retailQuantity: 15,
+      retailMinBoxes: 15,
+      retailMaxBoxes: 15,
       moq: 1000,
       wholesaleMoq: 5,
+      wholesaleMinBoxes: 5,
+      wholesaleMaxBoxes: undefined,
       pcsPerBox: 200,
       stockQuantity: 50,
       availableColors: DEFAULT_PALETTE.map(c => ({ ...c })),
@@ -322,9 +346,13 @@ export const ProductCatalogManager: React.FC = () => {
       originalPrice: p.originalPrice || Math.round((p.pricePerUnit || 59.99) * 1.25 * 100) / 100,
       retailPricePerUnit: p.retailPricePerUnit !== undefined && p.retailPricePerUnit > 0 ? p.retailPricePerUnit : Math.round((p.pricePerUnit || 59.99) * 1.45 * 100) / 100,
       retailOriginalPrice: p.retailOriginalPrice !== undefined && p.retailOriginalPrice > 0 ? p.retailOriginalPrice : Math.round((p.retailPricePerUnit || (p.pricePerUnit || 59.99) * 1.45) * 1.25 * 100) / 100,
-      retailMaxBoxes: p.retailMaxBoxes || 5,
+      retailQuantity: p.retailQuantity || 15,
+      retailMinBoxes: p.retailQuantity || 15,
+      retailMaxBoxes: p.retailQuantity || 15,
       moq: p.moq,
-      wholesaleMoq: p.wholesaleMoq || 5,
+      wholesaleMoq: p.wholesaleMinBoxes || p.wholesaleMoq || 5,
+      wholesaleMinBoxes: p.wholesaleMinBoxes || p.wholesaleMoq || 5,
+      wholesaleMaxBoxes: p.wholesaleMaxBoxes,
       pcsPerBox: p.pcsPerBox || 200,
       stockQuantity: currentStockQty,
       availableColors: (p.availableColors && p.availableColors.length > 0)
@@ -424,9 +452,13 @@ export const ProductCatalogManager: React.FC = () => {
       originalPrice: Math.max(0.01, Number(formData.originalPrice) || 74.99),
       retailPricePerUnit: Math.max(0.01, Number(formData.retailPricePerUnit) || 86.99),
       retailOriginalPrice: Math.max(0.01, Number(formData.retailOriginalPrice) || 108.73),
-      retailMaxBoxes: Math.max(1, Number(formData.retailMaxBoxes) || 5),
+      retailQuantity: Math.max(1, Number(formData.retailQuantity) || 15),
+      retailMinBoxes: Math.max(1, Number(formData.retailQuantity) || 15),
+      retailMaxBoxes: Math.max(1, Number(formData.retailQuantity) || 15),
       moq: Number(formData.moq) || 1000,
-      wholesaleMoq: Math.max(1, Number(formData.wholesaleMoq) || 5),
+      wholesaleMoq: Math.max(1, Number(formData.wholesaleMoq || formData.wholesaleMinBoxes) || 5),
+      wholesaleMinBoxes: Math.max(1, Number(formData.wholesaleMinBoxes || formData.wholesaleMoq) || 5),
+      wholesaleMaxBoxes: formData.wholesaleMaxBoxes ? Math.max(1, Number(formData.wholesaleMaxBoxes)) : undefined,
       pcsPerBox: Math.max(1, Number(formData.pcsPerBox) || 200),
       stockQuantity: finalStockQuantity,
       availableColors: (formData.availableColors || []).map(c => ({
@@ -924,7 +956,9 @@ export const ProductCatalogManager: React.FC = () => {
             </div>
 
             {/* Modal Scrollable Body */}
-            <form id="product-full-form" onSubmit={handleSaveProduct} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+            <form id="product-full-form" onSubmit={handleSaveProduct} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              {/* Modal Scrollable Body */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
               
               {/* ========================================================
                   TAB 1: GENERAL & PRICING
@@ -1093,7 +1127,7 @@ export const ProductCatalogManager: React.FC = () => {
                           </h4>
                         </div>
                         <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100/80 border border-emerald-300/80 px-2 py-0.5 rounded-full">
-                          MOQ: {formData.wholesaleMoq} Boxes
+                          MOQ: {formData.wholesaleMoq || 5} Boxes{formData.wholesaleMaxBoxes ? ' · Max: ' + formData.wholesaleMaxBoxes + ' Boxes' : ''}
                         </span>
                       </div>
 
@@ -1151,7 +1185,10 @@ export const ProductCatalogManager: React.FC = () => {
                             min="1"
                             required
                             value={formData.wholesaleMoq}
-                            onChange={(e) => setFormData({ ...formData, wholesaleMoq: Math.max(1, parseInt(e.target.value) || 5) })}
+                            onChange={(e) => {
+                              const val = Math.max(1, parseInt(e.target.value) || 5);
+                              setFormData({ ...formData, wholesaleMoq: val, wholesaleMinBoxes: val });
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-emerald-200 text-xs font-bold text-slate-800 bg-white"
                             placeholder="5"
                           />
@@ -1195,7 +1232,7 @@ export const ProductCatalogManager: React.FC = () => {
                           </h4>
                         </div>
                         <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100/80 border border-amber-300/80 px-2 py-0.5 rounded-full">
-                          Max: {formData.retailMaxBoxes} Boxes
+                          Fixed: {formData.retailQuantity || 15} Boxes
                         </span>
                       </div>
 
@@ -1245,17 +1282,25 @@ export const ProductCatalogManager: React.FC = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
-                            Retail Max Allowed (Boxes) *
+                            Retail Fixed Quantity (Boxes) *
                           </label>
                           <input
                             type="number"
                             step="1"
                             min="1"
                             required
-                            value={formData.retailMaxBoxes}
-                            onChange={(e) => setFormData({ ...formData, retailMaxBoxes: Math.max(1, parseInt(e.target.value) || 5) })}
+                            value={formData.retailQuantity || formData.retailMaxBoxes || 15}
+                            onChange={(e) => {
+                              const val = Math.max(1, parseInt(e.target.value) || 15);
+                              setFormData({
+                                ...formData,
+                                retailQuantity: val,
+                                retailMinBoxes: val,
+                                retailMaxBoxes: val
+                              });
+                            }}
                             className="w-full px-3 py-2 rounded-xl border border-amber-200 text-xs font-bold text-slate-800 bg-white"
-                            placeholder="5"
+                            placeholder="15"
                           />
                         </div>
 
@@ -1282,7 +1327,7 @@ export const ProductCatalogManager: React.FC = () => {
                           value={formData.retailPolicyText}
                           onChange={(e) => setFormData({ ...formData, retailPolicyText: e.target.value })}
                           className="w-full p-2 rounded-xl border border-amber-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-amber-600"
-                          placeholder="Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye..."
+                          placeholder="Retail order policy: Fixed 15 boxes per order. Isse kam ya zyada quantity ke liye barah-e-karam Wholesale Order select karein."
                         />
                       </div>
                     </div>
@@ -2131,31 +2176,32 @@ export const ProductCatalogManager: React.FC = () => {
                 </div>
               )}
 
-            </form>
-
-            {/* Modal Fixed Sticky Footer */}
-            <div className="p-3 sm:p-4 border-t border-slate-100 bg-white flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-between gap-2.5 shrink-0">
-              <span className="text-[11px] text-slate-400 hidden sm:inline">
-                All changes save directly to the database and sync instantly to the single product page.
-              </span>
-
-              <div className="flex items-center gap-2 xs:ml-auto w-full xs:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 xs:flex-none px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer text-center"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  form="product-full-form"
-                  className="flex-1 xs:flex-none px-6 py-2.5 rounded-xl bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold transition-all shadow-md shadow-amber-600/20 cursor-pointer hover:scale-[1.02] active:scale-[0.98] text-center whitespace-nowrap shrink-0"
-                >
-                  {editingProduct ? 'Save & Publish' : 'Create Product'}
-                </button>
               </div>
-            </div>
+
+              {/* Modal Fixed Sticky Footer */}
+              <div className="p-3 sm:p-4 border-t border-slate-100 bg-white flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-between gap-2.5 shrink-0">
+                <span className="text-[11px] text-slate-400 hidden sm:inline">
+                  All changes save directly to the database and sync instantly to the single product page.
+                </span>
+
+                <div className="flex items-center gap-2 xs:ml-auto w-full xs:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 xs:flex-none px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer text-center"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={handleSaveProduct}
+                    className="flex-1 xs:flex-none px-6 py-2.5 rounded-xl bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-bold transition-all shadow-md shadow-amber-600/20 cursor-pointer hover:scale-[1.02] active:scale-[0.98] text-center whitespace-nowrap shrink-0"
+                  >
+                    {editingProduct ? 'Save & Publish' : 'Create Product'}
+                  </button>
+                </div>
+              </div>
+            </form>
 
           </div>
         </div>,

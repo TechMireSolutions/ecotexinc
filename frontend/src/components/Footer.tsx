@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActiveSection } from '../types';
+import { ActiveSection, SocialLinkItem } from '../types';
 import { useStore } from '../store/useStore';
 import { Logo } from './Logo';
 import { 
@@ -10,7 +10,9 @@ import {
   Facebook, 
   Linkedin, 
   Instagram, 
-  Youtube 
+  Youtube,
+  Globe,
+  Phone
 } from 'lucide-react';
 
 interface FooterProps {
@@ -22,6 +24,50 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
 
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+
+  // Dynamic Social Links from Site Settings
+  const socialLinks: SocialLinkItem[] = React.useMemo(() => {
+    if (Array.isArray(siteSettings?.footerConfig?.socialLinks) && siteSettings.footerConfig.socialLinks.length > 0) {
+      return siteSettings.footerConfig.socialLinks;
+    }
+    const list: SocialLinkItem[] = [];
+    const fc = siteSettings?.footerConfig || {};
+    const cc = siteSettings?.contactConfig || {};
+    if (fc.socialTwitter || cc.twitterUrl) list.push({ id: 'tw', name: 'Twitter / X', url: fc.socialTwitter || cc.twitterUrl || 'https://twitter.com' });
+    if (fc.socialFacebook || cc.facebookUrl) list.push({ id: 'fb', name: 'Facebook', url: fc.socialFacebook || cc.facebookUrl || 'https://facebook.com' });
+    if (fc.socialLinkedin || cc.linkedinUrl) list.push({ id: 'li', name: 'LinkedIn', url: fc.socialLinkedin || cc.linkedinUrl || 'https://linkedin.com' });
+    if (fc.socialYoutube) list.push({ id: 'yt', name: 'YouTube', url: fc.socialYoutube || 'https://youtube.com' });
+    if (fc.socialInstagram || cc.instagramUrl) list.push({ id: 'ig', name: 'Instagram', url: fc.socialInstagram || cc.instagramUrl || 'https://instagram.com' });
+    if (list.length > 0) return list;
+    return [
+      { id: 'tw', name: 'Twitter / X', url: 'https://twitter.com' },
+      { id: 'fb', name: 'Facebook', url: 'https://facebook.com' },
+      { id: 'li', name: 'LinkedIn', url: 'https://linkedin.com' },
+      { id: 'yt', name: 'YouTube', url: 'https://youtube.com' },
+      { id: 'ig', name: 'Instagram', url: 'https://instagram.com' }
+    ];
+  }, [siteSettings?.footerConfig, siteSettings?.contactConfig]);
+
+  const renderSocialIcon = (name: string, url: string) => {
+    const n = (name || '').toLowerCase();
+    const u = (url || '').toLowerCase();
+    if (n.includes('tiktok') || u.includes('tiktok')) {
+      return (
+        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.67 6.34 6.34 0 0 0 9.35 22a6.33 6.33 0 0 0 6.32-6.33V9.17a8.28 8.28 0 0 0 4.84 1.55v-3.5a4.85 4.85 0 0 1-.92-.53z" />
+        </svg>
+      );
+    }
+    if (n.includes('whatsapp') || u.includes('whatsapp') || u.includes('wa.me')) {
+      return <Phone className="w-4 h-4" />;
+    }
+    if (n.includes('linkedin') || u.includes('linkedin')) return <Linkedin className="w-4 h-4" />;
+    if (n.includes('twitter') || n.includes('x.com') || u.includes('twitter') || u.includes('x.com')) return <Twitter className="w-4 h-4" />;
+    if (n.includes('facebook') || u.includes('facebook')) return <Facebook className="w-4 h-4" />;
+    if (n.includes('instagram') || u.includes('instagram')) return <Instagram className="w-4 h-4" />;
+    if (n.includes('youtube') || u.includes('youtube')) return <Youtube className="w-4 h-4" />;
+    return <Globe className="w-4 h-4" />;
+  };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -271,52 +317,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h5 className="text-xs font-black uppercase tracking-[0.18em] text-white mb-4">
               FOLLOW
             </h5>
-            <div className="flex items-center gap-3 text-slate-300">
-              <a 
-                href={siteSettings?.footerConfig?.socialTwitter || siteSettings?.contactConfig?.twitterUrl || "https://twitter.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                aria-label="Twitter"
-                className="hover:text-[#22c55e] transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a 
-                href={siteSettings?.footerConfig?.socialFacebook || siteSettings?.contactConfig?.facebookUrl || "https://facebook.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                aria-label="Facebook"
-                className="hover:text-[#22c55e] transition-colors"
-              >
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a 
-                href={siteSettings?.footerConfig?.socialLinkedin || siteSettings?.contactConfig?.linkedinUrl || "https://linkedin.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                aria-label="LinkedIn"
-                className="hover:text-[#22c55e] transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a 
-                href={siteSettings?.footerConfig?.socialYoutube || "https://youtube.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                aria-label="YouTube"
-                className="hover:text-[#22c55e] transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a 
-                href={siteSettings?.footerConfig?.socialInstagram || siteSettings?.contactConfig?.instagramUrl || "https://instagram.com"} 
-                target="_blank" 
-                rel="noreferrer" 
-                aria-label="Instagram"
-                className="hover:text-[#22c55e] transition-colors"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
+            <div className="flex flex-wrap items-center gap-3 text-slate-300">
+              {socialLinks.map((item) => (
+                <a
+                  key={item.id || item.name}
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={item.name}
+                  title={item.name}
+                  className="hover:text-[#22c55e] transition-colors p-1"
+                >
+                  {renderSocialIcon(item.name, item.url)}
+                </a>
+              ))}
             </div>
           </div>
 
