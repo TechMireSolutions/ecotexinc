@@ -65,9 +65,12 @@ app.use('/api', apiRouter);
 app.use('/admin/api', apiRouter);
 
 // Serve Frontend SPA build if available
-const distPath = fs.existsSync(config.paths.frontendDist)
-  ? config.paths.frontendDist
-  : config.paths.rootDist;
+const distPath = [
+  path.join(config.paths.root, 'dist'),
+  path.join(config.paths.root, 'public'),
+  config.paths.frontendDist,
+  config.paths.rootDist,
+].find((p) => p && fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) || config.paths.frontendDist;
 
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));

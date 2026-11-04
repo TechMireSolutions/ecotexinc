@@ -58,9 +58,14 @@ export const config = Object.freeze({
     dbFile: process.env.VERCEL ? path.join('/tmp', 'db.json') : path.join(rootBackendDir, 'db.json'),
     dbBackup: process.env.VERCEL ? path.join('/tmp', 'db.backup.json') : path.join(rootBackendDir, 'db.backup.json'),
     uploadsDir: process.env.VERCEL ? path.join('/tmp', process.env.UPLOAD_DIRECTORY || 'uploads') : path.join(rootBackendDir, process.env.UPLOAD_DIRECTORY || 'uploads'),
-    frontendDist: fs.existsSync(path.resolve(rootBackendDir, '..', 'frontend', 'dist'))
-      ? path.resolve(rootBackendDir, '..', 'frontend', 'dist')
-      : path.resolve(rootBackendDir, '..', 'ecotex-inc-frontend', 'dist'),
+    frontendDist: [
+      path.join(rootBackendDir, 'dist'),
+      path.join(rootBackendDir, 'public'),
+      path.resolve(rootBackendDir, '..', 'frontend', 'dist'),
+      path.resolve(rootBackendDir, '..', 'ecotex-inc-frontend', 'dist'),
+      path.resolve(rootBackendDir, '..', 'dist'),
+    ].find((p) => fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html')))
+      || path.join(rootBackendDir, 'dist'),
     rootDist: path.resolve(rootBackendDir, '..', 'dist'),
   },
 

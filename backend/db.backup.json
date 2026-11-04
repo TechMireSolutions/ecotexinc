@@ -23,7 +23,7 @@
       "createdAt": "2026-10-27T07:33:45.681Z",
       "ecoImpact": "Displaces up to 250 single-use plastic carrier bags per unit lifetime.",
       "pcsPerBox": 201,
-      "updatedAt": "2026-11-03T12:01:44.756Z",
+      "updatedAt": "2026-11-04T06:27:48.802Z",
       "dimensions": "12\"W x 14\"H x 4\"D",
       "description": "High tensile enterprise carrier bag manufactured for supermarkets, boutique retail, and trade exhibitions.",
       "volumeTiers": [
@@ -42,7 +42,7 @@
       ],
       "pricePerUnit": 0.25,
       "categoryLabel": "Non-Woven Totes",
-      "stockQuantity": 100,
+      "stockQuantity": 75,
       "certifications": [
         "GRS Certified",
         "100% Recyclable",
@@ -53,7 +53,7 @@
           "id": "col-0",
           "name": "Eco Green",
           "hex": "#86C59E",
-          "stockQuantity": 25
+          "stockQuantity": 0
         },
         {
           "id": "col-1",
@@ -65,7 +65,7 @@
           "id": "col-2",
           "name": "Deep Slate",
           "hex": "#0f172a",
-          "stockQuantity": 25
+          "stockQuantity": 200
         }
       ],
       "originalPrice": 0.31,
@@ -76,12 +76,12 @@
       "wholesaleMoq": 20,
       "wholesaleMinBoxes": 20,
       "colorStock": {
-        "col-0": 25,
-        "eco green": 25,
+        "col-0": 0,
+        "eco green": 0,
         "col-1": 25,
         "pure white": 25,
-        "col-2": 25,
-        "deep slate": 25
+        "col-2": 200,
+        "deep slate": 200
       },
       "rating": 4.9,
       "articleNo": "EP-PROD-1",
@@ -3742,13 +3742,13 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-11-04T05:27:51.886Z",
+    "updatedAt": "2026-11-04T06:31:34.752Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
       "badge": "ECO CHOICE",
       "title": "Grab It Before\nIt's Gone!",
-      "enabled": true,
+      "enabled": false,
       "subtitle": "100% plant-based Bio-PLA flat carrier with reinforced oval die-cut handle",
       "productId": "eco-dcut-heavy",
       "stockText": "Ready for Immediate Dispatch",
@@ -4050,6 +4050,11 @@
           "id": "soc-4",
           "name": "Instagram",
           "url": "https://instagram.com"
+        },
+        {
+          "id": "soc-1793773894733",
+          "name": "LinkedIn",
+          "url": "https://linkedin.com/company/"
         }
       ]
     },

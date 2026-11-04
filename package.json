@@ -19,6 +19,7 @@
     "test:frontend": "npm run test --prefix frontend",
     "test:backend": "npm run test --prefix backend",
     "check": "npm run lint --prefix frontend && npm run test",
+    "package:cpanel": "node scripts/package-cpanel.js",
     "start:backend": "npm run start --prefix backend"
   },
   "keywords": [

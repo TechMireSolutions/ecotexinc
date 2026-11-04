@@ -40,3 +40,7 @@ Thumbs.db
 
 # Test artifacts
 *test-pixel-*.png
+
+# Distribution archives & cPanel build output
+cpanel_dist/
+*.zip
