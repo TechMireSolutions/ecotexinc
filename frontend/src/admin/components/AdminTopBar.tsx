@@ -27,6 +27,7 @@ interface AdminTopBarProps {
   activeSectionTitle: string;
   isSidebarOpen?: boolean;
   onToggleDesktopSidebar?: () => void;
+  onNavigateToSection?: (section: any) => void;
 }
 
 export const AdminTopBar: React.FC<AdminTopBarProps> = ({
@@ -35,7 +36,8 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
   onLogout,
   activeSectionTitle,
   isSidebarOpen = true,
-  onToggleDesktopSidebar
+  onToggleDesktopSidebar,
+  onNavigateToSection
 }) => {
   const { adminUser, quotes, orders } = useStore();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -183,14 +185,14 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
           >
             <Bell className="w-4 h-4" />
             {totalNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#4E9F76] text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow-xs animate-bounce">
-                {totalNotifications}
+              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-[#16a34a] text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow-xs">
+                {totalNotifications > 99 ? '99+' : totalNotifications}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="fixed inset-x-3 top-18 sm:static sm:inset-auto sm:absolute sm:right-0 sm:top-full sm:mt-3 sm:w-96 max-w-sm sm:max-w-md mx-auto sm:mx-0 bg-white rounded-2xl shadow-2xl border border-[#B2E2C5]/30 p-4 z-50 animate-fadeInUp">
+            <div className="absolute right-0 top-full mt-2.5 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-50 animate-fadeIn">
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="font-bold text-sm text-[#0f172a] flex items-center gap-2">
@@ -259,20 +261,32 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                       return (
                         <div 
                           key={q.id} 
-                          className={`py-2.5 px-2 hover:bg-slate-50/80 rounded-xl transition-colors flex items-start justify-between gap-2 group ${
-                            isRead ? 'opacity-60 bg-slate-50/30' : ''
+                          onClick={() => {
+                            handleMarkAsRead(q.id);
+                            if (onNavigateToSection) {
+                              onNavigateToSection('inbox');
+                              setShowNotifications(false);
+                            }
+                          }}
+                          className={`py-2.5 px-3 hover:bg-slate-50 rounded-xl transition-all flex items-start justify-between gap-3 group cursor-pointer ${
+                            isRead ? 'opacity-50 bg-slate-50/40' : 'bg-emerald-50/30 hover:bg-emerald-50/60'
                           }`}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-[#4E9F76]">New RFQ ({q.id})</span>
-                              <span className="text-[10px] text-slate-400">{q.date}</span>
+                            <div className="flex items-center justify-between gap-2 text-xs">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded-md shrink-0">
+                                  RFQ
+                                </span>
+                                <span className="font-bold text-[#166534] truncate">{q.id}</span>
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-mono shrink-0">{q.date}</span>
                             </div>
-                            <p className="text-xs text-[#0f172a] font-medium truncate mt-0.5">
+                            <p className="text-xs text-[#0f172a] font-semibold truncate mt-1">
                               {q.name} · {q.company || 'Wholesale Buyer'}
                             </p>
                             <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                              Qty: {q.volume} · Category: {q.category}
+                              Qty: {q.volume || '5,000 units'} · Category: {q.category || 'General'}
                             </p>
                           </div>
                           {!isRead && (
@@ -282,11 +296,11 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                                 e.stopPropagation();
                                 handleMarkAsRead(q.id);
                               }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-[#4E9F76] hover:bg-[#B2E2C5]/20 transition-all opacity-80 group-hover:opacity-100 shrink-0 cursor-pointer mt-0.5"
+                              className="p-1 rounded-lg text-slate-400 hover:text-[#16a34a] hover:bg-emerald-100 transition-all opacity-80 group-hover:opacity-100 shrink-0 cursor-pointer mt-0.5"
                               title="Mark as read"
                               aria-label="Mark as read"
                             >
-                              <Check className="w-3.5 h-3.5" />
+                              <Check className="w-4 h-4" />
                             </button>
                           )}
                         </div>
@@ -298,19 +312,34 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                       return (
                         <div 
                           key={o.id} 
-                          className={`py-2.5 px-2 hover:bg-slate-50/80 rounded-xl transition-colors flex items-start justify-between gap-2 group ${
-                            isRead ? 'opacity-60 bg-slate-50/30' : ''
+                          onClick={() => {
+                            handleMarkAsRead(o.id);
+                            if (onNavigateToSection) {
+                              onNavigateToSection('inbox');
+                              setShowNotifications(false);
+                            }
+                          }}
+                          className={`py-2.5 px-3 hover:bg-slate-50 rounded-xl transition-all flex items-start justify-between gap-3 group cursor-pointer ${
+                            isRead ? 'opacity-50 bg-slate-50/40' : 'bg-blue-50/30 hover:bg-blue-50/60'
                           }`}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-bold text-[#86C59E]">Order {o.id}</span>
-                              <span className="text-[10px] font-bold text-slate-500">
+                            <div className="flex items-center justify-between gap-2 text-xs">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-blue-800 bg-blue-100/90 px-1.5 py-0.5 rounded-md shrink-0">
+                                  Order
+                                </span>
+                                <span className="font-bold text-blue-800 truncate">{o.id}</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-slate-700 shrink-0">
                                 ${(o.total || o.totalAmount || 0).toFixed(2)}
                               </span>
                             </div>
-                            <p className="text-xs text-[#0f172a] font-medium truncate mt-0.5">
+                            <p className="text-xs text-[#0f172a] font-semibold truncate mt-1">
                               {o.customerName} · {o.status}
+                            </p>
+                            <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                              {o.items?.length || 1} item(s) · {o.paymentMethod || 'Online'}
                             </p>
                           </div>
                           {!isRead && (
@@ -320,11 +349,11 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                                 e.stopPropagation();
                                 handleMarkAsRead(o.id);
                               }}
-                              className="p-1 rounded-lg text-slate-400 hover:text-[#4E9F76] hover:bg-[#B2E2C5]/20 transition-all opacity-80 group-hover:opacity-100 shrink-0 cursor-pointer mt-0.5"
+                              className="p-1 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-100 transition-all opacity-80 group-hover:opacity-100 shrink-0 cursor-pointer mt-0.5"
                               title="Mark as read"
                               aria-label="Mark as read"
                             >
-                              <Check className="w-3.5 h-3.5" />
+                              <Check className="w-4 h-4" />
                             </button>
                           )}
                         </div>

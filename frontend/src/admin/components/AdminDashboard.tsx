@@ -152,6 +152,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           activeSectionTitle={getSectionTitle(activeSection)}
           isSidebarOpen={isSidebarOpen}
           onToggleDesktopSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onNavigateToSection={(sec) => setActiveSection(sec)}
         />
 
         {/* Dynamic Studio Views */}
