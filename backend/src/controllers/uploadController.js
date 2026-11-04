@@ -64,15 +64,24 @@ export async function handleUpload(req, res) {
     const safeName = originalName.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 30) || 'upload';
     const cleanFilename = `${safeName}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}${finalExt}`;
 
-    // Write to backend uploads
+    // Write to primary backend uploads directory
     const localFilePath = path.join(localUploads, cleanFilename);
     await fs.promises.writeFile(localFilePath, buffer);
 
-    // Sync to frontend public uploads if exists
-    if (fs.existsSync(path.dirname(frontendPublicUploads))) {
-      try {
-        await fs.promises.writeFile(path.join(frontendPublicUploads, cleanFilename), buffer);
-      } catch (_) {}
+    // Sync across any frontend / public static uploads directories
+    const syncDirs = [
+      frontendPublicUploads,
+      path.join(config.paths.root, 'public', 'uploads'),
+      path.join(config.paths.root, 'dist', 'uploads'),
+    ];
+
+    for (const dir of syncDirs) {
+      if (dir && fs.existsSync(path.dirname(dir))) {
+        try {
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          await fs.promises.writeFile(path.join(dir, cleanFilename), buffer);
+        } catch (_) {}
+      }
     }
 
     const publicUrl = `/uploads/${cleanFilename}`;

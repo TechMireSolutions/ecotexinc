@@ -136,7 +136,7 @@ VITE_API_URL=/admin/api
 # Performance & Uploads
 RATE_LIMIT_MAX_REQUESTS=2500
 AUTH_RATE_LIMIT_MAX_REQUESTS=50
-MAX_UPLOAD_SIZE_MB=25
+MAX_UPLOAD_SIZE_MB=50
 
 # Optional cPanel MySQL Configuration
 # Uncomment and fill if you create a MySQL Database in cPanel:
@@ -180,8 +180,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json image/svg+xml
 </IfModule>
 
-# 5. Allow up to 25MB request payloads
-LimitRequestBody 26214400
+# 5. Allow up to 50MB request payloads
+LimitRequestBody 52428800
 
 # 6. Phusion Passenger Configuration (CloudLinux "Setup Node.js App")
 <IfModule mod_passenger.c>

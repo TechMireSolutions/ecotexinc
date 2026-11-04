@@ -77,10 +77,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       // 1. Client-Side Auto-Compression & Format Conversion (MBs -> KBs)
       const optimized = await compressAndConvertImage(file, {
-        maxWidth: 1600,
-        maxHeight: 1600,
-        quality: 0.82,
-        targetMaxKb: 350
+        maxWidth: aspectRatio === 'banner' || aspectRatio === 'wide' ? 2560 : 1800,
+        maxHeight: aspectRatio === 'banner' || aspectRatio === 'wide' ? 2560 : 1800,
+        quality: 0.85,
+        targetMaxKb: aspectRatio === 'banner' || aspectRatio === 'wide' ? 800 : 450
       });
 
       setConversionMeta({

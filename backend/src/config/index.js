@@ -70,8 +70,8 @@ export const config = Object.freeze({
   },
 
   upload: {
-    maxSizeMb: parseInt(process.env.MAX_UPLOAD_SIZE_MB || '25', 10),
-    maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_MB || '25', 10) * 1024 * 1024,
+    maxSizeMb: parseInt(process.env.MAX_UPLOAD_SIZE_MB || '50', 10),
+    maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_MB || '50', 10) * 1024 * 1024,
     allowedMimeTypes: [
       'image/png',
       'image/jpeg',

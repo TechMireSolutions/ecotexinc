@@ -33,3 +33,4 @@ describe('Image Compressor & Formatter Unit Tests', () => {
     assert.strictEqual(result.savingsPercent, 0);
   });
 });
+

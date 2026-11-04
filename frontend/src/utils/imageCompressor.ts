@@ -63,10 +63,10 @@ export async function compressAndConvertImage(
   options: CompressOptions = {}
 ): Promise<CompressionResult> {
   const {
-    maxWidth = 1600,
-    maxHeight = 1600,
-    quality = 0.82,
-    targetMaxKb = 400,
+    maxWidth = 2560,
+    maxHeight = 2560,
+    quality = 0.84,
+    targetMaxKb = 800,
     preferWebp = true,
   } = options;
 
@@ -150,7 +150,7 @@ export async function compressAndConvertImage(
 
   // 8. If even after quality reduction it's still large (e.g. extremely complex large photos),
   // scale down dimensions slightly to ensure it stays in KBs
-  if (blob.size > targetMaxKb * 1024 && (width > 1200 || height > 1200)) {
+  if (blob.size > targetMaxKb * 1024 && (width > 1920 || height > 1920)) {
     const scale = 0.75;
     const smallerW = Math.max(1, Math.round(width * scale));
     const smallerH = Math.max(1, Math.round(height * scale));
