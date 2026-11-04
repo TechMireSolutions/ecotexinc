@@ -251,8 +251,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
                 {/* Floating Micro Badge */}
                 <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/40 shadow-xl flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-bold text-[#0f172a]">Leadership</p>
-                    <p className="text-xs text-[#166534] font-semibold">20+ Years Sustainable Manufacturing</p>
+                    <p className="text-sm font-bold text-[#0f172a]">{aConfig?.leadershipBadgeTitle || 'Leadership'}</p>
+                    <p className="text-xs text-[#166534] font-semibold">{aConfig?.leadershipBadgeSubtitle || '20+ Years Sustainable Manufacturing'}</p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-[#166534] text-white flex items-center justify-center shadow-sm">
                     <Leaf className="w-5 h-5" />
@@ -289,8 +289,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
                       <ShieldCheck className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-2xl font-mono font-black text-[#0f172a]">125+ Uses</p>
-                      <p className="text-xs font-semibold text-slate-500">ASTM D6400 & GRS Certified</p>
+                      <p className="text-2xl font-mono font-black text-[#0f172a]">{aConfig?.statBadgeValue || '125+ Uses'}</p>
+                      <p className="text-xs font-semibold text-slate-500">{aConfig?.statBadgeLabel || 'ASTM D6400 & GRS Certified'}</p>
                     </div>
                   </div>
                 </div>
@@ -486,14 +486,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onNavigate }) => {
         {/* CTA banner below team */}
         <div className="mt-20 p-8 sm:p-12 lg:p-14 rounded-3xl bg-gradient-to-r from-[#166534] to-[#15803d] text-white flex flex-col sm:flex-row items-center justify-between gap-8 shadow-2xl">
           <div>
-            <h3 className="text-2xl sm:text-3xl font-bold">Ready to Elevate Your Packaging Sustainability?</h3>
-            <p className="text-sm sm:text-base text-emerald-100 mt-2">Talk to our packaging engineers in California or request custom prototypes.</p>
+            <h3 className="text-2xl sm:text-3xl font-bold">{aConfig?.ctaTitle || 'Ready to Elevate Your Packaging Sustainability?'}</h3>
+            <p className="text-sm sm:text-base text-emerald-100 mt-2">{aConfig?.ctaSubtitle || 'Talk to our packaging engineers in California or request custom prototypes.'}</p>
           </div>
           <button 
             onClick={() => onNavigate('contact')}
             className="px-8 py-4 rounded-xl font-bold text-sm bg-white text-[#166534] hover:bg-emerald-50 shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            Request Factory Consultation →
+            {aConfig?.ctaBtnText || 'Request Factory Consultation →'}
           </button>
         </div>
 

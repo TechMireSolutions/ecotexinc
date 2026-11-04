@@ -5,9 +5,6 @@ import { useStore } from '../../store/useStore';
 import { AdminSidebar, AdminSection } from './AdminSidebar';
 import { AdminTopBar } from './AdminTopBar';
 import { DashboardOverview } from './DashboardOverview';
-import { HomepageManager } from './HomepageManager';
-import { HeroBannerManager } from './HeroBannerManager';
-import { ShopBannerManager } from './ShopBannerManager';
 import { CategoriesManager } from './CategoriesManager';
 import { ProductCatalogManager } from './ProductCatalogManager';
 import { OffersDealsManager } from './OffersDealsManager';
@@ -163,16 +160,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <DashboardOverview onNavigateToSection={(sec) => setActiveSection(sec)} />
           )}
 
-          {activeSection === 'homepage' && (
-            <HomepageManager onNavigateToSection={(sec) => setActiveSection(sec as any)} />
-          )}
-
-          {activeSection === 'hero' && (
-            <HeroBannerManager />
-          )}
-
-          {activeSection === 'shop-banner' && (
-            <ShopBannerManager onViewShop={onBackToSite} />
+          {(activeSection === 'homepage' || activeSection === 'hero' || activeSection === 'shop-banner') && (
+            <PageContentEditor onNavigateToSection={(sec) => setActiveSection(sec as any)} />
           )}
 
           {activeSection === 'categories' && (

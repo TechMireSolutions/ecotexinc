@@ -58,10 +58,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const navItems: { id: AdminSection; label: string; icon: React.ElementType; badge?: string | number }[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'content', label: 'Pages (All Site Pages)', icon: FileText, badge: 'All Pages' },
-    { id: 'homepage', label: 'Homepage', icon: Home, badge: 'All Sections' },
-
+    { id: 'products', label: 'Product Catalog', icon: Package, badge: products.length },
     { id: 'categories', label: 'Categories', icon: FolderTree, badge: categories.filter(c => c.id !== 'all').length || categories.length },
-
     { id: 'offers', label: 'Special Offers & Deals', icon: Flame, badge: 'HOT' },
     { id: 'rfq-orders', label: 'Orders & Quotes', icon: Inbox, badge: (quotes.filter(q => q.status === 'New').length + orders.filter(o => o.status === 'Pending').length) || undefined },
     { id: 'media', label: 'Media Library', icon: ImageIcon }

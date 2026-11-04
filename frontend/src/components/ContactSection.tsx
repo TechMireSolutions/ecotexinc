@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
 import { useStore } from '../store/useStore';
 import {
   Mail,
@@ -10,7 +9,9 @@ import {
   MapPin,
   ArrowUpRight,
   Check,
-  ArrowRight
+  ArrowRight,
+  Clock,
+  Factory
 } from 'lucide-react';
 
 export const ContactSection: React.FC = () => {
@@ -56,14 +57,39 @@ export const ContactSection: React.FC = () => {
     }
   };
 
-  // Address and contacts configuration
-  const facilityAddress = siteSettings?.contactConfig?.facilityAddress || '1200 Industrial Parkway, Corona, CA 92881';
-  const email = siteSettings?.contactConfig?.email || siteSettings?.email || 'orders@ecotexinc.com';
-  const phone = siteSettings?.contactConfig?.phone || siteSettings?.phone || '+1 (951) 450-9773';
-  const website = 'ecotexinc.com';
+  // Dynamic Content & Contact Settings
+  const contactConfig = siteSettings?.contactConfig;
+  const facilityAddress = contactConfig?.facilityAddress || '1200 Industrial Parkway, Corona, CA 92881';
+  const plantAddress = contactConfig?.plantAddress || 'Sector 15, Korangi Industrial Area, Karachi, PK';
+  const email = contactConfig?.email || siteSettings?.email || 'orders@ecotexinc.com';
+  const phone = contactConfig?.phone || siteSettings?.phone || '+1 (951) 450-9773';
+  const secondaryPhone = contactConfig?.secondaryPhone || siteSettings?.secondaryPhone || '';
+  const website = contactConfig?.website || 'ecotexinc.com';
+  const businessHours = contactConfig?.businessHours || 'Mon - Fri: 8:00 AM - 5:00 PM PST';
 
   // Dynamic Google Maps URL from Admin Settings
-  const googleMapsUrl = siteSettings?.contactConfig?.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(facilityAddress)}`;
+  const googleMapsUrl = contactConfig?.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(facilityAddress)}`;
+
+  // Background Image
+  const bgImage = contactConfig?.bgImage || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1920&q=85';
+
+  // Headlines
+  const headline = contactConfig?.headline || '';
+  const headlineFirst = contactConfig?.headlineFirst || (headline ? headline.split(' ')[0] : 'Get in');
+  const headlineSecond = contactConfig?.headlineSecond || (headline ? headline.split(' ').slice(1).join(' ') : 'touch.');
+  const contactSubtitle = contactConfig?.subtitle || '';
+
+  // Form custom labels & text
+  const formTitle = contactConfig?.formTitle || '';
+  const formSubtitle = contactConfig?.formSubtitle || '';
+  const firstNameLabel = contactConfig?.firstNameLabel || 'First Name';
+  const lastNameLabel = contactConfig?.lastNameLabel || 'Last Name';
+  const emailLabel = contactConfig?.emailLabel || 'Email Address';
+  const messageLabel = contactConfig?.messageLabel || 'Message';
+  const submitBtnText = contactConfig?.submitBtnText || 'SUBMIT';
+  const successHeading = contactConfig?.successHeading || 'Thank You For Reaching Out!';
+  const successMessage = contactConfig?.successMessage || 'Your message has been received. Our executive commercial team will connect with you within 2 business hours.';
+  const resetBtnText = contactConfig?.resetBtnText || 'Send another message';
 
   return (
     <section id="contact-us" className="relative w-full overflow-hidden bg-[#07170e] py-12 sm:py-24 lg:py-32 selection:bg-[#22c55e] selection:text-[#07170e] border-t border-[#22c55e]/20">
@@ -73,7 +99,7 @@ export const ContactSection: React.FC = () => {
          ======================================================== */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         <img
-          src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1920&q=85"
+          src={bgImage}
           alt="Ecotex Wholesale Packaging Executive Team"
           className="w-full h-full object-cover object-center grayscale scale-105"
         />
@@ -113,9 +139,15 @@ export const ContactSection: React.FC = () => {
             {/* Big Title */}
             <div>
               <h2 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.05]">
-                Get in<br />
-                <span className="text-white">touch</span><span className="text-[#22c55e]">.</span>
+                {headlineFirst}<br />
+                <span className="text-white">{headlineSecond.replace(/\.$/, '')}</span>
+                <span className="text-[#22c55e]">{headlineSecond.endsWith('.') ? '.' : ''}</span>
               </h2>
+              {contactSubtitle && (
+                <p className="mt-3 text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md">
+                  {contactSubtitle}
+                </p>
+              )}
             </div>
 
             {/* 4 Contact Details Items with Icons */}
@@ -189,8 +221,51 @@ export const ContactSection: React.FC = () => {
                 </div>
               </div>
 
-            </div>
+              {/* Item 5 (Optional): Mill Plant Address */}
+              {plantAddress && (
+                <div className="flex items-start gap-4 group">
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 pt-0.5">
+                    <Factory className="w-5 h-5 text-[#86efac] group-hover:text-[#22c55e] transition-colors" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="tracking-wide font-light block leading-relaxed text-white/90">
+                      {plantAddress}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-[#86efac] tracking-wider block">
+                      Primary Manufacturing Mill Plant
+                    </span>
+                  </div>
+                </div>
+              )}
 
+              {/* Item 6 (Optional): Secondary Phone / Hotline */}
+              {secondaryPhone && (
+                <div className="flex items-center gap-4 group">
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-[#86efac] group-hover:text-[#22c55e] transition-colors" />
+                  </div>
+                  <a
+                    href={`tel:${secondaryPhone.replace(/[^0-9+]/g, '')}`}
+                    className="hover:text-[#22c55e] transition-colors tracking-wide font-light"
+                  >
+                    {secondaryPhone} <span className="text-[10px] text-white/60 ml-1">(Logistics Hotline)</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Item 7 (Optional): Business Operating Hours */}
+              {businessHours && (
+                <div className="flex items-center gap-4 group pt-2 border-t border-white/10">
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-[#86efac]" />
+                  </div>
+                  <span className="text-white/80 text-xs font-light tracking-wide">
+                    {businessHours}
+                  </span>
+                </div>
+              )}
+
+            </div>
           </div>
 
           {/* ====================================================
@@ -202,6 +277,19 @@ export const ContactSection: React.FC = () => {
              ==================================================== */}
           <div className="lg:col-span-7">
 
+            {formTitle && (
+              <div className="mb-4">
+                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  {formTitle}
+                </h3>
+                {formSubtitle && (
+                  <p className="text-xs sm:text-sm text-slate-300 font-normal mt-1">
+                    {formSubtitle}
+                  </p>
+                )}
+              </div>
+            )}
+
             {!isSubmitted ? (
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
@@ -212,7 +300,7 @@ export const ContactSection: React.FC = () => {
                       htmlFor="contact-first-name"
                       className="block text-xs sm:text-sm font-semibold text-white mb-1.5 tracking-wide"
                     >
-                      First Name
+                      {firstNameLabel}
                     </label>
                     <input
                       id="contact-first-name"
@@ -230,7 +318,7 @@ export const ContactSection: React.FC = () => {
                       htmlFor="contact-last-name"
                       className="block text-xs sm:text-sm font-semibold text-white mb-1.5 tracking-wide"
                     >
-                      Last Name
+                      {lastNameLabel}
                     </label>
                     <input
                       id="contact-last-name"
@@ -249,7 +337,7 @@ export const ContactSection: React.FC = () => {
                     htmlFor="contact-email-addr"
                     className="block text-xs sm:text-sm font-semibold text-white mb-1.5 tracking-wide"
                   >
-                    Email Address
+                    {emailLabel}
                   </label>
                   <input
                     id="contact-email-addr"
@@ -268,7 +356,7 @@ export const ContactSection: React.FC = () => {
                     htmlFor="contact-message-body"
                     className="block text-xs sm:text-sm font-semibold text-white mb-1.5 tracking-wide"
                   >
-                    Message
+                    {messageLabel}
                   </label>
                   <textarea
                     id="contact-message-body"
@@ -288,7 +376,7 @@ export const ContactSection: React.FC = () => {
                     disabled={isSubmitting}
                     className="w-full py-3 sm:py-4 px-6 bg-white hover:bg-[#22c55e] text-[#07170e] font-black text-sm uppercase tracking-[0.2em] rounded-xs transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-[0.99] cursor-pointer"
                   >
-                    {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                    {isSubmitting ? 'SUBMITTING...' : submitBtnText}
                   </button>
                 </div>
 
@@ -300,10 +388,10 @@ export const ContactSection: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-xl font-black text-white">
-                    Thank You For Reaching Out!
+                    {successHeading}
                   </h4>
                   <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-md mx-auto">
-                    Your message has been received. Our executive commercial team will connect with you within 2 business hours.
+                    {successMessage}
                   </p>
                 </div>
                 <button
@@ -319,7 +407,7 @@ export const ContactSection: React.FC = () => {
                   }}
                   className="text-xs text-[#86efac] hover:text-white font-bold inline-flex items-center gap-1 cursor-pointer pt-2 underline"
                 >
-                  <span>Send another message</span>
+                  <span>{resetBtnText}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

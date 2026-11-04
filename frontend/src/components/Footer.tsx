@@ -242,42 +242,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 {siteSettings?.footerConfig?.col2Title || 'SERVICES'}
               </h5>
               <ul className="space-y-2 sm:space-y-2.5 text-[11px] sm:text-xs text-slate-300">
-                <li>
-                  <button 
-                    type="button" 
-                    onClick={() => handleNav('shop')} 
-                    className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
-                  >
-                    Non-Woven Totes
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button" 
-                    onClick={() => handleNav('shop')} 
-                    className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
-                  >
-                    D-Cut Bags
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button" 
-                    onClick={() => handleNav('shop')} 
-                    className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
-                  >
-                    Laminated Gift Bags
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    type="button" 
-                    onClick={() => handleNav('contact')} 
-                    className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
-                  >
-                    Custom Flexo Print
-                  </button>
-                </li>
+                {((siteSettings?.footerConfig?.col2Links && siteSettings.footerConfig.col2Links.length > 0)
+                  ? siteSettings.footerConfig.col2Links
+                  : [
+                      { id: '1', label: 'Non-Woven Totes', url: 'shop' },
+                      { id: '2', label: 'D-Cut Bags', url: 'shop' },
+                      { id: '3', label: 'Laminated Gift Bags', url: 'shop' },
+                      { id: '4', label: 'Custom Flexo Print', url: 'contact' }
+                    ]
+                ).map((link, idx) => (
+                  <li key={link.id || idx}>
+                    <button 
+                      type="button" 
+                      onClick={() => handleNav((link.url === 'contact' ? 'contact' : 'shop') as ActiveSection)} 
+                      className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -287,26 +270,30 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 {siteSettings?.footerConfig?.col3Title || 'EVENTS'}
               </h5>
               <ul className="space-y-2 sm:space-y-2.5 text-[11px] sm:text-xs text-slate-300">
-                <li>
-                  <a href="#quote-form" className="hover:text-[#22c55e] transition-colors">
-                    Pack Expo 2026
-                  </a>
-                </li>
-                <li>
-                  <a href="#quote-form" className="hover:text-[#22c55e] transition-colors">
-                    Sustainable Retail
-                  </a>
-                </li>
-                <li>
-                  <a href="#quote-form" className="hover:text-[#22c55e] transition-colors">
-                    SB 270 Workshops
-                  </a>
-                </li>
-                <li>
-                  <a href="#quote-form" className="hover:text-[#22c55e] transition-colors">
-                    Sample Roadshow
-                  </a>
-                </li>
+                {((siteSettings?.footerConfig?.col3Links && siteSettings.footerConfig.col3Links.length > 0)
+                  ? siteSettings.footerConfig.col3Links
+                  : [
+                      { id: '1', label: 'Pack Expo 2026', url: '#quote-form' },
+                      { id: '2', label: 'Sustainable Retail', url: '#quote-form' },
+                      { id: '3', label: 'SB 270 Workshops', url: '#quote-form' },
+                      { id: '4', label: 'Sample Roadshow', url: '#quote-form' }
+                    ]
+                ).map((link, idx) => (
+                  <li key={link.id || idx}>
+                    <a 
+                      href={link.url || '#quote-form'} 
+                      onClick={(e) => {
+                        if (link.url === 'contact' || link.url === '#contact' || link.url === '#quote-form') {
+                          e.preventDefault();
+                          handleNav('contact');
+                        }
+                      }}
+                      className="hover:text-[#22c55e] transition-colors cursor-pointer text-left"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 

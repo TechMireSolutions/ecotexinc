@@ -3,6 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import {
   Home,
+  X,
+  Edit3,
+  Youtube,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Twitter,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Factory,
   ShoppingBag,
   Sparkles,
   Package,
@@ -73,15 +84,14 @@ type EditorTab =
   | 'versatility'
   | 'about'
   | 'contact'
-  | 'footer'
-  | 'single-product';
+  | 'footer';
 
 interface PageContentEditorProps {
   onNavigateToSection?: (section: string) => void;
 }
 
 export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigateToSection }) => {
-  const { siteSettings, updateSiteSettings, products, updateProduct } = useStore();
+  const { siteSettings, updateSiteSettings, products, updateProduct, updateHeroConfig } = useStore();
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [productSaveSuccess, setProductSaveSuccess] = useState(false);
 
@@ -262,8 +272,13 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
     setTimeout(() => setProductSaveSuccess(false), 3000);
   };
   const [formData, setFormData] = useState<SiteSettings>(siteSettings);
-  const [activeTab, setActiveTab] = useState<EditorTab>('logo');
+  const [activeTab, setActiveTab] = useState<EditorTab>('versatility');
+  type HomeSectionTab = 'hero' | 'featured-products' | 'versatility' | 'about-facilities' | 'contact-info';
+  const [activeHomeSection, setActiveHomeSection] = useState<HomeSectionTab>('hero');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isFooterSocialModalOpen, setIsFooterSocialModalOpen] = useState(false);
+  const [editingFooterSocialIdx, setEditingFooterSocialIdx] = useState<number | null>(null);
+  const [footerSocialForm, setFooterSocialForm] = useState({ name: '', url: '' });
 
   const isInitialized = React.useRef(false);
   useEffect(() => {
@@ -285,8 +300,28 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
     if (e) e.preventDefault();
     setIsSaving(true);
     try {
-      const updated = await apiService.updateSettings(formData);
-      updateSiteSettings(updated || formData);
+      const heroPayload = {
+        title: formData.heroTitle || formData.heroConfig?.title || "It's time to\npack better.",
+        subtitle: formData.heroSubtitle || formData.heroConfig?.subtitle || "Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors.",
+        ctaText: formData.heroButtonText || formData.heroConfig?.ctaText || "Shop Now",
+        backgroundImage: formData.heroBackgroundImage || formData.heroConfig?.backgroundImage || "/images/home-hero-bg.jpg"
+      };
+      const mergedPayload = {
+        ...formData,
+        heroTitle: heroPayload.title,
+        heroSubtitle: heroPayload.subtitle,
+        heroButtonText: heroPayload.ctaText,
+        heroBackgroundImage: heroPayload.backgroundImage,
+        heroConfig: {
+          ...formData.heroConfig,
+          ...heroPayload
+        }
+      };
+      const updated = await apiService.updateSettings(mergedPayload);
+      updateSiteSettings(updated || mergedPayload);
+      if (updateHeroConfig) {
+        updateHeroConfig(heroPayload);
+      }
       window.dispatchEvent(new CustomEvent('ecotex_homepage_updated', {
         detail: { settings: updated || formData }
       }));
@@ -303,14 +338,13 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
   };
 
   const tabs: { id: EditorTab; label: string; pageRoute: string; icon: React.ElementType; desc: string }[] = [
-    { id: 'versatility', label: '1. Home Page', pageRoute: '/', icon: Home, desc: 'Home story, value cards & versatility banner' },
+    { id: 'versatility', label: '1. Home Page', pageRoute: '/', icon: Home, desc: 'Hero, products, versatility, facilities & contact' },
     { id: 'about', label: '2. About Us Page', pageRoute: '/#about', icon: Users, desc: 'Corporate narrative, mission, team & stats' },
     { id: 'shop', label: '3. Shop Page', pageRoute: '/#shop', icon: ShoppingBag, desc: 'Hero panoramic banner, trust badges & headings' },
     { id: 'contact', label: '4. Contact Us Page', pageRoute: '/#contact', icon: Phone, desc: 'Corona address, phones, emails & Google Map' },
-    { id: 'single-product', label: '5. Single Product Page', pageRoute: '/#product-detail', icon: Package, desc: 'Single product template, specs & stock' },
-    { id: 'footer', label: '6. Legal & Footer Page', pageRoute: '/#footer', icon: Globe, desc: 'Terms & conditions, privacy, newsletter & copyright' },
-    { id: 'navbar', label: '7. Header & Navbar', pageRoute: '/', icon: Megaphone, desc: 'Top announcement marquee & header buttons' },
-    { id: 'logo', label: '8. Logo & Branding', pageRoute: '/', icon: Recycle, desc: 'Visual brand logo & website favicon' },
+    { id: 'footer', label: '5. Legal & Footer Page', pageRoute: '/#footer', icon: Globe, desc: 'Terms & conditions, privacy, newsletter & copyright' },
+    { id: 'navbar', label: '6. Header & Navbar', pageRoute: '/', icon: Megaphone, desc: 'Top announcement marquee & header buttons' },
+    { id: 'logo', label: '7. Logo & Branding', pageRoute: '/', icon: Recycle, desc: 'Visual brand logo & website favicon' },
   ];
 
   return (
@@ -611,758 +645,2711 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
         )}
 
         {/* ========================================================
-            TAB 2: NAVBAR & ANNOUNCEMENT BAR
+            TAB 2: COMPLETE HEADER & NAVBAR CMS
            ======================================================== */}
-        {activeTab === 'navbar' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="pb-4 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
-                  Navbar & Top Announcement Bar
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Configure top banner notification, CTA button wording, and telephone display.
-                </p>
-              </div>
+        {activeTab === 'navbar' && (() => {
+          const defaultNavLinks = [
+            { id: 'nav-home', label: 'HOME', targetSection: 'home' as const },
+            { id: 'nav-about', label: 'ABOUT US', targetSection: 'about' as const },
+            { id: 'nav-shop', label: 'SHOP', targetSection: 'shop' as const },
+            { id: 'nav-contact', label: 'CONTACT', targetSection: 'contact' as const }
+          ];
 
-              <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-                <input
-                  type="checkbox"
-                  checked={formData.navbarConfig?.announcementActive ?? true}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    navbarConfig: { ...formData.navbarConfig!, announcementActive: e.target.checked }
-                  })}
-                  className="w-4 h-4 text-[#4E9F76] rounded-md focus:ring-[#86C59E]"
-                />
-                <span className="text-xs font-bold text-slate-700">Display Top Announcement</span>
-              </label>
-            </div>
+          const currentNavLinks = (formData.navbarConfig?.navLinks && formData.navbarConfig.navLinks.length > 0)
+            ? formData.navbarConfig.navLinks
+            : defaultNavLinks;
 
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                Top Announcement Bar Copy
-              </label>
-              <input
-                type="text"
-                value={formData.navbarConfig?.announcementText || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  navbarConfig: { ...formData.navbarConfig!, announcementText: e.target.value }
-                })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-                placeholder="🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility"
-              />
-            </div>
+          const handleUpdateLink = (idx: number, updates: Partial<typeof defaultNavLinks[0]>) => {
+            const updated = [...currentNavLinks];
+            updated[idx] = { ...updated[idx], ...updates };
+            setFormData({
+              ...formData,
+              navbarConfig: {
+                ...formData.navbarConfig!,
+                navLinks: updated
+              }
+            });
+          };
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Navbar Primary CTA Button Text
-                </label>
-                <input
-                  type="text"
-                  value={formData.navbarConfig?.ctaButtonText || 'START SHOP'}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    navbarConfig: { ...formData.navbarConfig!, ctaButtonText: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#4E9F76] focus:outline-none focus:border-[#86C59E]"
-                  placeholder="e.g. START SHOP or REQUEST SAMPLE"
-                />
-              </div>
+          const handleAddLink = () => {
+            const newLink = {
+              id: 'nav-' + Date.now().toString(36),
+              label: 'NEW LINK',
+              targetSection: 'shop' as const
+            };
+            setFormData({
+              ...formData,
+              navbarConfig: {
+                ...formData.navbarConfig!,
+                navLinks: [...currentNavLinks, newLink]
+              }
+            });
+          };
 
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Header Phone Number Display
-                </label>
-                <input
-                  type="text"
-                  value={formData.navbarConfig?.phoneDisplay || '(951) 555-ECOTEX'}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    navbarConfig: { ...formData.navbarConfig!, phoneDisplay: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-                  placeholder="(951) 555-ECOTEX"
-                />
-              </div>
-            </div>
-          </div>
-        )}
+          const handleDeleteLink = (idx: number) => {
+            const updated = currentNavLinks.filter((_, i) => i !== idx);
+            setFormData({
+              ...formData,
+              navbarConfig: {
+                ...formData.navbarConfig!,
+                navLinks: updated
+              }
+            });
+          };
 
-        {/* ========================================================
-            TAB 3: VERSATILITY & VALUE CARDS
-           ======================================================== */}
-        {activeTab === 'versatility' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
-                Versatility & Value Cards Section
-              </h3>
-              <p className="text-xs text-slate-500">
-                Customize the Sustainable Fashion section, the 4 value feature cards, the large photographic editorial banner, and bottom trust badges.
-              </p>
-            </div>
+          const handleMoveLink = (idx: number, direction: 'up' | 'down') => {
+            if (direction === 'up' && idx === 0) return;
+            if (direction === 'down' && idx === currentNavLinks.length - 1) return;
+            const updated = [...currentNavLinks];
+            const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+            const temp = updated[idx];
+            updated[idx] = updated[targetIdx];
+            updated[targetIdx] = temp;
+            setFormData({
+              ...formData,
+              navbarConfig: {
+                ...formData.navbarConfig!,
+                navLinks: updated
+              }
+            });
+          };
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Sustainable Fashion Section Headline
-                </label>
-                <input
-                  type="text"
-                  value={formData.versatilityConfig?.sustainableFashionTitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    versatilityConfig: { ...formData.versatilityConfig!, sustainableFashionTitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
+          const handleResetLinks = () => {
+            setFormData({
+              ...formData,
+              navbarConfig: {
+                ...formData.navbarConfig!,
+                navLinks: defaultNavLinks
+              }
+            });
+          };
 
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Sustainable Fashion Subtitle
-                </label>
-                <input
-                  type="text"
-                  value={formData.versatilityConfig?.sustainableFashionSubtitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    versatilityConfig: { ...formData.versatilityConfig!, sustainableFashionSubtitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-            </div>
+          const announcementActive = formData.navbarConfig?.announcementActive !== false;
+          const announcementText = formData.navbarConfig?.announcementText || formData.announcement || '🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility';
+          const ctaText = formData.navbarConfig?.ctaButtonText || 'START SHOP';
+          const showCta = formData.navbarConfig?.showCtaButton !== false;
+          const showSearch = formData.navbarConfig?.showSearch !== false;
+          const showCart = formData.navbarConfig?.showCart !== false;
+          const showPhone = formData.navbarConfig?.showPhone !== false;
+          const ctaAction = formData.navbarConfig?.ctaButtonAction || 'shop';
+          const phoneDisplay = formData.navbarConfig?.phoneDisplay || formData.phone || '(951) 555-ECOTEX';
 
-            {/* 4 Feature Cards */}
-            <div>
-              <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider mb-3">
-                4 Value Proposition Cards
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(formData.versatilityConfig?.featureCards || []).map((card, idx) => (
-                  <div key={card.id || idx} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-2">
-                    <span className="text-[10px] font-bold text-[#4E9F76] uppercase tracking-wider block">
-                      Card #{idx + 1}
+          return (
+            <div className="space-y-6 animate-fadeIn">
+              
+              {/* Header Title & Description */}
+              <div className="pb-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-[#B2E2C5]/30 text-[#166534]">
+                      <Megaphone className="w-4 h-4" />
                     </span>
-                    <input
-                      type="text"
-                      value={card.title}
-                      onChange={(e) => {
-                        const newCards = [...formData.versatilityConfig!.featureCards];
-                        newCards[idx] = { ...newCards[idx], title: e.target.value };
-                        setFormData({
-                          ...formData,
-                          versatilityConfig: { ...formData.versatilityConfig!, featureCards: newCards }
-                        });
-                      }}
-                      className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
-                      placeholder="Title"
-                    />
-                    <textarea
-                      rows={2}
-                      value={card.description}
-                      onChange={(e) => {
-                        const newCards = [...formData.versatilityConfig!.featureCards];
-                        newCards[idx] = { ...newCards[idx], description: e.target.value };
-                        setFormData({
-                          ...formData,
-                          versatilityConfig: { ...formData.versatilityConfig!, featureCards: newCards }
-                        });
-                      }}
-                      className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
-                      placeholder="Description"
-                    />
+                    <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
+                      Header & Navbar Menu Manager
+                    </h3>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Big Editorial Banner */}
-            <div className="p-5 rounded-2xl bg-[#F4F9F5] border border-[#B2E2C5]/40 space-y-4">
-              <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider">
-                Big Editorial Banner
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                    Banner Title
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.versatilityConfig?.bannerTitle || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      versatilityConfig: { ...formData.versatilityConfig!, bannerTitle: e.target.value }
-                    })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
-                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Manage top announcement banner, navigation menu links (add, reorder, change text, change page targets), primary CTA pill button, and header utility icons.
+                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                    Banner Subtitle
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.versatilityConfig?.bannerSubtitle || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      versatilityConfig: { ...formData.versatilityConfig!, bannerSubtitle: e.target.value }
-                    })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
-                  />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#B2E2C5]/20 text-[#166534] border border-[#B2E2C5]/50 shrink-0 self-start md:self-auto">
+                  <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
+                  <span>{currentNavLinks.length} Active Menu Links</span>
+                </span>
+              </div>
+
+              {/* LIVE STOREFRONT NAVBAR PREVIEW */}
+              <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-xs bg-white">
+                <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between text-[11px] font-bold text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5 text-[#166534]" />
+                    Live Navbar Visual Preview
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-normal">
+                    Matches current configuration
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                    Banner Button Text
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.versatilityConfig?.bannerButtonText || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      versatilityConfig: { ...formData.versatilityConfig!, bannerButtonText: e.target.value }
-                    })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#4E9F76] bg-white focus:outline-none focus:border-[#86C59E]"
-                  />
+                {/* Simulated Announcement Bar */}
+                {announcementActive && (
+                  <div className="bg-[#4E9F76] text-white py-1.5 px-4 text-center text-[10px] sm:text-[11px] font-semibold tracking-wide">
+                    {announcementText}
+                  </div>
+                )}
+
+                {/* Simulated Navbar Row */}
+                <div className="p-3 sm:p-4 flex items-center justify-between gap-4 bg-white/90 border-b border-slate-100">
+                  {/* Left: Brand Logo Wordmark */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-[#166534] text-white flex items-center justify-center font-black text-xs">
+                      E
+                    </div>
+                    <span className="font-black text-xs tracking-tight text-slate-900">
+                      ECO<span className="text-[#166534]">TEX</span> INC.
+                    </span>
+                  </div>
+
+                  {/* Center: Dynamic Nav Links Preview */}
+                  <div className="hidden sm:flex items-center gap-4 lg:gap-6">
+                    {currentNavLinks.map((link, idx) => (
+                      <span key={link.id || idx} className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-700 hover:text-slate-950">
+                        {link.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Right: Utility Icons & CTA */}
+                  <div className="flex items-center gap-2.5">
+                    {showSearch && (
+                      <div className="p-1.5 rounded-full bg-slate-100 text-slate-500">
+                        <Search className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                    {showCart && (
+                      <div className="p-1.5 rounded-full bg-slate-100 text-slate-500 relative">
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span className="absolute -top-1 -right-1 bg-[#166534] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                          0
+                        </span>
+                      </div>
+                    )}
+                    {showCta && (
+                      <span className="px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#d2e2da] text-[#144f33]">
+                        {ctaText}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Direct File Import for Big Banner Background */}
-              <div className="pt-2">
-                <ImageUploader
-                  label="Editorial Banner Background Image"
-                  description="Import high-resolution lifestyle packaging photo from your computer."
-                  value={formData.versatilityConfig?.bannerImage || ''}
-                  onChange={(newUrl) => setFormData({
-                    ...formData,
-                    versatilityConfig: { ...formData.versatilityConfig!, bannerImage: newUrl }
-                  })}
-                  aspectRatio="wide"
-                />
-              </div>
-            </div>
+              {/* PART 1: NAVBAR MENU LINKS (ADD, EDIT, REORDER, TARGET SECTION) */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                  <div>
+                    <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider flex items-center gap-2">
+                      <span>Navbar Navigation Links</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        {currentNavLinks.length} Items
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Configure the exact links displayed in your website navbar. Reorder them or link each to a specific storefront page.
+                    </p>
+                  </div>
 
-            {/* Bottom Trust Badges */}
-            <div>
-              <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider mb-2">
-                4 Bottom Trust Badges
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                {(formData.versatilityConfig?.bottomTrustBadges || []).map((badge, idx) => (
-                  <div key={idx}>
-                    <label className="block text-[10px] font-bold text-slate-500 mb-1">
-                      Badge #{idx + 1}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleResetLinks}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-[11px] font-bold transition-all cursor-pointer"
+                      title="Reset to default 4 standard links (HOME, ABOUT US, SHOP, CONTACT)"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset Standard Links</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddLink}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#166534] text-white hover:bg-[#14532d] text-[11px] font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Navigation Link</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Navigation Links Table / Card List */}
+                <div className="space-y-2.5">
+                  {currentNavLinks.map((link, idx) => (
+                    <div
+                      key={link.id || idx}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-200/90 bg-slate-50/60 hover:bg-white hover:border-[#86C59E] transition-all"
+                    >
+                      {/* Left: Reorder index & Label Input */}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="w-6 h-6 rounded-lg bg-emerald-100 text-[#166534] font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+
+                        <div className="flex-1 min-w-0">
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                            Display Label Text
+                          </label>
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) => handleUpdateLink(idx, { label: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E] tracking-wider uppercase"
+                            placeholder="e.g. HOME, SHOP, CONTACT"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Middle: Target Section Dropdown */}
+                      <div className="w-full sm:w-56 shrink-0">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                          Target Storefront Section
+                        </label>
+                        <select
+                          value={link.targetSection || 'home'}
+                          onChange={(e) => handleUpdateLink(idx, { targetSection: e.target.value as any })}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-[#86C59E] cursor-pointer"
+                        >
+                          <option value="home">Home Page (/)</option>
+                          <option value="about">About Us Page (/#about)</option>
+                          <option value="shop">Shop Catalog (/#shop)</option>
+                          <option value="contact">Contact Us Page (/#contact)</option>
+                        </select>
+                      </div>
+
+                      {/* Right: Move Up, Move Down & Delete Actions */}
+                      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveLink(idx, 'up')}
+                          disabled={idx === 0}
+                          title="Move up"
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveLink(idx, 'down')}
+                          disabled={idx === currentNavLinks.length - 1}
+                          title="Move down"
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLink(idx)}
+                          title="Delete navigation link"
+                          className="p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-700 cursor-pointer transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* PART 2: PRIMARY CTA PILL BUTTON (START SHOP) */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                      Navbar Primary CTA Button (START SHOP)
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Configure the signature rounded action button positioned on the right side of the navbar.
+                    </p>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={showCta}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, showCtaButton: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded-md focus:ring-[#86C59E] accent-[#166534]"
+                    />
+                    <span className="text-xs font-bold text-slate-800">Show CTA Button</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Button Label Text
                     </label>
                     <input
                       type="text"
-                      value={badge}
-                      onChange={(e) => {
-                        const newBadges = [...formData.versatilityConfig!.bottomTrustBadges];
-                        newBadges[idx] = e.target.value;
-                        setFormData({
-                          ...formData,
-                          versatilityConfig: { ...formData.versatilityConfig!, bottomTrustBadges: newBadges }
-                        });
-                      }}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
+                      value={ctaText}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, ctaButtonText: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] bg-white focus:outline-none focus:border-[#86C59E] uppercase tracking-wider"
+                      placeholder="e.g. START SHOP, EXPLORE CATALOG, REQUEST QUOTE"
                     />
                   </div>
-                ))}
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Button Action when Clicked
+                    </label>
+                    <select
+                      value={ctaAction}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, ctaButtonAction: e.target.value as any }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-[#86C59E] cursor-pointer"
+                    >
+                      <option value="shop">Navigate to Shop Catalog (/#shop)</option>
+                      <option value="contact">Open Contact & RFQ Quote Form (/#contact)</option>
+                      <option value="cart">Open Shopping Bag / Cart Drawer</option>
+                    </select>
+                  </div>
+                </div>
               </div>
+
+              {/* PART 3: TOP ANNOUNCEMENT MARQUEE BAR */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                      Top Announcement Marquee Bar
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Displays a notification banner above the navbar across the entire website.
+                    </p>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={announcementActive}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        announcementActive: e.target.checked,
+                        navbarConfig: { ...formData.navbarConfig!, announcementActive: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded-md focus:ring-[#86C59E] accent-[#166534]"
+                    />
+                    <span className="text-xs font-bold text-slate-800">Display Announcement Bar</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                    Announcement Message Text
+                  </label>
+                  <input
+                    type="text"
+                    value={announcementText}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      announcement: e.target.value,
+                      navbarConfig: { ...formData.navbarConfig!, announcementText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-none focus:border-[#86C59E]"
+                    placeholder="🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility"
+                  />
+                </div>
+              </div>
+
+              {/* PART 4: HEADER UTILITY ICONS & MOBILE DRAWER */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    Header Utility Icons & Mobile Drawer Settings
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Toggle visibility for the search icon, shopping bag with live counter, and mobile menu phone call link.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50/60 cursor-pointer hover:bg-white">
+                    <input
+                      type="checkbox"
+                      checked={showSearch}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, showSearch: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded accent-[#166534]"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Search Modal Icon</span>
+                      <span className="text-[10px] text-slate-400">Allows instant catalog search</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50/60 cursor-pointer hover:bg-white">
+                    <input
+                      type="checkbox"
+                      checked={showCart}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, showCart: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded accent-[#166534]"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Shopping Bag Icon</span>
+                      <span className="text-[10px] text-slate-400">Shows live cart badge count</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50/60 cursor-pointer hover:bg-white">
+                    <input
+                      type="checkbox"
+                      checked={showPhone}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        navbarConfig: { ...formData.navbarConfig!, showPhone: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded accent-[#166534]"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Mobile Phone Link</span>
+                      <span className="text-[10px] text-slate-400">Click-to-call in drawer</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="pt-2">
+                  <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                    Header & Mobile Phone Number Display
+                  </label>
+                  <input
+                    type="text"
+                    value={phoneDisplay}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      phone: e.target.value,
+                      navbarConfig: { ...formData.navbarConfig!, phoneDisplay: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E]"
+                    placeholder="(951) 555-ECOTEX"
+                  />
+                </div>
+              </div>
+
             </div>
+          );
+        })()}
+
+        {/* ========================================================
+            TAB 1: COMPLETE HOME PAGE CMS (ALL 5 SECTIONS)
+           ======================================================== */}
+        {activeTab === 'versatility' && (
+          <div className="space-y-6 animate-fadeIn">
+            
+            {/* Header & Section Navigation Bar */}
+            <div className="pb-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="p-1 rounded-lg bg-[#B2E2C5]/30 text-[#166534]">
+                    <Home className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
+                    Home Page - All Live Sections CMS
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Directly customize all 5 core sections displayed on the storefront Homepage: Hero Showcase, Products Collection, Versatility & Value Cards, About & Manufacturing Hubs, and Direct Mill Contact.
+                </p>
+              </div>
+
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#B2E2C5]/20 text-[#166534] border border-[#B2E2C5]/50 shrink-0 self-start md:self-auto">
+                <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
+                <span>5 Core Sections Active</span>
+              </span>
+            </div>
+
+            {/* Horizontal Sub-Navigation Tabs for the 5 Home Page Sections */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin border-b border-slate-100">
+              {[
+                { id: 'hero', label: '1. Hero Showcase', icon: Sparkles, badge: 'Main Banner' },
+                { id: 'featured-products', label: '2. Products Showcase', icon: ShoppingBag, badge: 'Catalog' },
+                { id: 'versatility', label: '3. Versatility & Cards', icon: Layers, badge: 'Value Cards' },
+                { id: 'about-facilities', label: '4. About & Facilities', icon: Factory, badge: 'Mill Hubs' },
+                { id: 'contact-info', label: '5. Direct Mill Contact', icon: Phone, badge: 'Corona CA' }
+              ].map((sec) => {
+                const Icon = sec.icon;
+                const isCurrent = activeHomeSection === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => setActiveHomeSection(sec.id as any)}
+                    className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
+                      isCurrent
+                        ? 'bg-[#166534] text-white border-[#166534] shadow-sm shadow-[#166534]/20'
+                        : 'bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-emerald-200' : 'text-[#4E9F76]'}`} />
+                    <span>{sec.label}</span>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-mono ${
+                      isCurrent ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-500'
+                    }`}>
+                      {sec.badge}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ========================================================
+                SECTION 1: HERO SHOWCASE (BiteStyleHero)
+               ======================================================== */}
+            {activeHomeSection === 'hero' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-[#166534] shrink-0 mt-0.5" />
+                  <div className="text-xs text-emerald-950">
+                    <span className="font-bold block">Storefront Hero Panoramic Showcase</span>
+                    This section controls the top-most centerpiece of your website. Headlines support line breaks (press Enter), with dynamic glowing green styling automatically applied to the final word.
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Hero Headline / Main Title * (Supports line breaks)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={formData.heroTitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        heroTitle: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E] font-mono"
+                      placeholder="It's time to\npack better."
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Tip: Write on multiple lines to stack headline text. The last word renders with a radiant emerald gradient.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Hero Paragraph / Narrative Subtitle *
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formData.heroSubtitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        heroSubtitle: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Engineered non-woven, compostable bio-PLA, and insulated wholesale carrier bags for retail supermarkets, luxury boutiques, and global distributors."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Primary CTA Button Text
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.heroButtonText || 'Shop Now'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          heroButtonText: e.target.value
+                        })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] bg-white focus:outline-none focus:border-[#86C59E]"
+                        placeholder="Shop Now"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Top Announcement Bar Message
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.announcement || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          announcement: e.target.value
+                        })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-[#86C59E]"
+                        placeholder="🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Hero Background Image Direct Upload */}
+                  <div className="pt-2">
+                    <ImageUploader
+                      label="Hero Panoramic Background Image"
+                      description="Import your custom panoramic photo from your computer (e.g. factory floor, showroom, or lifestyle warehouse scene). Defaults to /images/home-hero-bg.jpg."
+                      value={formData.heroBackgroundImage || '/images/home-hero-bg.jpg'}
+                      onChange={(newUrl) => setFormData({
+                        ...formData,
+                        heroBackgroundImage: newUrl
+                      })}
+                      aspectRatio="wide"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================
+                SECTION 2: FEATURED PRODUCTS SHOWCASE (ShopSection on Home)
+               ======================================================== */}
+            {activeHomeSection === 'featured-products' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                  <ShoppingBag className="w-5 h-5 text-[#166534] shrink-0 mt-0.5" />
+                  <div className="text-xs text-slate-700">
+                    <span className="font-bold text-slate-900 block">Featured Products & New Arrivals Carousel</span>
+                    This section displays your featured eco-friendly products directly on the Homepage with quick-add cart controls and instant wholesale quote triggers.
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Section Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.shopConfig?.newArrivalsHeading || 'New Arrivals'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shopConfig: { ...formData.shopConfig!, newArrivalsHeading: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="New Arrivals"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      View All Catalog Button Text
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.shopConfig?.allProductsHeading || 'Shop All Products'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shopConfig: { ...formData.shopConfig!, allProductsHeading: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Shop All Products"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Section Description / Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.shopConfig?.newArrivalsSubtitle || 'High-tensile reusable non-woven polypropylene carrier bags engineered for commercial retail.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shopConfig: { ...formData.shopConfig!, newArrivalsSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="High-tensile reusable non-woven polypropylene carrier bags engineered for commercial retail."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================
+                SECTION 3: VERSATILITY & VALUE CARDS (VersatilityBannerSection)
+               ======================================================== */}
+            {activeHomeSection === 'versatility' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Sustainable Fashion Section Headline
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.versatilityConfig?.sustainableFashionTitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        versatilityConfig: { ...formData.versatilityConfig!, sustainableFashionTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Sustainable Fashion Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.versatilityConfig?.sustainableFashionSubtitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        versatilityConfig: { ...formData.versatilityConfig!, sustainableFashionSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                {/* 4 Feature Cards */}
+                <div>
+                  <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider mb-3">
+                    4 Value Proposition Cards
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {(formData.versatilityConfig?.featureCards || []).map((card, idx) => (
+                      <div key={card.id || idx} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <span className="text-[10px] font-bold text-[#4E9F76] uppercase tracking-wider block">
+                          Card #{idx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={card.title}
+                          onChange={(e) => {
+                            const newCards = [...formData.versatilityConfig!.featureCards];
+                            newCards[idx] = { ...newCards[idx], title: e.target.value };
+                            setFormData({
+                              ...formData,
+                              versatilityConfig: { ...formData.versatilityConfig!, featureCards: newCards }
+                            });
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
+                          placeholder="Title"
+                        />
+                        <textarea
+                          rows={2}
+                          value={card.description}
+                          onChange={(e) => {
+                            const newCards = [...formData.versatilityConfig!.featureCards];
+                            newCards[idx] = { ...newCards[idx], description: e.target.value };
+                            setFormData({
+                              ...formData,
+                              versatilityConfig: { ...formData.versatilityConfig!, featureCards: newCards }
+                            });
+                          }}
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                          placeholder="Description"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Big Editorial Banner */}
+                <div className="p-5 rounded-2xl bg-[#F4F9F5] border border-[#B2E2C5]/40 space-y-4">
+                  <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider">
+                    Big Editorial Banner
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Banner Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.versatilityConfig?.bannerTitle || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          versatilityConfig: { ...formData.versatilityConfig!, bannerTitle: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Banner Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.versatilityConfig?.bannerSubtitle || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          versatilityConfig: { ...formData.versatilityConfig!, bannerSubtitle: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Banner Button Text
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.versatilityConfig?.bannerButtonText || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          versatilityConfig: { ...formData.versatilityConfig!, bannerButtonText: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-[#4E9F76] bg-white focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Direct File Import for Big Banner Background */}
+                  <div className="pt-2">
+                    <ImageUploader
+                      label="Editorial Banner Background Image"
+                      description="Import high-resolution lifestyle packaging photo from your computer."
+                      value={formData.versatilityConfig?.bannerImage || ''}
+                      onChange={(newUrl) => setFormData({
+                        ...formData,
+                        versatilityConfig: { ...formData.versatilityConfig!, bannerImage: newUrl }
+                      })}
+                      aspectRatio="wide"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Trust Badges */}
+                <div>
+                  <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider mb-2">
+                    4 Bottom Trust Badges
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    {(formData.versatilityConfig?.bottomTrustBadges || []).map((badge, idx) => (
+                      <div key={idx}>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                          Badge #{idx + 1}
+                        </label>
+                        <input
+                          type="text"
+                          value={badge}
+                          onChange={(e) => {
+                            const newBadges = [...formData.versatilityConfig!.bottomTrustBadges];
+                            newBadges[idx] = e.target.value;
+                            setFormData({
+                              ...formData,
+                              versatilityConfig: { ...formData.versatilityConfig!, bottomTrustBadges: newBadges }
+                            });
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================
+                SECTION 4: ABOUT ECOTEX & FACILITIES (HomepageAboutFacilitiesSection)
+               ======================================================== */}
+            {activeHomeSection === 'about-facilities' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <Factory className="w-5 h-5 text-[#166534] shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-xs text-emerald-950 block">About Ecotex & Manufacturing Facilities</span>
+                      <p className="text-[11px] text-emerald-800 mt-0.5">
+                        Controls the brand story, mission quote, executive founder profile, and international manufacturing & distribution hubs displayed on the Homepage.
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={formData.facilitiesConfig?.showOnHomepage !== false}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        facilitiesConfig: { ...formData.facilitiesConfig!, showOnHomepage: e.target.checked }
+                      })}
+                      className="w-4 h-4 rounded text-[#166534] focus:ring-[#166534] accent-[#166534]"
+                    />
+                    <span className="text-xs font-bold text-emerald-950">Show on Homepage</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Section Category Tag
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.aboutConfig?.sectionTagline || '| SUSTAINABILITY & CIRCULAR PACKAGING'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig!, sectionTagline: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] bg-white focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Brand Story Title
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.aboutConfig?.storyTitle || formData.aboutTitle || 'We Are Ecotex'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutTitle: e.target.value,
+                        aboutConfig: { ...formData.aboutConfig!, storyTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Mission Statement / Italic Blockquote
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={formData.aboutConfig?.missionQuote || formData.aboutMission || 'We engineered our circular manufacturing framework around a simple premise: commercial packaging can protect goods and elevate brands without ever polluting our natural world.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutMission: e.target.value,
+                        aboutConfig: { ...formData.aboutConfig!, missionQuote: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-none focus:border-[#86C59E] italic"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Brand Story Paragraph #1
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formData.aboutConfig?.storyParagraph1 || formData.aboutStory || 'Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutStory: e.target.value,
+                        aboutConfig: { ...formData.aboutConfig!, storyParagraph1: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                {/* Founder Info & Portrait Card */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    Executive Leadership & Founder Info
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Founder Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.aboutConfig?.founderName || 'Rashid Mahmood'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          aboutConfig: { ...formData.aboutConfig!, founderName: e.target.value }
+                        })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                        Founder Title / Role
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.aboutConfig?.founderRole || 'Managing Director & Founder, Ecotex Inc.'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          aboutConfig: { ...formData.aboutConfig!, founderRole: e.target.value }
+                        })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 pt-2">
+                      <ImageUploader
+                        label="Founder Portrait Photo"
+                        description="Upload executive portrait directly from your computer."
+                        value={formData.aboutConfig?.founderImage || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=85'}
+                        onChange={(newUrl) => setFormData({
+                          ...formData,
+                          aboutConfig: { ...formData.aboutConfig!, founderImage: newUrl }
+                        })}
+                        aspectRatio="square"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Facilities & Logistics Hubs */}
+                <div className="p-5 rounded-2xl bg-[#F4F9F5] border border-[#B2E2C5]/40 space-y-4">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    Manufacturing & Logistics Hubs (Corona CA & Overseas Mill)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+                      <span className="text-[10px] font-bold text-[#166534] uppercase tracking-wider block">
+                        Hub #1: US Distribution Hub
+                      </span>
+                      <input
+                        type="text"
+                        value={formData.facilityAddress || '1200 Industrial Parkway, Corona, CA 92881'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          facilityAddress: e.target.value
+                        })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-800"
+                        placeholder="Corona Facility Address"
+                      />
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+                      <span className="text-[10px] font-bold text-[#166534] uppercase tracking-wider block">
+                        Hub #2: Heavy Industrial Mill Plant
+                      </span>
+                      <input
+                        type="text"
+                        value={formData.plantAddress || 'Sector 15, Korangi Industrial Area, Karachi, PK'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          plantAddress: e.target.value
+                        })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-800"
+                        placeholder="Mill Plant Address"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================
+                SECTION 5: DIRECT MILL & CORONA CONTACT (ContactSection on Home)
+               ======================================================== */}
+            {activeHomeSection === 'contact-info' && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-[#166534] shrink-0 mt-0.5" />
+                  <div className="text-xs text-slate-700">
+                    <span className="font-bold text-slate-900 block">Direct Mill & Corona Contact Section</span>
+                    This section manages the official addresses, telephone numbers, quote inquiry email, and Google Maps location displayed at the bottom of the Homepage.
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Direct US Logistics Phone
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.phone || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        phone: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="+1 (951) 450-9773"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Official Quotes & Orders Email
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        email: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="orders@ecotexinc.com"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Corona CA Facility Address (US Headquarters)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.facilityAddress || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        facilityAddress: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="1200 Industrial Parkway, Corona, CA 92881"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Google Maps Navigation URL
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.contactConfig?.googleMapsUrl || 'https://maps.google.com/?q=1200+Industrial+Parkway,+Corona,+CA+92881'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig!, googleMapsUrl: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="https://maps.google.com/?q=1200+Industrial+Parkway,+Corona,+CA+92881"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
         {/* ========================================================
             TAB 5: ABOUT US & LEADERSHIP TEAM
            ======================================================== */}
-        {activeTab === 'about' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
-                About Us, Corporate Narrative & Leadership Team
-              </h3>
-              <p className="text-xs text-slate-500">
-                Import real photos directly for the hero background, founder portrait, factory floor, and team profiles.
-              </p>
-            </div>
+        {activeTab === 'about' && (() => {
+          const currentFeatures = (formData.aboutConfig?.whyChooseUsFeatures && formData.aboutConfig.whyChooseUsFeatures.length > 0)
+            ? formData.aboutConfig.whyChooseUsFeatures
+            : [
+                {
+                  title: '100% Recyclable Fabrics',
+                  description: 'Manufactured with virgin and pre-consumer polypropylene, lab-certified for 125+ reuse cycles.'
+                },
+                {
+                  title: 'Easy to Customize',
+                  description: 'Flexible sizing, ultrasonic handle sealing, custom gusset depths, and pantone-matched dyed fabrics.'
+                },
+                {
+                  title: '24/7 B2B Global Support',
+                  description: 'Dedicated enterprise account directors for national retail chains, grocers, and FMCG brands.'
+                },
+                {
+                  title: 'Free Sample Verification',
+                  description: 'Physical pre-production specimen kits dispatched within 48 hours for tensile testing and color sign-off.'
+                },
+                {
+                  title: 'High-Definition Flexo Print',
+                  description: 'Zero-VOC soy and water-based ink flexography delivering photo-sharp photographic brand imprints.'
+                },
+                {
+                  title: 'Rapid Turnaround Times',
+                  description: 'Immediate dispatch for unbranded warehouse inventory and accelerated 10-14 day custom printed delivery.'
+                }
+              ];
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Hero Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.aboutConfig?.heroTitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    aboutConfig: { ...formData.aboutConfig!, heroTitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
+          const defaultTeamFallback = [
+            {
+              id: 'tm1',
+              name: 'Rashid Mahmood',
+              role: 'Managing Director & Founder',
+              image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=85',
+              bio: 'Pioneered circular non-woven manufacturing across North America and South Asia with over two decades in sustainable polymer engineering.',
+              linkedin: '#',
+              twitter: '#',
+              email: 'rashid@ecotexinc.com'
+            },
+            {
+              id: 'tm2',
+              name: 'Farah Al-Sayed',
+              role: 'Head of Quality & Materials Engineering',
+              image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=85',
+              bio: 'Leads our ASTM D6400 biodegradable testing laboratories and Global Recycled Standard (GRS) chain-of-custody compliance.',
+              linkedin: '#',
+              twitter: '#',
+              email: 'farah@ecotexinc.com'
+            },
+            {
+              id: 'tm3',
+              name: 'Marcus Vance',
+              role: 'Chief Sustainability Officer',
+              image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=85',
+              bio: 'Oversees enterprise carbon reduction accounting and California SB 270 / SB 54 regulatory packaging compliance.',
+              linkedin: '#',
+              twitter: '#',
+              email: 'marcus@ecotexinc.com'
+            }
+          ];
 
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Hero Subtitle
-                </label>
-                <input
-                  type="text"
-                  value={formData.aboutConfig?.heroSubtitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    aboutConfig: { ...formData.aboutConfig!, heroSubtitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-            </div>
+          const currentTeam = (formData.aboutConfig?.teamMembers && formData.aboutConfig.teamMembers.length > 0)
+            ? formData.aboutConfig.teamMembers
+            : defaultTeamFallback;
 
-            {/* Direct Image File Import for About Hero Background */}
-            <ImageUploader
-              label="About Us Page Hero Background Photo"
-              description="Import high-resolution facility / executive background image."
-              value={formData.aboutConfig?.heroBgImage || 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=2000&q=85'}
-              onChange={(newUrl) => setFormData({
-                ...formData,
-                aboutConfig: { ...formData.aboutConfig!, heroBgImage: newUrl }
-              })}
-              aspectRatio="wide"
-            />
+          return (
+            <div className="space-y-6 animate-fadeIn">
 
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                Executive Mission Quote
-              </label>
-              <textarea
-                rows={2}
-                value={formData.aboutConfig?.missionQuote || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  aboutConfig: { ...formData.aboutConfig!, missionQuote: e.target.value }
-                })}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Story Paragraph 1
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.aboutConfig?.storyParagraph1 || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    aboutConfig: { ...formData.aboutConfig!, storyParagraph1: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Story Paragraph 2
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.aboutConfig?.storyParagraph2 || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    aboutConfig: { ...formData.aboutConfig!, storyParagraph2: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-            </div>
-
-            {/* Direct Image File Import for Founder Portrait and Workshop */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-              <ImageUploader
-                label="Founder Portrait Photo (Rashid Mahmood)"
-                description="Import official founder executive portrait from your computer."
-                value={formData.aboutConfig?.founderImage || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=85'}
-                onChange={(newUrl) => setFormData({
-                  ...formData,
-                  aboutConfig: { ...formData.aboutConfig!, founderImage: newUrl }
-                })}
-                aspectRatio="portrait"
-              />
-
-              <ImageUploader
-                label="Engineering Workshop & Testing Laboratory Photo"
-                description="Import manufacturing inspection photo from your computer."
-                value={formData.aboutConfig?.workshopImage || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85'}
-                onChange={(newUrl) => setFormData({
-                  ...formData,
-                  aboutConfig: { ...formData.aboutConfig!, workshopImage: newUrl }
-                })}
-                aspectRatio="wide"
-              />
-            </div>
-
-            {/* Team Members List */}
-            <div className="pt-6 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider">
-                    Executive Leadership Team Roster
-                  </h4>
-                  <p className="text-[11px] text-slate-400">
-                    Add or update leadership cards displayed on the About Us page with direct photo uploads.
-                  </p>
+              {/* Top Action Header Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      Section Editor · Live Real-Time Storefront Sync
+                    </span>
+                    <h3 className="text-xl font-black text-slate-900 mt-1">
+                      2. About Us Page
+                    </h3>
+                  </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    const newMember: TeamMemberConfig = {
-                      id: `tm-${Date.now()}`,
-                      name: 'New Executive',
-                      role: 'Vice President of Production',
-                      bio: 'Experienced supply chain executive dedicated to sustainable industrial packaging.',
-                      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
-                      email: 'team@ecotexinc.com',
-                      linkedin: '#'
-                    };
-                    const updatedMembers = [...(formData.aboutConfig?.teamMembers || []), newMember];
-                    setFormData({
-                      ...formData,
-                      aboutConfig: { ...formData.aboutConfig!, teamMembers: updatedMembers }
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4E9F76]/10 hover:bg-[#4E9F76]/20 text-[#4E9F76] text-xs font-bold transition-all cursor-pointer"
+                  onClick={() => handleSave()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer self-start sm:self-auto"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add Member</span>
+                  <Save className="w-4 h-4" />
+                  <span>Save 2.</span>
                 </button>
               </div>
 
-              <div className="space-y-6">
-                {(formData.aboutConfig?.teamMembers || []).map((member, idx) => (
-                  <div key={member.id || idx} className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <span className="text-xs font-bold text-[#4E9F76]">
-                        Member #{idx + 1}: {member.name}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = formData.aboutConfig!.teamMembers.filter((_, i) => i !== idx);
-                          setFormData({
-                            ...formData,
-                            aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                          });
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 text-xs font-bold cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
+              {/* CARD 1: HERO BANNER & CINEMATIC BACKGROUND */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4" />
                     </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Editorial Hero Banner & Background
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Top masthead headline, descriptive subtitle, and high-resolution background image.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                      <div className="lg:col-span-4">
-                        <ImageUploader
-                          label="Profile Headshot Photo"
-                          value={member.image}
-                          onChange={(newUrl) => {
-                            const updated = [...formData.aboutConfig!.teamMembers];
-                            updated[idx] = { ...updated[idx], image: newUrl };
-                            setFormData({
-                              ...formData,
-                              aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                            });
-                          }}
-                          aspectRatio="portrait"
-                        />
-                      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Hero Title
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="About Us"
+                      value={formData.aboutConfig?.heroTitle ?? 'About Us'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, heroTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
 
-                      <div className="lg:col-span-8 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1">Name</label>
-                            <input
-                              type="text"
-                              value={member.name}
-                              onChange={(e) => {
-                                const updated = [...formData.aboutConfig!.teamMembers];
-                                updated[idx] = { ...updated[idx], name: e.target.value };
-                                setFormData({
-                                  ...formData,
-                                  aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                                });
-                              }}
-                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] bg-white focus:outline-none focus:border-[#86C59E]"
-                            />
-                          </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Hero Subtitle Narrative
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="A sustainable future for packaging. Engineered with purpose, manufactured for impact."
+                      value={formData.aboutConfig?.heroSubtitle ?? 'A sustainable future for packaging. Engineered with purpose, manufactured for impact.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, heroSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
 
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1">Role / Designation</label>
-                            <input
-                              type="text"
-                              value={member.role}
-                              onChange={(e) => {
-                                const updated = [...formData.aboutConfig!.teamMembers];
-                                updated[idx] = { ...updated[idx], role: e.target.value };
-                                setFormData({
-                                  ...formData,
-                                  aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                                });
-                              }}
-                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
-                            />
-                          </div>
+                {/* Direct Image File Import for About Hero Background */}
+                <div className="pt-2">
+                  <ImageUploader
+                    label="About Us Page Hero Background Photo"
+                    description="Import high-resolution facility / executive background photograph from your computer."
+                    value={formData.aboutConfig?.heroBgImage || 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=2000&q=85'}
+                    onChange={(newUrl) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, heroBgImage: newUrl }
+                    })}
+                    aspectRatio="wide"
+                  />
+                </div>
+              </div>
+
+              {/* CARD 2: CORPORATE NARRATIVE & FOUNDER LEADERSHIP */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Corporate Narrative & Founder Leadership
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Story headline, executive mission quote, company history paragraphs, and founder portrait.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Story Main Headline
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="We Are Ecotex"
+                      value={formData.aboutConfig?.storyTitle ?? 'We Are Ecotex'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, storyTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Founder Full Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Rashid Mahmood"
+                      value={formData.aboutConfig?.founderName ?? 'Rashid Mahmood'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, founderName: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Founder Executive Title / Role
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Managing Director & Founder, Ecotex Inc."
+                      value={formData.aboutConfig?.founderRole ?? 'Managing Director & Founder, Ecotex Inc.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, founderRole: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Leadership Badge Label
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Leadership"
+                      value={formData.aboutConfig?.leadershipBadgeTitle ?? 'Leadership'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, leadershipBadgeTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Leadership Badge Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="20+ Years Sustainable Manufacturing"
+                      value={formData.aboutConfig?.leadershipBadgeSubtitle ?? '20+ Years Sustainable Manufacturing'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, leadershipBadgeSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Executive Mission Quote
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="We engineered our circular manufacturing framework around a simple premise..."
+                    value={formData.aboutConfig?.missionQuote ?? 'We engineered our circular manufacturing framework around a simple premise: commercial packaging can protect goods and elevate brands without ever polluting our natural world.'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, missionQuote: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Corporate Narrative Paragraph 1
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="Founded to combat the global crisis of single-use plastic waste..."
+                      value={formData.aboutConfig?.storyParagraph1 ?? 'Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, storyParagraph1: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Corporate Narrative Paragraph 2
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="From our corporate headquarters in California to state-of-the-art automated manufacturing..."
+                      value={formData.aboutConfig?.storyParagraph2 ?? 'From our corporate headquarters in California to state-of-the-art automated manufacturing facilities, every product is subjected to rigorous tensile testing, automated ultrasonic seam welding, and non-toxic water-based printing. We empower grocery retailers, boutique lifestyle brands, and logistics operations across the globe to achieve zero-waste compliance with full chain-of-custody audit trails.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, storyParagraph2: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Direct Image File Import for Founder Portrait */}
+                <div className="pt-2">
+                  <ImageUploader
+                    label="Founder Official Executive Portrait Photo (Rashid Mahmood)"
+                    description="Import high-resolution executive portrait directly from your computer (auto framed with floating leadership badge)."
+                    value={formData.aboutConfig?.founderImage || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=85'}
+                    onChange={(newUrl) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, founderImage: newUrl }
+                    })}
+                    aspectRatio="square"
+                  />
+                </div>
+              </div>
+
+              {/* CARD 3: WHY CHOOSE US & INDUSTRIAL MANUFACTURING STANDARDS */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Why Choose Us & Industrial Manufacturing Standards
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Section headline, workshop laboratory photograph, certifications badge, and 6 industrial feature cards.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Section Title
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Why Choose Us"
+                      value={formData.aboutConfig?.whyChooseUsTitle ?? 'Why Choose Us'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, whyChooseUsTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Workshop Stat Badge Value
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="125+ Uses"
+                      value={formData.aboutConfig?.statBadgeValue ?? '125+ Uses'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, statBadgeValue: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Workshop Stat Badge Label
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="ASTM D6400 & GRS Certified"
+                      value={formData.aboutConfig?.statBadgeLabel ?? 'ASTM D6400 & GRS Certified'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, statBadgeLabel: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Section Subtitle Narrative
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="We combine German ultrasonic welding machinery, ISO 9001 certified batch audits..."
+                    value={formData.aboutConfig?.whyChooseUsSubtitle ?? 'We combine German ultrasonic welding machinery, ISO 9001 certified batch audits, and non-toxic soy formulations to deliver high-capacity packaging engineered to outlast disposable plastic.'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, whyChooseUsSubtitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                  />
+                </div>
+
+                {/* Direct Image File Import for Workshop Photo */}
+                <div className="pt-2">
+                  <ImageUploader
+                    label="Engineering Workshop & Testing Laboratory Photo"
+                    description="Import high-resolution quality testing laboratory or automated factory floor photo from your computer."
+                    value={formData.aboutConfig?.workshopImage || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85'}
+                    onChange={(newUrl) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, workshopImage: newUrl }
+                    })}
+                    aspectRatio="wide"
+                  />
+                </div>
+
+                {/* 6 Precision Industrial Features Editor */}
+                <div className="pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h5 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        6 Industrial Manufacturing Precision Features
+                      </h5>
+                      <p className="text-[11px] text-slate-500">
+                        Customise the titles and descriptions displayed on the storefront split grid.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          aboutConfig: {
+                            ...formData.aboutConfig,
+                            whyChooseUsFeatures: [
+                              {
+                                title: '100% Recyclable Fabrics',
+                                description: 'Manufactured with virgin and pre-consumer polypropylene, lab-certified for 125+ reuse cycles.'
+                              },
+                              {
+                                title: 'Easy to Customize',
+                                description: 'Flexible sizing, ultrasonic handle sealing, custom gusset depths, and pantone-matched dyed fabrics.'
+                              },
+                              {
+                                title: '24/7 B2B Global Support',
+                                description: 'Dedicated enterprise account directors for national retail chains, grocers, and FMCG brands.'
+                              },
+                              {
+                                title: 'Free Sample Verification',
+                                description: 'Physical pre-production specimen kits dispatched within 48 hours for tensile testing and color sign-off.'
+                              },
+                              {
+                                title: 'High-Definition Flexo Print',
+                                description: 'Zero-VOC soy and water-based ink flexography delivering photo-sharp photographic brand imprints.'
+                              },
+                              {
+                                title: 'Rapid Turnaround Times',
+                                description: 'Immediate dispatch for unbranded warehouse inventory and accelerated 10-14 day custom printed delivery.'
+                              }
+                            ]
+                          }
+                        });
+                      }}
+                      className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold hover:underline cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset Features</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {currentFeatures.map((feat, fIdx) => (
+                      <div key={fIdx} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                            Feature {fIdx + 1}
+                          </span>
                         </div>
-
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Professional Bio</label>
-                          <textarea
-                            rows={2}
-                            value={member.bio}
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Title
+                          </label>
+                          <input
+                            type="text"
+                            value={feat.title}
                             onChange={(e) => {
-                              const updated = [...formData.aboutConfig!.teamMembers];
-                              updated[idx] = { ...updated[idx], bio: e.target.value };
+                              const updated = [...currentFeatures];
+                              updated[fIdx] = { ...updated[fIdx], title: e.target.value };
                               setFormData({
                                 ...formData,
-                                aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
+                                aboutConfig: { ...formData.aboutConfig, whyChooseUsFeatures: updated }
                               });
                             }}
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={feat.description}
+                            onChange={(e) => {
+                              const updated = [...currentFeatures];
+                              updated[fIdx] = { ...updated[fIdx], description: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, whyChooseUsFeatures: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 4: EXECUTIVE LEADERSHIP TEAM MEMBERS */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Executive Leadership Team Members
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Customise member headshot portraits, executive credentials, bios, and direct channels.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newMember = {
+                        id: 'tm_' + Date.now(),
+                        name: 'New Executive Member',
+                        role: 'Packaging Specialist',
+                        bio: 'Specializing in sustainable packaging engineering and enterprise customer satisfaction.',
+                        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+                        email: 'executive@ecotexinc.com',
+                        linkedin: '#',
+                        twitter: '#'
+                      };
+                      setFormData({
+                        ...formData,
+                        aboutConfig: {
+                          ...formData.aboutConfig,
+                          teamMembers: [...currentTeam, newMember]
+                        }
+                      });
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4E9F76] hover:bg-[#86C59E] text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Member</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Team Section Headline
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Meet Our Team"
+                      value={formData.aboutConfig?.teamSectionTitle ?? 'Meet Our Team'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, teamSectionTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Team Section Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="The experts behind global sustainable packaging."
+                      value={formData.aboutConfig?.teamSectionSubtitle ?? 'The experts behind global sustainable packaging.'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, teamSectionSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                {/* Team Members List */}
+                <div className="space-y-4 pt-2">
+                  {currentTeam.map((member, idx) => (
+                    <div
+                      key={member.id || idx}
+                      className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4 hover:border-slate-300 transition-all"
+                    >
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-black flex items-center justify-center">
+                            {idx + 1}
+                          </span>
+                          <span className="text-xs font-black text-slate-800">
+                            {member.name || 'Untitled Member'}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            · {member.role || 'Role unassigned'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...currentTeam];
+                                const temp = updated[idx - 1];
+                                updated[idx - 1] = updated[idx];
+                                updated[idx] = temp;
+                                setFormData({
+                                  ...formData,
+                                  aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                                });
+                              }}
+                              className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {idx < currentTeam.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...currentTeam];
+                                const temp = updated[idx + 1];
+                                updated[idx + 1] = updated[idx];
+                                updated[idx] = temp;
+                                setFormData({
+                                  ...formData,
+                                  aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                                });
+                              }}
+                              className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
+                              title="Move Down"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = currentTeam.filter((_, i) => i !== idx);
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-500 transition-colors ml-1"
+                            title="Delete Member"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Headshot Photo Uploader */}
+                      <ImageUploader
+                        label="Profile Headshot Photo"
+                        description="Import official portrait photograph from your computer."
+                        value={member.image || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=85'}
+                        onChange={(newUrl) => {
+                          const updated = [...currentTeam];
+                          updated[idx] = { ...updated[idx], image: newUrl };
+                          setFormData({
+                            ...formData,
+                            aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                          });
+                        }}
+                        aspectRatio="square"
+                      />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Full Name
+                          </label>
+                          <input
+                            type="text"
+                            value={member.name}
+                            onChange={(e) => {
+                              const updated = [...currentTeam];
+                              updated[idx] = { ...updated[idx], name: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1">Email</label>
-                            <input
-                              type="text"
-                              value={member.email}
-                              onChange={(e) => {
-                                const updated = [...formData.aboutConfig!.teamMembers];
-                                updated[idx] = { ...updated[idx], email: e.target.value };
-                                setFormData({
-                                  ...formData,
-                                  aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                                });
-                              }}
-                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
-                            />
-                          </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Role / Job Title
+                          </label>
+                          <input
+                            type="text"
+                            value={member.role}
+                            onChange={(e) => {
+                              const updated = [...currentTeam];
+                              updated[idx] = { ...updated[idx], role: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                          />
+                        </div>
+                      </div>
 
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1">LinkedIn URL</label>
-                            <input
-                              type="text"
-                              value={member.linkedin}
-                              onChange={(e) => {
-                                const updated = [...formData.aboutConfig!.teamMembers];
-                                updated[idx] = { ...updated[idx], linkedin: e.target.value };
-                                setFormData({
-                                  ...formData,
-                                  aboutConfig: { ...formData.aboutConfig!, teamMembers: updated }
-                                });
-                              }}
-                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
-                            />
-                          </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                          Executive Biography / Credentials
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={member.bio}
+                          onChange={(e) => {
+                            const updated = [...currentTeam];
+                            updated[idx] = { ...updated[idx], bio: e.target.value };
+                            setFormData({
+                              ...formData,
+                              aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                            });
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Direct Email
+                          </label>
+                          <input
+                            type="email"
+                            placeholder="executive@ecotexinc.com"
+                            value={member.email || ''}
+                            onChange={(e) => {
+                              const updated = [...currentTeam];
+                              updated[idx] = { ...updated[idx], email: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            LinkedIn URL
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://linkedin.com/in/..."
+                            value={member.linkedin || ''}
+                            onChange={(e) => {
+                              const updated = [...currentTeam];
+                              updated[idx] = { ...updated[idx], linkedin: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                            Twitter / X URL
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://twitter.com/..."
+                            value={member.twitter || ''}
+                            onChange={(e) => {
+                              const updated = [...currentTeam];
+                              updated[idx] = { ...updated[idx], twitter: e.target.value };
+                              setFormData({
+                                ...formData,
+                                aboutConfig: { ...formData.aboutConfig, teamMembers: updated }
+                              });
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                          />
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+
+              {/* CARD 5: FACTORY CONSULTATION CTA BANNER */}
+              <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                      <Megaphone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Bottom Factory Consultation Call-To-Action Banner
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Configure the bottom gradient banner leading enterprise buyers to factory consultations.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Banner Headline
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ready to Elevate Your Packaging Sustainability?"
+                      value={formData.aboutConfig?.ctaTitle ?? 'Ready to Elevate Your Packaging Sustainability?'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, ctaTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Call-to-Action Button Label
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Request Factory Consultation →"
+                      value={formData.aboutConfig?.ctaBtnText ?? 'Request Factory Consultation →'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        aboutConfig: { ...formData.aboutConfig, ctaBtnText: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Banner Subtitle Narrative
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Talk to our packaging engineers in California or request custom prototypes."
+                    value={formData.aboutConfig?.ctaSubtitle ?? 'Talk to our packaging engineers in California or request custom prototypes.'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      aboutConfig: { ...formData.aboutConfig, ctaSubtitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+              </div>
+
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ========================================================
             TAB 6: CORPORATE CONTACT & FACILITIES
            ======================================================== */}
         {activeTab === 'contact' && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
-                Corporate Contact & Manufacturing Facilities
-              </h3>
-              <p className="text-xs text-slate-500">
-                Live telephone numbers, facility locations, and social media URLs across the application.
-              </p>
+
+            {/* Top Action Header Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    Section Editor · Live Real-Time Storefront Sync
+                  </span>
+                  <h3 className="text-xl font-black text-slate-900 mt-1">
+                    4. Contact Us Page
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer self-start sm:self-auto"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save 4.</span>
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                Contact Page Headline
-              </label>
-              <input
-                type="text"
-                value={formData.contactConfig?.headline || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  contactConfig: { ...formData.contactConfig!, headline: e.target.value }
-                })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-              />
-            </div>
+            {/* CARD 1: HERO HEADLINES & CINEMATIC PHOTO */}
+            <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                      Hero Headlines & Edge-to-Edge Cinematic Photo
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Configure the prominent typography, narrative subtitle, and edge-to-edge background photograph.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Primary Corporate Phone
-                </label>
-                <input
-                  type="text"
-                  value={formData.contactConfig?.phone || formData.phone || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    phone: e.target.value,
-                    contactConfig: { ...formData.contactConfig!, phone: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Primary Headline First Line
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Get in"
+                    value={formData.contactConfig?.headlineFirst ?? 'Get in'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, headlineFirst: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Rendered in large crisp bold white lettering (top line).
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Accented Word / Second Line
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="touch."
+                    value={formData.contactConfig?.headlineSecond ?? 'touch.'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, headlineSecond: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    The trailing period '.' receives our vibrant brand accent green (#22c55e).
+                  </span>
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Secondary Logistics Hotline
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Section Narrative Subtitle / Description
                 </label>
-                <input
-                  type="text"
-                  value={formData.contactConfig?.secondaryPhone || formData.secondaryPhone || ''}
+                <textarea
+                  rows={2}
+                  placeholder="Direct manufacturer of certified circular non-woven, compostable bio-PLA, and insulated wholesale packaging."
+                  value={formData.contactConfig?.subtitle || ''}
                   onChange={(e) => setFormData({
                     ...formData,
-                    secondaryPhone: e.target.value,
-                    contactConfig: { ...formData.contactConfig!, secondaryPhone: e.target.value }
+                    contactConfig: { ...formData.contactConfig, subtitle: e.target.value }
                   })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Orders & Procurement Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.contactConfig?.email || formData.email || ''}
-                  onChange={(e) => setFormData({
+              {/* Direct Computer Image Upload for Cinematic Background */}
+              <div className="pt-2">
+                <ImageUploader
+                  label="Cinematic Contact Hero Background Photo"
+                  description="Import high-resolution facility, team, or manufacturing floor photograph from your computer (auto dark overlay applied)."
+                  value={formData.contactConfig?.bgImage || 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1920&q=85'}
+                  onChange={(newUrl) => setFormData({
                     ...formData,
-                    email: e.target.value,
-                    contactConfig: { ...formData.contactConfig!, email: e.target.value }
+                    contactConfig: { ...formData.contactConfig, bgImage: newUrl }
                   })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  US Distribution Facility (Corona, CA)
-                </label>
-                <input
-                  type="text"
-                  value={formData.contactConfig?.facilityAddress || formData.facilityAddress || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    facilityAddress: e.target.value,
-                    contactConfig: { ...formData.contactConfig!, facilityAddress: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Primary Manufacturing Mill Plant
-                </label>
-                <input
-                  type="text"
-                  value={formData.contactConfig?.plantAddress || formData.plantAddress || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    plantAddress: e.target.value,
-                    contactConfig: { ...formData.contactConfig!, plantAddress: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                  aspectRatio="wide"
                 />
               </div>
             </div>
 
-            {/* Social Media Links */}
-            <div>
-              <h4 className="text-xs font-black text-[#4E9F76] uppercase tracking-wider mb-3">
-                Social Media URLs
-              </h4>
+            {/* CARD 2: DIRECT TELECOMMUNICATION & CHANNELS */}
+            <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                      Direct Telecommunication & Channels
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Live telephone lines, customer procurement email channels, and business operating hours.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Primary Corporate Phone
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="+1 (951) 450-9773"
+                    value={formData.contactConfig?.phone || formData.phone || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      phone: e.target.value,
+                      contactConfig: { ...formData.contactConfig, phone: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Secondary Logistics Hotline
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="+1 (951) 450-9773"
+                    value={formData.contactConfig?.secondaryPhone || formData.secondaryPhone || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      secondaryPhone: e.target.value,
+                      contactConfig: { ...formData.contactConfig, secondaryPhone: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Orders & Procurement Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="orders@ecotexinc.com"
+                    value={formData.contactConfig?.email || formData.email || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      email: e.target.value,
+                      contactConfig: { ...formData.contactConfig, email: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Customer Support Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="support@ecotexinc.com"
+                    value={formData.contactConfig?.supportEmail || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, supportEmail: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Official Website Domain
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ecotexinc.com"
+                    value={formData.contactConfig?.website || 'ecotexinc.com'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, website: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Commercial Operating Hours
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Mon - Fri: 8:00 AM - 5:00 PM PST"
+                    value={formData.contactConfig?.businessHours || 'Mon - Fri: 8:00 AM - 5:00 PM PST'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, businessHours: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 3: MANUFACTURING & LOGISTICS FACILITIES */}
+            <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <Building className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                      Manufacturing & Logistics Facilities
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Physical warehousing and direct Google Maps navigation URL for 1-click turn-by-turn directions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                      US Distribution Hub
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      Primary Commercial Facility
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      US Distribution Facility Address (Corona, CA)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="1200 Industrial Parkway, Corona, CA 92881"
+                      value={formData.contactConfig?.facilityAddress || formData.facilityAddress || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        facilityAddress: e.target.value,
+                        contactConfig: { ...formData.contactConfig, facilityAddress: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center justify-between">
+                      <span>Google Maps Navigation Link</span>
+                      {formData.contactConfig?.googleMapsUrl && (
+                        <a
+                          href={formData.contactConfig.googleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-emerald-600 hover:underline inline-flex items-center gap-0.5"
+                        >
+                          <span>Test Link</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="https://maps.google.com/?q=..."
+                      value={formData.contactConfig?.googleMapsUrl || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, googleMapsUrl: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-mono text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Leave blank to auto-generate maps link from the facility address.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-blue-800 bg-blue-100/70 px-2 py-0.5 rounded-md">
+                      Direct Mill Plant
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      Primary Extrusion & Converting
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Primary Manufacturing Mill Plant Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Sector 15, Korangi Industrial Area, Karachi, PK"
+                      value={formData.contactConfig?.plantAddress || formData.plantAddress || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        plantAddress: e.target.value,
+                        contactConfig: { ...formData.contactConfig, plantAddress: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Mill Capabilities & Certifications Tagline
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="ISO 9001 & FSC Certified Extrusion Mill"
+                      value={formData.contactConfig?.plantCapabilities || 'Primary Manufacturing Mill Plant · ISO 9001 & FSC Certified'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, plantCapabilities: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 4: INTERACTIVE RFQ & INQUIRY FORM SETTINGS */}
+            <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                      Interactive Quote & Inquiry Form Settings
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Customize form titles, input field labels, submit button wording, and post-submission success feedback.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Form Card Title (Optional Header)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Request Direct Mill Pricing"
+                    value={formData.contactConfig?.formTitle || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, formTitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Form Card Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Direct mill pricing, custom flexo specs & pallet freight dispatch."
+                    value={formData.contactConfig?.formSubtitle || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, formSubtitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+              </div>
+
+              {/* 4 Input Field Labels */}
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                  Input Field Labels
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      First Name Field
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="First Name"
+                      value={formData.contactConfig?.firstNameLabel || 'First Name'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, firstNameLabel: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Last Name Field
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      value={formData.contactConfig?.lastNameLabel || 'Last Name'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, lastNameLabel: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Email Address Field
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Email Address"
+                      value={formData.contactConfig?.emailLabel || 'Email Address'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, emailLabel: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Message Field
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Message"
+                      value={formData.contactConfig?.messageLabel || 'Message'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        contactConfig: { ...formData.contactConfig, messageLabel: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Action & Feedback */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Submit Button Text
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="SUBMIT"
+                    value={formData.contactConfig?.submitBtnText || 'SUBMIT'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, submitBtnText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-black uppercase tracking-wider text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Submission Success Heading
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Thank You For Reaching Out!"
+                    value={formData.contactConfig?.successHeading || 'Thank You For Reaching Out!'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, successHeading: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Reset / Another Message Label
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Send another message"
+                    value={formData.contactConfig?.resetBtnText || 'Send another message'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contactConfig: { ...formData.contactConfig, resetBtnText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Submission Success Message Body
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Your message has been received. Our executive commercial team will connect with you within 2 business hours."
+                  value={formData.contactConfig?.successMessage || 'Your message has been received. Our executive commercial team will connect with you within 2 business hours.'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    contactConfig: { ...formData.contactConfig, successMessage: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E] resize-none"
+                />
+              </div>
+            </div>
+
+            {/* CARD 5: SOCIAL MEDIA PROFILES */}
+            <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                    <Globe className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+                      Corporate Social Media URLs
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Direct profile links for enterprise social channels.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  <label className="block text-[10px] font-bold text-slate-600 mb-1">
                     LinkedIn URL
                   </label>
                   <input
                     type="text"
+                    placeholder="https://linkedin.com/company/ecotex"
                     value={formData.contactConfig?.linkedinUrl || ''}
                     onChange={(e) => setFormData({
                       ...formData,
-                      contactConfig: { ...formData.contactConfig!, linkedinUrl: e.target.value }
+                      contactConfig: { ...formData.contactConfig, linkedinUrl: e.target.value }
                     })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  <label className="block text-[10px] font-bold text-slate-600 mb-1">
                     Facebook URL
                   </label>
                   <input
                     type="text"
+                    placeholder="https://facebook.com/ecotexinc"
                     value={formData.contactConfig?.facebookUrl || ''}
                     onChange={(e) => setFormData({
                       ...formData,
-                      contactConfig: { ...formData.contactConfig!, facebookUrl: e.target.value }
+                      contactConfig: { ...formData.contactConfig, facebookUrl: e.target.value }
                     })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  <label className="block text-[10px] font-bold text-slate-600 mb-1">
                     Instagram URL
                   </label>
                   <input
                     type="text"
+                    placeholder="https://instagram.com/ecotexinc"
                     value={formData.contactConfig?.instagramUrl || ''}
                     onChange={(e) => setFormData({
                       ...formData,
-                      contactConfig: { ...formData.contactConfig!, instagramUrl: e.target.value }
+                      contactConfig: { ...formData.contactConfig, instagramUrl: e.target.value }
                     })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">
+                  <label className="block text-[10px] font-bold text-slate-600 mb-1">
                     Twitter / X URL
                   </label>
                   <input
                     type="text"
+                    placeholder="https://twitter.com/ecotexinc"
                     value={formData.contactConfig?.twitterUrl || ''}
                     onChange={(e) => setFormData({
                       ...formData,
-                      contactConfig: { ...formData.contactConfig!, twitterUrl: e.target.value }
+                      contactConfig: { ...formData.contactConfig, twitterUrl: e.target.value }
                     })}
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
                   />
                 </div>
               </div>
             </div>
+
           </div>
         )}
 
@@ -1745,939 +3732,688 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
         )}
 
         {/* ========================================================
-            TAB 7: FOOTER & LEGAL
+            TAB 5: COMPLETE FOOTER & LEGAL CMS
            ======================================================== */}
-        {activeTab === 'footer' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
-                Footer, Newsletter Banner & Legal Copy
-              </h3>
-              <p className="text-xs text-slate-500">
-                Customise the bottom newsletter strip, background image, footer brand tagline, and copyright notice.
-              </p>
-            </div>
+        {activeTab === 'footer' && (() => {
+          const defaultSocialLinks = [
+            { id: 'li', name: 'LinkedIn', url: 'https://linkedin.com' },
+            { id: 'tw', name: 'Twitter / X', url: 'https://twitter.com' },
+            { id: 'fb', name: 'Facebook', url: 'https://facebook.com' },
+            { id: 'ig', name: 'Instagram', url: 'https://instagram.com' },
+            { id: 'yt', name: 'YouTube', url: 'https://youtube.com' }
+          ];
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Newsletter Banner Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.newsletterTitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    footerConfig: { ...formData.footerConfig!, newsletterTitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
+          const currentSocialLinks = (formData.footerConfig?.socialLinks && formData.footerConfig.socialLinks.length > 0)
+            ? formData.footerConfig.socialLinks
+            : defaultSocialLinks;
 
-              <div>
-                <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                  Newsletter Subtitle
-                </label>
-                <input
-                  type="text"
-                  value={formData.footerConfig?.newsletterSubtitle || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    footerConfig: { ...formData.footerConfig!, newsletterSubtitle: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-                />
-              </div>
-            </div>
+          const defaultCol2Links = [
+            { id: '1', label: 'Non-Woven Totes', url: 'shop' },
+            { id: '2', label: 'D-Cut Bags', url: 'shop' },
+            { id: '3', label: 'Laminated Gift Bags', url: 'shop' },
+            { id: '4', label: 'Custom Flexo Print', url: 'contact' }
+          ];
 
-            {/* Direct Image File Import for Newsletter Background */}
-            <ImageUploader
-              label="Quarterly Newsletter Background Photo"
-              description="Import high-contrast background photo from your computer."
-              value={formData.footerConfig?.newsletterBgImage || 'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1600&q=80'}
-              onChange={(newUrl) => setFormData({
-                ...formData,
-                footerConfig: { ...formData.footerConfig!, newsletterBgImage: newUrl }
-              })}
-              aspectRatio="wide"
-            />
+          const currentCol2Links = (formData.footerConfig?.col2Links && formData.footerConfig.col2Links.length > 0)
+            ? formData.footerConfig.col2Links
+            : defaultCol2Links;
 
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                Footer Brand Sub-tagline
-              </label>
-              <input
-                type="text"
-                value={formData.footerConfig?.tagline || formData.footerTagline || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  footerTagline: e.target.value,
-                  footerConfig: { ...formData.footerConfig!, tagline: e.target.value }
-                })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-              />
-            </div>
+          const defaultCol3Links = [
+            { id: '1', label: 'Pack Expo 2026', url: '#quote-form' },
+            { id: '2', label: 'Sustainable Retail', url: '#quote-form' },
+            { id: '3', label: 'SB 270 Workshops', url: '#quote-form' },
+            { id: '4', label: 'Sample Roadshow', url: '#quote-form' }
+          ];
 
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] mb-1">
-                Legal Copyright Notice
-              </label>
-              <input
-                type="text"
-                value={formData.footerConfig?.copyrightNotice || formData.copyrightNotice || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  copyrightNotice: e.target.value,
-                  footerConfig: { ...formData.footerConfig!, copyrightNotice: e.target.value }
-                })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
-              />
-            </div>
-          </div>
-        )}
+          const currentCol3Links = (formData.footerConfig?.col3Links && formData.footerConfig.col3Links.length > 0)
+            ? formData.footerConfig.col3Links
+            : defaultCol3Links;
 
-        {/* TAB 7: SINGLE PRODUCT PAGE EDITOR */}
-        {activeTab === 'single-product' && (
-          <div className="space-y-6 animate-fadeIn">
-            
-            {/* Header Banner & Product Selector */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h4 className="text-sm font-black text-amber-950 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-[#d97706]" />
-                  <span>Single Product Page Content Customizer</span>
-                </h4>
-                <p className="text-xs text-amber-800/90 mt-0.5">
-                  Select any wholesale product from your catalog to customize its single product page specifications, 4-photo gallery, badges, and policies.
-                </p>
-              </div>
+          const getSocialIcon = (name: string, url: string) => {
+            const n = (name || '').toLowerCase();
+            const u = (url || '').toLowerCase();
+            if (n.includes('tiktok') || u.includes('tiktok')) {
+              return (
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.67 6.34 6.34 0 0 0 9.35 22a6.33 6.33 0 0 0 6.32-6.33V9.17a8.28 8.28 0 0 0 4.84 1.55v-3.5a4.85 4.85 0 0 1-.92-.53z" />
+                </svg>
+              );
+            }
+            if (n.includes('whatsapp') || u.includes('whatsapp') || u.includes('wa.me')) return <Phone className="w-4 h-4 text-emerald-600" />;
+            if (n.includes('linkedin') || u.includes('linkedin')) return <Linkedin className="w-4 h-4 text-blue-600" />;
+            if (n.includes('twitter') || n.includes('x.com') || u.includes('twitter') || u.includes('x.com')) return <Twitter className="w-4 h-4 text-sky-500" />;
+            if (n.includes('facebook') || u.includes('facebook')) return <Facebook className="w-4 h-4 text-blue-700" />;
+            if (n.includes('instagram') || u.includes('instagram')) return <Instagram className="w-4 h-4 text-pink-600" />;
+            if (n.includes('youtube') || u.includes('youtube')) return <Youtube className="w-4 h-4 text-red-600" />;
+            return <Globe className="w-4 h-4 text-[#166534]" />;
+          };
 
-              {/* Product Selector Dropdown */}
-              <div className="w-full sm:w-72 shrink-0">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-amber-900 mb-1">
-                  Active Product:
-                </label>
-                <select
-                  value={selectedProductId}
-                  onChange={(e) => setSelectedProductId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-amber-300 bg-white text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                >
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.articleNo || p.id.slice(0, 6).toUpperCase()})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+          const handleSaveSocial = () => {
+            if (!footerSocialForm.name.trim() || !footerSocialForm.url.trim()) return;
+            let updatedList = [...currentSocialLinks];
+            if (editingFooterSocialIdx !== null && editingFooterSocialIdx >= 0) {
+              updatedList[editingFooterSocialIdx] = {
+                ...updatedList[editingFooterSocialIdx],
+                name: footerSocialForm.name.trim(),
+                url: footerSocialForm.url.trim()
+              };
+            } else {
+              updatedList.push({
+                id: 'soc-' + Date.now().toString(36),
+                name: footerSocialForm.name.trim(),
+                url: footerSocialForm.url.trim()
+              });
+            }
+            setFormData({
+              ...formData,
+              footerConfig: {
+                ...formData.footerConfig!,
+                socialLinks: updatedList
+              }
+            });
+            setIsFooterSocialModalOpen(false);
+            setEditingFooterSocialIdx(null);
+            setFooterSocialForm({ name: '', url: '' });
+          };
 
-            {pdpForm && (
-              <form onSubmit={handleSavePdpForm} className="space-y-5">
-                
-                {/* 1. Basic Metadata */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3.5">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-[#d97706]" />
-                      <span>1. Headline, Article & Brand Metadata</span>
-                    </h5>
-                    <span className="text-[11px] font-mono text-slate-400">ID: {activeSelectedProduct.id}</span>
-                  </div>
+          const handleDeleteSocial = (idx: number) => {
+            const updated = currentSocialLinks.filter((_, i) => i !== idx);
+            setFormData({
+              ...formData,
+              footerConfig: {
+                ...formData.footerConfig!,
+                socialLinks: updated
+              }
+            });
+          };
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Product Title</label>
-                      <input
-                        type="text"
-                        required
-                        value={pdpForm.name}
-                        onChange={(e) => setPdpForm({ ...pdpForm, name: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold text-xs"
-                      />
-                    </div>
+          const handleUpdateCol2Link = (idx: number, newLabel: string) => {
+            const updated = [...currentCol2Links];
+            updated[idx] = { ...updated[idx], label: newLabel };
+            setFormData({
+              ...formData,
+              footerConfig: { ...formData.footerConfig!, col2Links: updated }
+            });
+          };
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Category Label</label>
-                      <input
-                        type="text"
-                        value={pdpForm.categoryLabel}
-                        onChange={(e) => setPdpForm({ ...pdpForm, categoryLabel: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="SUSTAINABLE NON-WOVEN"
-                      />
-                    </div>
+          const handleUpdateCol3Link = (idx: number, newLabel: string) => {
+            const updated = [...currentCol3Links];
+            updated[idx] = { ...updated[idx], label: newLabel };
+            setFormData({
+              ...formData,
+              footerConfig: { ...formData.footerConfig!, col3Links: updated }
+            });
+          };
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Customer Rating (Stars)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="1.0"
-                        max="5.0"
-                        value={pdpForm.rating}
-                        onChange={(e) => setPdpForm({ ...pdpForm, rating: parseFloat(e.target.value) || 4.9 })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
+          const newsletterActive = formData.footerConfig?.newsletterActive !== false;
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Article No.</label>
-                      <input
-                        type="text"
-                        value={pdpForm.articleNo}
-                        onChange={(e) => setPdpForm({ ...pdpForm, articleNo: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono font-bold"
-                        placeholder="EP-NW-3040"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Volume No.</label>
-                      <input
-                        type="text"
-                        value={pdpForm.volumeNo}
-                        onChange={(e) => setPdpForm({ ...pdpForm, volumeNo: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono font-bold"
-                        placeholder="80 GSM LUXURY"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. 4-Thumbnail Gallery */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3.5">
-                  <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-[#d97706]" />
-                    <span>2. 4-Photo Gallery Strip</span>
-                  </h5>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {[0, 1, 2, 3].map((slotIdx) => {
-                      const key = `gallery${slotIdx}`;
-                      const val = pdpForm[key] || '';
-                      return (
-                        <div key={slotIdx} className="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
-                          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                            <span>{slotIdx === 0 ? 'Slot 1 (Main Hero)' : `Slot ${slotIdx + 1} (Thumbnail)`}</span>
-                          </div>
-                          <ImageUploader
-                            label=""
-                            value={val}
-                            onChange={(url) => setPdpForm({ ...pdpForm, [key]: url })}
-                            aspectRatio="portrait"
-                            placeholderText="Upload photo from computer"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 3. Pricing & Order Modes (Wholesale vs Retail Configuration) */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-[#d97706]" />
-                      <span>3. Pricing & Order Modes (Wholesale & Retail Settings)</span>
-                    </h5>
-                    <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-2xs">
-                      <Package className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-700">1 Box =</span>
-                      <input
-                        type="number"
-                        min="1"
-                        step="10"
-                        value={pdpForm.pcsPerBox || 200}
-                        onChange={(e) => setPdpForm({ ...pdpForm, pcsPerBox: Math.max(1, parseInt(e.target.value) || 200) })}
-                        className="w-16 px-1.5 py-0.5 text-center text-xs font-mono font-bold text-emerald-950 border border-slate-200 rounded-md bg-slate-50"
-                      />
-                      <span className="text-[10px] font-bold text-slate-500">Pcs</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Wholesale Mode Box */}
-                    <div className="bg-emerald-50/40 p-4 rounded-xl border-2 border-emerald-200 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                          <strong className="text-xs font-extrabold uppercase text-[#166534]">
-                            Wholesale Order Mode
-                          </strong>
-                        </div>
-                        <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          MOQ: {pdpForm.wholesaleMoq || 5} Boxes{pdpForm.wholesaleMaxBoxes ? ' · Max: ' + pdpForm.wholesaleMaxBoxes + ' Boxes' : ''}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-emerald-900 mb-1">Box Price ($)</label>
-                          <div className="relative">
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={pdpForm.pricePerUnit}
-                              onChange={(e) => setPdpForm({ ...pdpForm, pricePerUnit: parseFloat(e.target.value) || 0 })}
-                              className="w-full pl-6 pr-2.5 py-1.5 rounded-xl border border-emerald-300 text-xs font-bold text-[#166534] bg-white focus:outline-none focus:border-emerald-600"
-                              placeholder="59.99"
-                            />
-                          </div>
-                          <span className="text-[10px] font-mono text-emerald-700 mt-1 block">
-                            ≈ ${( (pdpForm.pricePerUnit || 0) / (pdpForm.pcsPerBox || 200) ).toFixed(3)} / pc
-                          </span>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">Original Price ($)</label>
-                          <div className="relative">
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={pdpForm.originalPrice}
-                              onChange={(e) => setPdpForm({ ...pdpForm, originalPrice: parseFloat(e.target.value) || 0 })}
-                              className="w-full pl-6 pr-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 bg-white"
-                              placeholder="74.99"
-                            />
-                          </div>
-                          <span className="text-[10px] text-slate-400 mt-1 block">Compare-At Strike</span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Wholesale MOQ (Boxes)</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={pdpForm.wholesaleMoq}
-                            onChange={(e) => setPdpForm({ ...pdpForm, wholesaleMoq: Math.max(1, parseInt(e.target.value) || 5) })}
-                            className="w-full px-2.5 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold bg-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Tab Button Label</label>
-                          <input
-                            type="text"
-                            value={pdpForm.wholesaleTabLabel || ''}
-                            onChange={(e) => setPdpForm({ ...pdpForm, wholesaleTabLabel: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] bg-white"
-                            placeholder="Wholesale Order"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Wholesale Policy Notice</label>
-                        <textarea
-                          rows={2}
-                          value={pdpForm.wholesalePolicyText || ''}
-                          onChange={(e) => setPdpForm({ ...pdpForm, wholesalePolicyText: e.target.value })}
-                          className="w-full p-2 rounded-xl border border-emerald-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-emerald-600"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Retail Mode Box */}
-                    <div className="bg-amber-50/40 p-4 rounded-xl border-2 border-amber-200 space-y-3 shadow-xs">
-                      <div className="flex items-center justify-between border-b border-amber-200 pb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
-                          <strong className="text-xs font-extrabold uppercase text-amber-900">
-                            Retail Order Mode
-                          </strong>
-                        </div>
-                        <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Fixed: {pdpForm.retailQuantity || 15} Boxes
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-amber-950 mb-1">Box Price ($)</label>
-                          <div className="relative">
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-700">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={pdpForm.retailPricePerUnit}
-                              onChange={(e) => setPdpForm({ ...pdpForm, retailPricePerUnit: parseFloat(e.target.value) || 0 })}
-                              className="w-full pl-6 pr-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-bold text-[#d97706] bg-white focus:outline-none focus:border-amber-600"
-                              placeholder="86.99"
-                            />
-                          </div>
-                          <span className="text-[10px] font-mono text-amber-700 mt-1 block">
-                            ≈ ${( (pdpForm.retailPricePerUnit || 0) / (pdpForm.pcsPerBox || 200) ).toFixed(3)} / pc
-                          </span>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">Original Price ($)</label>
-                          <div className="relative">
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={pdpForm.retailOriginalPrice}
-                              onChange={(e) => setPdpForm({ ...pdpForm, retailOriginalPrice: parseFloat(e.target.value) || 0 })}
-                              className="w-full pl-6 pr-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 bg-white"
-                              placeholder="108.73"
-                            />
-                          </div>
-                          <span className="text-[10px] text-slate-400 mt-1 block">Compare-At Strike</span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Retail Max Allowed (Boxes)</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={pdpForm.retailMaxBoxes}
-                            onChange={(e) => setPdpForm({ ...pdpForm, retailMaxBoxes: Math.max(1, parseInt(e.target.value) || 5) })}
-                            className="w-full px-2.5 py-1.5 rounded-xl border border-amber-200 text-xs font-bold bg-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Tab Button Label</label>
-                          <input
-                            type="text"
-                            value={pdpForm.retailTabLabel || ''}
-                            onChange={(e) => setPdpForm({ ...pdpForm, retailTabLabel: e.target.value })}
-                            className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-amber-900 bg-white"
-                            placeholder="Retail Order"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Retail Policy Notice</label>
-                        <textarea
-                          rows={2}
-                          value={pdpForm.retailPolicyText || ''}
-                          onChange={(e) => setPdpForm({ ...pdpForm, retailPolicyText: e.target.value })}
-                          className="w-full p-2 rounded-xl border border-amber-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-amber-600"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Stock Availability */}
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <strong className="block text-xs font-bold text-slate-800">Master Stock (Boxes)</strong>
-                      <span className="text-[11px] text-slate-500">Stock 0 hone pr product automatic Sold Out mark ho jata hai.</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="number"
-                        min="0"
-                        value={pdpForm.stockQuantity}
-                        onChange={(e) => setPdpForm({ ...pdpForm, stockQuantity: Math.max(0, parseInt(e.target.value) || 0) })}
-                        className="w-24 px-2.5 py-1.5 rounded-xl border border-slate-200 font-mono font-bold text-xs bg-slate-50"
-                      />
-                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={pdpForm.inStock && (pdpForm.stockQuantity || 0) > 0}
-                          onChange={(e) => setPdpForm({ ...pdpForm, inStock: e.target.checked })}
-                          className="w-4 h-4 rounded text-emerald-600"
-                        />
-                        <span>Active & In Stock</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Dynamic Color Palette & Stock Inventory Card */}
-                  <div className="bg-white p-4.5 rounded-xl border-2 border-emerald-200/90 space-y-3.5 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-200/80 pb-3">
-                      <div>
-                        <strong className="block text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                          <Layers className="w-4 h-4 text-emerald-600" />
-                          <span>Dynamic Color Palette & Stock Inventory</span>
-                        </strong>
-                        <span className="text-[11px] text-slate-500">
-                          Apni marzi se naye colours add karein, color picker se shade chunein, aur har colour ka stock set karein (jaise Red mein 20 boxes).
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
-                        <span className="text-xs font-bold text-slate-600">Total:</span>
-                        <span className="text-xs font-mono font-bold text-[#166534] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                          {(pdpForm.availableColors || []).reduce((acc: number, c: any) => acc + (Number(c.stockQuantity) || 0), 0)} Boxes
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const sum = (pdpForm.availableColors || []).reduce((acc: number, c: any) => acc + (Number(c.stockQuantity) || 0), 0);
-                            setPdpForm({ ...pdpForm, stockQuantity: sum, inStock: sum > 0 });
-                          }}
-                          className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
-                          title="Sync master stock with color sum"
-                        >
-                          Sync Master
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newId = 'col-' + Date.now();
-                            const newColor: ProductColorVariant = {
-                              id: newId,
-                              name: 'Color ' + ((pdpForm.availableColors || []).length + 1),
-                              hex: '#166534',
-                              stockQuantity: 20
-                            };
-                            setPdpForm({
-                              ...pdpForm,
-                              availableColors: [...(pdpForm.availableColors || []), newColor]
-                            });
-                          }}
-                          className="px-3 py-1.5 bg-[#166534] hover:bg-[#14532d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>+ Add Color</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Color items list */}
-                    {(!pdpForm.availableColors || pdpForm.availableColors.length === 0) ? (
-                      <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-300 space-y-2">
-                        <p className="text-xs text-slate-500">Abhi koi colour add nahi hai.</p>
-                        <button
-                          type="button"
-                          onClick={() => setPdpForm({ ...pdpForm, availableColors: DEFAULT_PALETTE.map(c => ({ ...c })) })}
-                          className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-xs font-bold rounded-xl cursor-pointer"
-                        >
-                          Standard 10 Colors Load Karein
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                        {pdpForm.availableColors.map((c: any, index: number) => {
-                          const stock = Number(c.stockQuantity) || 0;
-                          const isSoldOut = stock <= 0;
-                          return (
-                            <div
-                              key={c.id || index}
-                              className={`p-3 rounded-xl border transition-all flex flex-col justify-between space-y-2.5 relative group ${
-                                isSoldOut 
-                                  ? 'bg-rose-50/40 border-rose-200' 
-                                  : 'bg-slate-50/70 border-slate-200 hover:border-emerald-300'
-                              }`}
-                            >
-                              {/* Top row: Color Picker Swatch & Color Name Input */}
-                              <div className="flex items-center gap-2">
-                                <label 
-                                  className="relative w-6 h-6 rounded-full shrink-0 shadow-2xs border-2 border-slate-300 cursor-pointer overflow-hidden"
-                                  style={{ backgroundColor: c.hex }}
-                                  title="Click to pick color shade"
-                                >
-                                  <input
-                                    type="color"
-                                    value={c.hex}
-                                    onChange={(e) => {
-                                      const updated = [...pdpForm.availableColors];
-                                      updated[index] = { ...updated[index], hex: e.target.value };
-                                      setPdpForm({ ...pdpForm, availableColors: updated });
-                                    }}
-                                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-                                  />
-                                </label>
-                                <input
-                                  type="text"
-                                  value={c.name}
-                                  onChange={(e) => {
-                                    const updated = [...pdpForm.availableColors];
-                                    updated[index] = { ...updated[index], name: e.target.value };
-                                    setPdpForm({ ...pdpForm, availableColors: updated });
-                                  }}
-                                  className="w-full text-xs font-bold text-slate-900 border-b border-transparent hover:border-slate-300 focus:border-emerald-500 focus:outline-none bg-transparent"
-                                  placeholder="Color Name"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = pdpForm.availableColors.filter((_: any, i: number) => i !== index);
-                                    setPdpForm({ ...pdpForm, availableColors: updated });
-                                  }}
-                                  className="opacity-40 hover:opacity-100 text-rose-500 hover:text-rose-700 p-0.5 rounded cursor-pointer transition-opacity"
-                                  title="Delete this color"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-
-                              {/* Middle row: Hex code & Stock Input */}
-                              <div className="flex items-center gap-2">
-                                <div className="relative w-20 shrink-0">
-                                  <input
-                                    type="text"
-                                    value={c.hex}
-                                    onChange={(e) => {
-                                      const updated = [...pdpForm.availableColors];
-                                      updated[index] = { ...updated[index], hex: e.target.value };
-                                      setPdpForm({ ...pdpForm, availableColors: updated });
-                                    }}
-                                    className="w-full px-1.5 py-1 text-[10px] font-mono text-slate-600 bg-white border border-slate-200 rounded-lg text-center"
-                                    placeholder="#000000"
-                                  />
-                                </div>
-
-                                <div className="relative flex-1">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    value={stock}
-                                    onChange={(e) => {
-                                      const val = Math.max(0, parseInt(e.target.value) || 0);
-                                      const updated = [...pdpForm.availableColors];
-                                      updated[index] = { ...updated[index], stockQuantity: val };
-                                      setPdpForm({ ...pdpForm, availableColors: updated });
-                                    }}
-                                    className={`w-full pl-2 pr-7 py-1 text-center font-mono font-bold text-xs rounded-lg border focus:outline-none focus:border-emerald-500 ${
-                                      isSoldOut 
-                                        ? 'border-rose-300 bg-rose-50/50 text-rose-800' 
-                                        : 'border-slate-200 bg-white text-slate-800'
-                                    }`}
-                                    placeholder="0"
-                                  />
-                                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400 font-mono">bx</span>
-                                </div>
-                              </div>
-
-                              {/* Bottom status */}
-                              <div className="flex items-center justify-between text-[10px] pt-0.5">
-                                <span className="text-slate-400">Status:</span>
-                                <strong className={isSoldOut ? 'text-rose-600 font-bold' : 'text-[#166534]'}>
-                                  {isSoldOut ? 'Sold Out' : `${stock} Boxes`}
-                                </strong>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>                </div>
-
-                {/* 4. Full Specifications List */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3.5">
-                  <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#d97706]" />
-                    <span>4. Technical Specifications Table</span>
-                  </h5>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• BRAND NAME</label>
-                      <input
-                        type="text"
-                        value={pdpForm.brandName}
-                        onChange={(e) => setPdpForm({ ...pdpForm, brandName: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="ECOTEX INC."
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Fabric</label>
-                      <input
-                        type="text"
-                        value={pdpForm.fabricDetails}
-                        onChange={(e) => setPdpForm({ ...pdpForm, fabricDetails: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="80 GSM Virgin Non-Woven Polypropylene"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Dimensions</label>
-                      <input
-                        type="text"
-                        value={pdpForm.dimensions}
-                        onChange={(e) => setPdpForm({ ...pdpForm, dimensions: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder='11.5"W x 21"H x 6.5" Gusset'
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Handles</label>
-                      <input
-                        type="text"
-                        value={pdpForm.handles}
-                        onChange={(e) => setPdpForm({ ...pdpForm, handles: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="Ultrasonic Thermal Welded Loops"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Printing</label>
-                      <input
-                        type="text"
-                        value={pdpForm.printingMethod}
-                        onChange={(e) => setPdpForm({ ...pdpForm, printingMethod: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="High-Precision Flexographic / Gravure Custom Imprint"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Compliance</label>
-                      <input
-                        type="text"
-                        value={pdpForm.compliance}
-                        onChange={(e) => setPdpForm({ ...pdpForm, compliance: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="Certified California SB 270 & ASTM D6400"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Bag & Picture Packing</label>
-                      <input
-                        type="text"
-                        value={pdpForm.packingDetails}
-                        onChange={(e) => setPdpForm({ ...pdpForm, packingDetails: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="Export-Grade Heavy Duty Corrugated Cartons"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">• Guaranteed Fabric</label>
-                      <input
-                        type="text"
-                        value={pdpForm.guaranteedFabric}
-                        onChange={(e) => setPdpForm({ ...pdpForm, guaranteedFabric: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                        placeholder="100% Virgin Grade Recyclable Polypropylene"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">• Quality Standard Banner</label>
-                    <input
-                      type="text"
-                      value={pdpForm.enrouteQuality}
-                      onChange={(e) => setPdpForm({ ...pdpForm, enrouteQuality: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-[#d97706]"
-                      placeholder="Enroute to Quality Standard"
-                    />
-                  </div>
-                </div>
-
-                {/* 4. Badges & Policies */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3.5">
-                  <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#d97706]" />
-                    <span>4. Badges, Policies & Out of Stock Notification</span>
-                  </h5>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Trust Badge 1</label>
-                      <input
-                        type="text"
-                        value={pdpForm.trustBadge1}
-                        onChange={(e) => setPdpForm({ ...pdpForm, trustBadge1: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                        placeholder="Fast Delivery"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Trust Badge 2</label>
-                      <input
-                        type="text"
-                        value={pdpForm.trustBadge2}
-                        onChange={(e) => setPdpForm({ ...pdpForm, trustBadge2: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                        placeholder="Secure Store"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Trust Badge 3</label>
-                      <input
-                        type="text"
-                        value={pdpForm.trustBadge3}
-                        onChange={(e) => setPdpForm({ ...pdpForm, trustBadge3: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                        placeholder="Easy Return"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Retail Order Policy Text</label>
-                    <textarea
-                      rows={2}
-                      value={pdpForm.retailPolicyText}
-                      onChange={(e) => setPdpForm({ ...pdpForm, retailPolicyText: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Wholesale Order Policy Text</label>
-                    <textarea
-                      rows={2}
-                      value={pdpForm.wholesalePolicyText}
-                      onChange={(e) => setPdpForm({ ...pdpForm, wholesalePolicyText: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-rose-800 mb-1">Out of Stock Notice (When 0 Boxes)</label>
-                    <textarea
-                      rows={2}
-                      value={pdpForm.outOfStockNotice}
-                      onChange={(e) => setPdpForm({ ...pdpForm, outOfStockNotice: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-rose-200 bg-white text-xs font-medium text-rose-900"
-                    />
-                  </div>
-                </div>
-
-                {/* 5. Custom Buttons & Related Products Section */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3.5">
-                  <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#d97706]" />
-                    <span>5. Buttons, Tab Labels & Related Products Section</span>
-                  </h5>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Checkout Button Text</label>
-                      <input
-                        type="text"
-                        value={pdpForm.checkoutButtonText || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, checkoutButtonText: e.target.value })}
-                        placeholder="→ Express Checkout"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-[#d97706]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Sold Out Button Text</label>
-                      <input
-                        type="text"
-                        value={pdpForm.outOfStockButtonText || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, outOfStockButtonText: e.target.value })}
-                        placeholder="Purchases Temporarily Closed (Sold Out)"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Retail Order Tab Label</label>
-                      <input
-                        type="text"
-                        value={pdpForm.retailTabLabel || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, retailTabLabel: e.target.value })}
-                        placeholder="Retail Order"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Wholesale Order Tab Label</label>
-                      <input
-                        type="text"
-                        value={pdpForm.wholesaleTabLabel || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, wholesaleTabLabel: e.target.value })}
-                        placeholder="Wholesale Order"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-[#166534]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Specifications Section Heading</label>
-                      <input
-                        type="text"
-                        value={pdpForm.specsHeading || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, specsHeading: e.target.value })}
-                        placeholder="Description"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Related Products Tag</label>
-                      <input
-                        type="text"
-                        value={pdpForm.relatedTag || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, relatedTag: e.target.value })}
-                        placeholder="Explore More Options"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Related Products Title</label>
-                      <input
-                        type="text"
-                        value={pdpForm.relatedTitle || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, relatedTitle: e.target.value })}
-                        placeholder="Related Products"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Related Back Button Text</label>
-                      <input
-                        type="text"
-                        value={pdpForm.relatedBackBtnText || ''}
-                        onChange={(e) => setPdpForm({ ...pdpForm, relatedBackBtnText: e.target.value })}
-                        placeholder="View Full Catalog"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Related Products Subtitle</label>
-                    <input
-                      type="text"
-                      value={pdpForm.relatedSubtitle || ''}
-                      onChange={(e) => setPdpForm({ ...pdpForm, relatedSubtitle: e.target.value })}
-                      placeholder="Frequently ordered together or alternative sizing options for your business."
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium"
-                    />
-                  </div>
-                </div>
-
-                {/* Save Product Page Button */}
-                <div className="pt-2 flex items-center justify-end gap-3">
-                  {productSaveSuccess && (
-                    <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 animate-fadeIn">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Single Product Page changes saved live!</span>
+          return (
+            <div className="space-y-6 animate-fadeIn">
+              
+              {/* Header Title */}
+              <div className="pb-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded-lg bg-[#B2E2C5]/30 text-[#166534]">
+                      <Globe className="w-4 h-4" />
                     </span>
-                  )}
+                    <h3 className="text-base font-black text-[#0f172a] uppercase tracking-wider">
+                      Footer, Newsletter, Navigation Columns & Legal Policy Manager
+                    </h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Manage all elements of your website footer: Newsletter banner, Company tagline & addresses, Navigation column titles and links, Social media channels (add/edit/delete), and Legal policies.
+                  </p>
+                </div>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#B2E2C5]/20 text-[#166534] border border-[#B2E2C5]/50 shrink-0 self-start md:self-auto">
+                  <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
+                  <span>5 Column Layout Active</span>
+                </span>
+              </div>
+
+              {/* PART 1: TOP NEWSLETTER SUBSCRIPTION BANNER */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div>
+                    <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                      1. Top Newsletter Subscription Banner
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Panoramic subscription strip displayed at the top of the footer across the website.
+                    </p>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={newsletterActive}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, newsletterActive: e.target.checked }
+                      })}
+                      className="w-4 h-4 text-[#166534] rounded-md focus:ring-[#86C59E] accent-[#166534]"
+                    />
+                    <span className="text-xs font-bold text-slate-800">Display Newsletter Banner</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Newsletter Banner Headline
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.newsletterTitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, newsletterTitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#0f172a] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Subscribe To Our Quarterly Newsletter"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Subscribe Button Label Text
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.newsletterBtnText || 'Subscribe'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, newsletterBtnText: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Subscribe"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Newsletter Subtitle Description
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.newsletterSubtitle || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, newsletterSubtitle: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Receive direct mill pricing updates, material innovation whitepapers, and California SB 54 regulatory packaging briefs."
+                    />
+                  </div>
+                </div>
+
+                {/* Direct Image File Import for Newsletter Background */}
+                <div className="pt-2">
+                  <ImageUploader
+                    label="Quarterly Newsletter Background Photo"
+                    description="Import high-contrast background photo from your computer."
+                    value={formData.footerConfig?.newsletterBgImage || 'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1600&q=80'}
+                    onChange={(newUrl) => setFormData({
+                      ...formData,
+                      footerConfig: { ...formData.footerConfig!, newsletterBgImage: newUrl }
+                    })}
+                    aspectRatio="wide"
+                  />
+                </div>
+              </div>
+
+              {/* PART 2: COLUMN 1: BRAND TAGLINE & ADDRESS */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    2. Column 1: Brand Wordmark, Tagline & Direct Facility Contacts
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Positioned on the left side under the Ecotex brand logo.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Footer Brand Sub-tagline
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={formData.footerConfig?.tagline || formData.footerTagline || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerTagline: e.target.value,
+                        footerConfig: { ...formData.footerConfig!, tagline: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Direct manufacturer of certified circular non-woven, compostable bio-PLA, and insulated wholesale packaging for global commercial enterprise."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      US Facility Address (Displayed in Footer)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.facilityAddress || '1200 Industrial Parkway, Corona, CA 92881'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        facilityAddress: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#86C59E]"
+                      placeholder="1200 Industrial Parkway, Corona, CA 92881"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Official Contact Email (Displayed in Footer)
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email || 'orders@ecotexinc.com'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        email: e.target.value
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#166534] focus:outline-none focus:border-[#86C59E]"
+                      placeholder="orders@ecotexinc.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PART 3: COLUMNS 2, 3 & 4: NAVIGATION TITLES & LINKS */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-5">
+                <div className="pb-3 border-b border-slate-100">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    3. Columns 2, 3 & 4: Navigation Column Titles & Link Items
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Customize the 3 column headers and individual link labels displayed in the center of the footer.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {/* Column 2: ECOTEX */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        Column 2 Header Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.footerConfig?.col1Title || 'ECOTEX'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          footerConfig: { ...formData.footerConfig!, col1Title: e.target.value }
+                        })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-black text-slate-900 bg-white tracking-wider uppercase focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+                    <div className="text-[11px] text-slate-500 space-y-1 pt-1 border-t border-slate-200/80">
+                      <span className="font-bold text-slate-700 block text-[10px] uppercase">Default Links:</span>
+                      <div className="text-slate-600 font-mono text-[11px] space-y-0.5">
+                        <div>• Home</div>
+                        <div>• About</div>
+                        <div>• Shop</div>
+                        <div>• Contact</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 3: SERVICES */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        Column 3 Header Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.footerConfig?.col2Title || 'SERVICES'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          footerConfig: { ...formData.footerConfig!, col2Title: e.target.value }
+                        })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-black text-slate-900 bg-white tracking-wider uppercase focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+                    <div className="space-y-1.5 pt-1 border-t border-slate-200/80">
+                      <span className="font-bold text-slate-700 block text-[10px] uppercase">Link Items:</span>
+                      {currentCol2Links.map((link, idx) => (
+                        <input
+                          key={link.id || idx}
+                          type="text"
+                          value={link.label}
+                          onChange={(e) => handleUpdateCol2Link(idx, e.target.value)}
+                          className="w-full px-2.5 py-1 rounded-md border border-slate-200 text-[11px] font-medium text-slate-800 bg-white focus:outline-none focus:border-[#86C59E]"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 4: EVENTS */}
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        Column 4 Header Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.footerConfig?.col3Title || 'EVENTS'}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          footerConfig: { ...formData.footerConfig!, col3Title: e.target.value }
+                        })}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-black text-slate-900 bg-white tracking-wider uppercase focus:outline-none focus:border-[#86C59E]"
+                      />
+                    </div>
+                    <div className="space-y-1.5 pt-1 border-t border-slate-200/80">
+                      <span className="font-bold text-slate-700 block text-[10px] uppercase">Link Items:</span>
+                      {currentCol3Links.map((link, idx) => (
+                        <input
+                          key={link.id || idx}
+                          type="text"
+                          value={link.label}
+                          onChange={(e) => handleUpdateCol3Link(idx, e.target.value)}
+                          className="w-full px-2.5 py-1 rounded-md border border-slate-200 text-[11px] font-medium text-slate-800 bg-white focus:outline-none focus:border-[#86C59E]"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* PART 4: COLUMN 5: SOCIAL MEDIA CHANNELS (FOLLOW) */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                  <div>
+                    <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider flex items-center gap-2">
+                      <span>4. Social Media Channel Links (FOLLOW Column)</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        {currentSocialLinks.length} Configured
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Add, edit, or remove social media links. Official brand icons are automatically detected from the name or URL.
+                    </p>
+                  </div>
+
                   <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#d97706] hover:bg-[#b45309] text-white text-xs font-extrabold shadow-md shadow-amber-600/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    type="button"
+                    onClick={() => {
+                      setEditingFooterSocialIdx(null);
+                      setFooterSocialForm({ name: '', url: '' });
+                      setIsFooterSocialModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#166534] text-white hover:bg-[#14532d] text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>Save Single Product Page</span>
+                    <Plus className="w-4 h-4" />
+                    <span>Add Social Media Link</span>
                   </button>
                 </div>
 
-              </form>
-            )}
+                {/* Social Media Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {currentSocialLinks.map((item, idx) => (
+                    <div
+                      key={item.id || idx}
+                      className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-[#86C59E] transition-all flex items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+                          {getSocialIcon(item.name, item.url)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-bold text-slate-900 block truncate">
+                            {item.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block truncate font-mono">
+                            {item.url}
+                          </span>
+                        </div>
+                      </div>
 
-          </div>
-        )}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingFooterSocialIdx(idx);
+                            setFooterSocialForm({ name: item.name, url: item.url });
+                            setIsFooterSocialModalOpen(true);
+                          }}
+                          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+                          title="Edit social media link"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSocial(idx)}
+                          className="p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
+                          title="Remove social media link"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* PART 5: BOTTOM LEGAL BAR & NOTICES */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    5. Bottom Legal Bar & Official Copyright Notice
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Positioned at the very bottom divider line of the website.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Terms & Conditions Link Text
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.termsNotice || 'TERMS & CONDITIONS'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, termsNotice: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E] uppercase tracking-wider"
+                      placeholder="TERMS & CONDITIONS"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Privacy Policy Link Text
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.privacyNotice || 'PRIVACY POLICY'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, privacyNotice: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E] uppercase tracking-wider"
+                      placeholder="PRIVACY POLICY"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Sitemap Link Text
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.sitemapNotice || 'SITEMAP'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, sitemapNotice: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#86C59E]"
+                      placeholder="SITEMAP"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-3">
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Official Legal Copyright Notice
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.footerConfig?.copyrightNotice || formData.copyrightNotice || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        copyrightNotice: e.target.value,
+                        footerConfig: { ...formData.footerConfig!, copyrightNotice: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Copyright 2026 © Ecotex Inc. All rights reserved."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PART 6: FULL LEGAL AGREEMENTS CONTENT (TERMS & PRIVACY) */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#B2E2C5]/50 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100">
+                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
+                    6. Full Legal Policies & Compliance Content
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Edit the comprehensive Terms & Conditions policy narrative and California SB 54 privacy disclosure text.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Terms of Service & Wholesale Policies Agreement
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={formData.footerConfig?.termsContent || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, termsContent: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-normal text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                      placeholder="All wholesale purchases from Ecotex Inc. are subject to pallet freight terms and California SB 54 regulatory compliance standards..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#0f172a] mb-1">
+                      Privacy Policy & Enterprise Data Protection
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={formData.footerConfig?.privacyContent || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        footerConfig: { ...formData.footerConfig!, privacyContent: e.target.value }
+                      })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-normal text-slate-700 bg-white focus:outline-none focus:border-[#86C59E]"
+                      placeholder="Ecotex Inc. respects your commercial privacy. Client artwork and custom flexo printing dies remain the exclusive intellectual property of the purchaser..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SOCIAL MEDIA POPUP MODAL */}
+              {isFooterSocialModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+                  <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4 animate-scaleUp">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 text-[#166534] flex items-center justify-center">
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <h4 className="text-sm font-black text-slate-900">
+                          {editingFooterSocialIdx !== null ? 'Edit Social Media Link' : 'Add Social Media Link'}
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsFooterSocialModalOpen(false)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                          Platform / App Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={footerSocialForm.name}
+                          onChange={(e) => setFooterSocialForm({ ...footerSocialForm, name: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#86C59E]"
+                          placeholder="e.g. LinkedIn, TikTok, WhatsApp, Facebook"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                          Official Profile / Channel URL *
+                        </label>
+                        <input
+                          type="url"
+                          value={footerSocialForm.url}
+                          onChange={(e) => setFooterSocialForm({ ...footerSocialForm, url: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#86C59E]"
+                          placeholder="https://linkedin.com/company/ecotexinc"
+                        />
+                      </div>
+
+                      {/* Real-time Icon Detection Preview */}
+                      {footerSocialForm.name && (
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2.5 text-xs text-slate-600">
+                          <span className="text-[10px] uppercase font-bold text-slate-400">Detected Icon:</span>
+                          <div className="w-6 h-6 rounded-md bg-white border border-slate-200 flex items-center justify-center">
+                            {getSocialIcon(footerSocialForm.name, footerSocialForm.url)}
+                          </div>
+                          <span className="font-semibold text-slate-800">{footerSocialForm.name}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setIsFooterSocialModalOpen(false)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveSocial}
+                        disabled={!footerSocialForm.name.trim() || !footerSocialForm.url.trim()}
+                        className="px-5 py-2 rounded-xl bg-[#166534] text-white text-xs font-bold hover:bg-[#14532d] disabled:opacity-40 transition-colors shadow-xs"
+                      >
+                        {editingFooterSocialIdx !== null ? 'Save Changes' : 'Add Link'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          );
+        })()}
 
                 </div>
       </div>

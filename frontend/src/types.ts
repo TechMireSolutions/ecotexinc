@@ -181,11 +181,23 @@ export interface LogoConfig {
   faviconUrl?: string;
 }
 
+export interface NavLinkItem {
+  id: string;
+  label: string;
+  targetSection: 'home' | 'about' | 'shop' | 'contact';
+}
+
 export interface NavbarConfig {
   announcementText: string;
   announcementActive: boolean;
   ctaButtonText: string;
+  ctaButtonAction?: 'shop' | 'contact' | 'cart';
+  showCtaButton?: boolean;
   phoneDisplay: string;
+  showPhone?: boolean;
+  showSearch?: boolean;
+  showCart?: boolean;
+  navLinks?: NavLinkItem[];
 }
 
 export interface VersatilityCard {
@@ -238,38 +250,67 @@ export interface AboutFeature {
 }
 
 export interface AboutConfig {
-  heroTitle: string;
-  heroSubtitle: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   heroBgImage?: string;
   storyTitle?: string;
-  missionQuote: string;
-  storyParagraph1: string;
-  storyParagraph2: string;
+  missionQuote?: string;
+  storyParagraph1?: string;
+  storyParagraph2?: string;
   founderName?: string;
   founderRole?: string;
   founderImage?: string;
+  leadershipBadgeTitle?: string;
+  leadershipBadgeSubtitle?: string;
   workshopImage?: string;
-  whyChooseUsTitle: string;
-  whyChooseUsSubtitle: string;
-  whyChooseUsFeatures: AboutFeature[];
+  statBadgeValue?: string;
+  statBadgeLabel?: string;
+  whyChooseUsTitle?: string;
+  whyChooseUsSubtitle?: string;
+  whyChooseUsFeatures?: AboutFeature[];
   teamSectionTitle?: string;
   teamSectionSubtitle?: string;
-  teamMembers: TeamMemberConfig[];
+  teamMembers?: TeamMemberConfig[];
+  ctaTitle?: string;
+  ctaSubtitle?: string;
+  ctaBtnText?: string;
+  [key: string]: any;
 }
 
 export interface ContactConfig {
-  headline: string;
-  email: string;
-  phone: string;
-  secondaryPhone: string;
-  facilityAddress: string;
-  plantAddress: string;
-  facebookUrl: string;
-  instagramUrl: string;
-  twitterUrl: string;
-  linkedinUrl: string;
+  headline?: string;
+  headlineFirst?: string;
+  headlineSecond?: string;
+  subtitle?: string;
+  email?: string;
+  supportEmail?: string;
+  phone?: string;
+  secondaryPhone?: string;
+  website?: string;
+  businessHours?: string;
+  facilityAddress?: string;
+  plantAddress?: string;
   googleMapsUrl?: string;
   googleMapsEmbedUrl?: string;
+  bgImage?: string;
+  formTitle?: string;
+  formSubtitle?: string;
+  firstNameLabel?: string;
+  lastNameLabel?: string;
+  emailLabel?: string;
+  messageLabel?: string;
+  submitBtnText?: string;
+  successHeading?: string;
+  successMessage?: string;
+  resetBtnText?: string;
+  trustBadge1?: string;
+  trustBadge2?: string;
+  trustBadge3?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
+  linkedinUrl?: string;
+  [key: string]: any;
 }
 
 export interface FacilityHub {
@@ -312,6 +353,12 @@ export interface SocialLinkItem {
   icon?: string;
 }
 
+export interface FooterLinkItem {
+  id: string;
+  label: string;
+  url?: string;
+}
+
 export interface FooterConfig {
   newsletterTitle: string;
   newsletterSubtitle?: string;
@@ -323,6 +370,8 @@ export interface FooterConfig {
   col1Title?: string;
   col2Title?: string;
   col3Title?: string;
+  col2Links?: FooterLinkItem[];
+  col3Links?: FooterLinkItem[];
   socialLinks?: SocialLinkItem[];
   socialTwitter?: string;
   socialFacebook?: string;
@@ -332,6 +381,8 @@ export interface FooterConfig {
   termsNotice?: string;
   privacyNotice?: string;
   sitemapNotice?: string;
+  termsContent?: string;
+  privacyContent?: string;
 }
 
 export interface QuoteCalcConfig {

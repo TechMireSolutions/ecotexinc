@@ -39,12 +39,38 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks: { id: ActiveSection; label: string }[] = [
-    { id: 'home', label: 'HOME' },
-    { id: 'about', label: 'ABOUT US' },
-    { id: 'shop', label: 'SHOP' },
-    { id: 'contact', label: 'CONTACT' }
+  const defaultNavLinks: { id: string; label: string; targetSection: ActiveSection }[] = [
+    { id: 'home', label: 'HOME', targetSection: 'home' },
+    { id: 'about', label: 'ABOUT US', targetSection: 'about' },
+    { id: 'shop', label: 'SHOP', targetSection: 'shop' },
+    { id: 'contact', label: 'CONTACT', targetSection: 'contact' }
   ];
+
+  const configuredLinks = siteSettings?.navbarConfig?.navLinks;
+  const navLinks = (configuredLinks && configuredLinks.length > 0)
+    ? configuredLinks.map(l => ({
+        id: l.id || l.label.toLowerCase().replace(/\s+/g, '-'),
+        label: l.label,
+        targetSection: (l.targetSection || 'home') as ActiveSection
+      }))
+    : defaultNavLinks;
+
+  const showCtaButton = siteSettings?.navbarConfig?.showCtaButton !== false;
+  const showSearch = siteSettings?.navbarConfig?.showSearch !== false;
+  const showCart = siteSettings?.navbarConfig?.showCart !== false;
+  const showPhone = siteSettings?.navbarConfig?.showPhone !== false;
+  const ctaAction = siteSettings?.navbarConfig?.ctaButtonAction || 'shop';
+  const phoneDisplay = siteSettings?.navbarConfig?.phoneDisplay || siteSettings?.phone || '(951) 555-ECOTEX';
+
+  const handleCtaClick = () => {
+    if (ctaAction === 'cart') {
+      onOpenCart();
+    } else if (ctaAction === 'contact') {
+      handleNavClick('contact');
+    } else {
+      handleNavClick('shop');
+    }
+  };
 
   const handleNavClick = (sectionId: ActiveSection) => {
     setActiveSection(sectionId);
@@ -88,11 +114,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* 2. Middle Zone: Clean Uppercase Nav Links (matching reference image typography & spacing) */}
             <nav className="hidden md:flex items-center gap-8 lg:gap-11">
               {navLinks.map((link) => {
-                const isActive = activeSection === link.id || (activeSection === 'product-detail' && link.id === 'shop');
+                const isActive = activeSection === link.targetSection || (activeSection === 'product-detail' && link.targetSection === 'shop');
                 return (
                   <button
                     key={link.id}
-                    onClick={() => handleNavClick(link.id)}
+                    onClick={() => handleNavClick(link.targetSection)}
                     className={`text-xs font-semibold tracking-[0.2em] uppercase transition-all duration-200 cursor-pointer relative py-1.5 ${isActive
                         ? 'text-[#111827] font-bold'
                         : 'text-slate-500 hover:text-[#111827]'
@@ -111,35 +137,41 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-3 sm:gap-4">
 
               {/* Search Icon Trigger */}
-              <button
-                onClick={onOpenSearch}
-                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full transition-colors cursor-pointer"
-                aria-label="Search eco products"
-              >
-                <Search className="w-4.5 h-4.5" />
-              </button>
+              {showSearch && (
+                <button
+                  onClick={onOpenSearch}
+                  className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full transition-colors cursor-pointer"
+                  aria-label="Search eco products"
+                >
+                  <Search className="w-4.5 h-4.5" />
+                </button>
+              )}
 
               {/* Shopping Bag Trigger with Live Counter */}
-              <button
-                onClick={onOpenCart}
-                className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full transition-colors cursor-pointer"
-                aria-label={`Shopping bag with ${cartCount} items`}
-              >
-                <ShoppingBag className="w-4.5 h-4.5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#166534] text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center font-mono shadow-xs">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
-              </button>
+              {showCart && (
+                <button
+                  onClick={onOpenCart}
+                  className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full transition-colors cursor-pointer"
+                  aria-label={`Shopping bag with ${cartCount} items`}
+                >
+                  <ShoppingBag className="w-4.5 h-4.5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#166534] text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center font-mono shadow-xs">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </button>
+              )}
 
               {/* Signature Rounded Pill CTA Button (START SHOP) */}
-              <button
-                onClick={() => handleNavClick('shop')}
-                className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#d2e2da] text-[#144f33] hover:bg-[#166534] hover:text-white transition-all duration-300 shadow-2xs hover:shadow-xs active:scale-96 cursor-pointer whitespace-nowrap"
-              >
-                <span>{ctaText}</span>
-              </button>
+              {showCtaButton && (
+                <button
+                  onClick={handleCtaClick}
+                  className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#d2e2da] text-[#144f33] hover:bg-[#166534] hover:text-white transition-all duration-300 shadow-2xs hover:shadow-xs active:scale-96 cursor-pointer whitespace-nowrap"
+                >
+                  <span>{ctaText}</span>
+                </button>
+              )}
 
 
               {/* Mobile Menu Hamburger Toggle */}
@@ -187,11 +219,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* Mobile Links */}
               <div className="py-6 space-y-1">
                 {navLinks.map((link) => {
-                  const isActive = activeSection === link.id;
+                  const isActive = activeSection === link.targetSection;
                   return (
                     <button
                       key={link.id}
-                      onClick={() => handleNavClick(link.id)}
+                      onClick={() => handleNavClick(link.targetSection)}
                       className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl text-xs font-bold tracking-[0.18em] uppercase transition-colors flex items-center justify-between cursor-pointer ${isActive
                           ? 'bg-[#edf4e7] text-[#166534]'
                           : 'text-slate-700 hover:bg-slate-50'
@@ -207,26 +239,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Bottom Actions */}
             <div className="pt-6 border-t border-slate-100 space-y-3">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleNavClick('shop');
-                }}
-                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#d2e2da] text-[#144f33] hover:bg-[#166534] hover:text-white transition-all cursor-pointer shadow-xs"
-              >
-                <span>{ctaText}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              {showCtaButton && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleCtaClick();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#d2e2da] text-[#144f33] hover:bg-[#166534] hover:text-white transition-all cursor-pointer shadow-xs"
+                >
+                  <span>{ctaText}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
 
-              <a
-                href="tel:9515553268"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
-              >
-
-
-                <PhoneCall className="w-4 h-4 text-[#166534]" />
-                <span>Corona, CA · (951) 555-ECOTEX</span>
-              </a>
+              {showPhone && (
+                <a
+                  href={`tel:${phoneDisplay.replace(/[^0-9]/g, '')}`}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                >
+                  <PhoneCall className="w-4 h-4 text-[#166534]" />
+                  <span>Corona, CA · {phoneDisplay}</span>
+                </a>
+              )}
             </div>
           </div>
         </div>
