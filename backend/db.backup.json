@@ -664,6 +664,55 @@
   ],
   "orders": [
     {
+      "id": "ECX-628685",
+      "buyerName": "Enterprise Test Buyer",
+      "customerName": "Enterprise Test Buyer",
+      "companyName": "Apex Global Retail",
+      "customerCompany": "Apex Global Retail",
+      "email": "",
+      "customerEmail": "",
+      "phone": "",
+      "address": "",
+      "shippingAddress": "",
+      "city": "",
+      "state": "CA",
+      "zip": "",
+      "paymentTerms": "Credit Card / Instant ACH",
+      "subtotal": 500,
+      "shipping": 50,
+      "total": 550,
+      "totalAmount": 550,
+      "status": "In Production",
+      "date": "2026-11-04",
+      "createdAt": "2026-11-04T11:54:40.308Z",
+      "items": [
+        {
+          "productId": "",
+          "productName": "Eco Loop Bag",
+          "name": "Eco Loop Bag",
+          "quantity": 2000,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 500,
+          "color": "Default",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-11-04T11:54:40.308Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784015",
+          "timestamp": "2026-11-04T11:54:40.308Z"
+        }
+      },
+      "updatedAt": "2026-11-04T11:54:40.315Z"
+    },
+    {
       "id": "ECX-579758",
       "buyerName": "Enterprise Test Buyer",
       "customerName": "Enterprise Test Buyer",
@@ -3111,6 +3160,21 @@
   ],
   "quotes": [
     {
+      "id": "RFQ-3560",
+      "name": "Procurement Director",
+      "company": "California Marts",
+      "email": "buyer@calmart.com",
+      "phone": "",
+      "category": "General Inquiries",
+      "volume": "25,000 units",
+      "printing": "2-Color Flexo",
+      "message": "Direct quote request via Ecotex RFQ Engine.",
+      "bagType": "",
+      "status": "New",
+      "date": "2026-11-04",
+      "createdAt": "2026-11-04T11:54:40.322Z"
+    },
+    {
       "id": "RFQ-3876",
       "name": "Procurement Director",
       "company": "California Marts",
@@ -3742,7 +3806,7 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-11-04T06:31:34.752Z",
+    "updatedAt": "2026-11-04T11:54:40.330Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
@@ -4269,8 +4333,8 @@
   "adminAuth": {
     "name": "Operations Director",
     "email": "admin@ecotexinc.com",
-    "password": "$2b$10$HtESuCvIClkb0LIcwkiSSOL9t84TJ4My8A5aJj8ddgkMNGTRlEpW.",
-    "updatedAt": "2026-11-03T11:42:44.915Z"
+    "password": "$2b$10$88Wkpum/LaXrkS5w/TekP.hyKmpM1oyntcG1Cbj9WwJxkiqnKjjGy",
+    "updatedAt": "2026-11-04T11:54:40.264Z"
   },
   "customerMessages": [
     {

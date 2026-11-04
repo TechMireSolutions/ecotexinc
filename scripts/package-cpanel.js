@@ -149,13 +149,12 @@ RATE_LIMIT_MAX_REQUESTS=2500
 AUTH_RATE_LIMIT_MAX_REQUESTS=50
 MAX_UPLOAD_SIZE_MB=50
 
-# Optional cPanel MySQL Configuration
-# Uncomment and fill if you create a MySQL Database in cPanel:
-# DB_HOST=localhost
-# DB_PORT=3306
-# DB_USER=your_cpanel_db_user
-# DB_PASSWORD=your_cpanel_db_password
-# DB_NAME=your_cpanel_db_name
+# cPanel MySQL Database Configuration (Active)
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=mkbrothe_ecotexinc_user
+DB_PASSWORD="upfrhq+n_mvtyS;+"
+DB_NAME=mkbrothe_ecotexinc
 `;
 fs.writeFileSync(path.join(outDir, '.env'), envContent, 'utf8');
 
@@ -243,11 +242,20 @@ STEP 3: Files Upload Karein (cPanel File Manager Se)
 5. Upload complete hone ke baad wapas File Manager mein aayein.
 6. "ecotex-cpanel-production.zip" par right-click karein aur "Extract" (Extract Here) par click karein.
 
-STEP 4: App Start / Restart Karein
+STEP 4 (Optional): MySQL Database Tables Verify / Import Karein
+Note: Application start hote hi tables ko automatic check aur create kar leti hai.
+Agar DevOps ne phpMyAdmin se manually import karna ho:
+1. cPanel mein "phpMyAdmin" open karein.
+2. Database "mkbrothe_ecotexinc" par click karein.
+3. Top navigation mein "Import" par click karein.
+4. "database_schema.sql" (ya "schema.sql") file choose karein jo extracted folder mein maujood hai.
+5. Neeche "Go" button dabayein. Saari tables aur latest CMS data pre-load ho jayega!
+
+STEP 5: App Start / Restart Karein
 1. Wapas "Setup Node.js App" page par jayein.
 2. Apni application ke samne "Restart" (ya "Run JS Script") button par click karein.
 
-STEP 5: Check Karein
+STEP 6: Check Karein
 1. Apne browser mein open karein:
    - https://ecotexinc.com
      -> Yahan aapka main frontend website (Storefront) khulega.
