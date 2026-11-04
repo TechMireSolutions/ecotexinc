@@ -191,8 +191,12 @@ export const apiService = {
 
   // 4. Orders
   async getOrders(): Promise<Order[]> {
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders.Authorization) {
+      return [];
+    }
     return safeFetchJson<Order[]>('/orders', {
-      headers: { ...getAuthHeaders() },
+      headers: { ...authHeaders },
     });
   },
 
@@ -237,8 +241,12 @@ export const apiService = {
 
   // 5. Quotes / RFQs
   async getQuotes(): Promise<QuoteSubmission[]> {
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders.Authorization) {
+      return [];
+    }
     return safeFetchJson<QuoteSubmission[]>('/quotes', {
-      headers: { ...getAuthHeaders() },
+      headers: { ...authHeaders },
     });
   },
 

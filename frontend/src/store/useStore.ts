@@ -762,6 +762,7 @@ export const useStore = create<StoreState>((set, get) => ({
         }
 
         set({ isAuthenticated: true, adminToken: token, adminUser: user });
+        get().fetchAllData().catch(() => {});
         return { success: true };
       } else {
         const errorData = await res.json().catch(() => ({}));
@@ -853,12 +854,15 @@ export const useStore = create<StoreState>((set, get) => ({
 
   fetchAllData: async () => {
     try {
+      const authHeaders = getAuthHeaders();
+      const isAdminLoggedIn = Boolean(authHeaders.Authorization);
+
       const [settingsRes, prodRes, catRes, ordsRes, qtsRes, statsRes, msgsRes] = await Promise.allSettled([
         apiService.getSettings(),
         apiService.getProducts(),
         apiService.getCategories(),
-        apiService.getOrders(),
-        apiService.getQuotes(),
+        isAdminLoggedIn ? apiService.getOrders() : Promise.resolve([]),
+        isAdminLoggedIn ? apiService.getQuotes() : Promise.resolve([]),
         apiService.getStats(),
         apiService.getMessages(),
       ]);
@@ -1164,9 +1168,13 @@ export const useStore = create<StoreState>((set, get) => ({
 
   // Orders & Quotes Fetching
   fetchOrders: async () => {
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders.Authorization) {
+      return get().orders;
+    }
     try {
       const res = await fetch(`${BASE_URL}/orders`, {
-        headers: { ...getAuthHeaders() },
+        headers: { ...authHeaders },
       });
       if (res.ok) {
         const data = await res.json();
@@ -1204,9 +1212,13 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   fetchQuotes: async () => {
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders.Authorization) {
+      return get().quotes;
+    }
     try {
       const res = await fetch(`${BASE_URL}/quotes`, {
-        headers: { ...getAuthHeaders() },
+        headers: { ...authHeaders },
       });
       if (res.ok) {
         const data = await res.json();

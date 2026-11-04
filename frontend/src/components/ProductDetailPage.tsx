@@ -853,37 +853,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 )}
               </div>
 
-              {/* Wholesale Quick Select Presets (Disabled if exceeds availableStock) */}
-              {orderType === 'wholesale' && !isOutOfStock && (
-                <div className="flex flex-wrap items-center gap-2 mt-2.5">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Quick:</span>
-                  {Array.from(new Set([wholesaleMoq, 10, 25, 50, 100, 250, 500, 1000].filter(n => n >= wholesaleMoq))).map((preset) => {
-                    const isExceedingStock = preset > availableStock;
-                    return (
-                      <button
-                        key={preset}
-                        type="button"
-                        disabled={isExceedingStock}
-                        onClick={() => {
-                          if (isExceedingStock) return;
-                          setQuantity(preset);
-                          setMoqWarning(null);
-                        }}
-                        title={isExceedingStock ? `Stock limit is ${availableStock} boxes (${preset} is unavailable)` : `Select ${preset} boxes`}
-                        className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-all ${
-                          isExceedingStock
-                            ? 'opacity-35 cursor-not-allowed line-through bg-slate-100 text-slate-400 border-slate-200'
-                            : quantity === preset
-                            ? 'bg-[#166534] text-white border-[#166534] font-bold shadow-xs cursor-pointer'
-                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-white hover:text-slate-900 cursor-pointer'
-                        }`}
-                      >
-                        {preset.toLocaleString()}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+
 
               {/* Out of Stock Notice Banner */}
               {isOutOfStock && (
