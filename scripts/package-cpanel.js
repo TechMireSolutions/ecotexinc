@@ -47,12 +47,23 @@ copyDirSync(frontendDist, path.join(outDir, 'public'));
 console.log('📂 Step 4: Copying backend server source...');
 copyDirSync(path.join(rootDir, 'backend', 'src'), path.join(outDir, 'src'));
 
-// 5. Copy backend root files
-console.log('📂 Step 5: Copying core backend files & database...');
+// 5. Copy backend root files & SQL schema
+console.log('📂 Step 5: Copying core backend files, database & SQL schema...');
 fs.copyFileSync(path.join(rootDir, 'backend', 'index.js'), path.join(outDir, 'index.js'));
 fs.copyFileSync(path.join(rootDir, 'backend', 'db.json'), path.join(outDir, 'db.json'));
 if (fs.existsSync(path.join(rootDir, 'backend', 'db.backup.json'))) {
   fs.copyFileSync(path.join(rootDir, 'backend', 'db.backup.json'), path.join(outDir, 'db.backup.json'));
+}
+
+// Generate & copy MySQL schema
+try {
+  execSync('node scripts/generate-sql.js', { stdio: 'inherit', cwd: rootDir });
+  if (fs.existsSync(path.join(rootDir, 'backend', 'database_schema.sql'))) {
+    fs.copyFileSync(path.join(rootDir, 'backend', 'database_schema.sql'), path.join(outDir, 'database_schema.sql'));
+    fs.copyFileSync(path.join(rootDir, 'backend', 'database_schema.sql'), path.join(outDir, 'schema.sql'));
+  }
+} catch (sqlGenErr) {
+  console.warn('SQL generation notice:', sqlGenErr.message);
 }
 
 // 6. Ensure uploads folder exists
