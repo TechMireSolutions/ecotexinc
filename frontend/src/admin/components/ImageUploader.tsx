@@ -9,9 +9,12 @@ import {
   ExternalLink, 
   RefreshCw,
   Eye,
-  FileCheck
+  FileCheck,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { BASE_URL } from '../../services/apiService';
+import { compressAndConvertImage } from '../../utils/imageCompressor';
 
 interface ImageUploaderProps {
   label: string;
@@ -37,6 +40,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [isUrlMode, setIsUrlMode] = useState(false);
   const [urlInput, setUrlInput] = useState(value || '');
+  const [conversionMeta, setConversionMeta] = useState<{
+    originalSizeStr: string;
+    compressedSizeStr: string;
+    savingsPercent: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fallbackDataRef = useRef<string>('');
 
@@ -64,25 +72,72 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
 
-    setUploadStatus('Uploading to server...');
+    setUploadStatus('Auto-converting & compressing to KB...');
 
     try {
-      // 1. Read locally as Base64 Data URL for instant, zero-delay preview
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64Data = e.target?.result as string;
-        if (!base64Data) return;
+      // 1. Client-Side Auto-Compression & Format Conversion (MBs -> KBs)
+      const optimized = await compressAndConvertImage(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.82,
+        targetMaxKb: 350
+      });
 
-        fallbackDataRef.current = base64Data;
-        setDisplayUrl(base64Data);
-        setUrlInput(base64Data);
+      setConversionMeta({
+        originalSizeStr: optimized.originalSizeStr,
+        compressedSizeStr: optimized.compressedSizeStr,
+        savingsPercent: optimized.savingsPercent
+      });
 
-        // 2. Persist to server disk in background
+      // 2. Set instant, zero-delay preview using the optimized data URL
+      fallbackDataRef.current = optimized.dataUrl;
+      setDisplayUrl(optimized.dataUrl);
+      setUrlInput(optimized.dataUrl);
+
+      setUploadStatus(
+        optimized.savingsPercent > 0
+          ? `Auto-converted: ${optimized.originalSizeStr} → ${optimized.compressedSizeStr} (-${optimized.savingsPercent}%)`
+          : 'Uploading optimized image...'
+      );
+
+      // 3. Persist to server disk in background using FormData multipart
+      let serverSaved = false;
+      try {
+        const formData = new FormData();
+        formData.append('file', optimized.file);
+
+        const res = await fetch(`${BASE_URL}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.url) {
+            setDisplayUrl(json.url);
+            setUrlInput(json.url);
+            onChange(json.url);
+            serverSaved = true;
+            setUploadStatus(
+              optimized.savingsPercent > 0
+                ? `Uploaded! ${optimized.originalSizeStr} → ${optimized.compressedSizeStr} (-${optimized.savingsPercent}%)`
+                : 'Uploaded & Synchronized!'
+            );
+            setTimeout(() => setUploadStatus(null), 3500);
+            return;
+          }
+        }
+      } catch (formDataErr) {
+        console.warn('Multipart upload failed, attempting JSON upload fallback:', formDataErr);
+      }
+
+      // 4. Fallback to JSON Base64 upload if multipart was rejected
+      if (!serverSaved) {
         try {
           const res = await fetch(`${BASE_URL}/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: base64Data, filename: file.name })
+            body: JSON.stringify({ data: optimized.dataUrl, filename: optimized.file.name })
           });
 
           if (res.ok) {
@@ -91,26 +146,35 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               setDisplayUrl(json.url);
               setUrlInput(json.url);
               onChange(json.url);
-              setUploadStatus('Uploaded & Synchronized!');
-              setTimeout(() => setUploadStatus(null), 2500);
+              serverSaved = true;
+              setUploadStatus(
+                optimized.savingsPercent > 0
+                  ? `Uploaded! ${optimized.originalSizeStr} → ${optimized.compressedSizeStr} (-${optimized.savingsPercent}%)`
+                  : 'Uploaded & Synchronized!'
+              );
+              setTimeout(() => setUploadStatus(null), 3500);
               return;
             }
           }
         } catch (serverErr) {
-          console.warn('Server upload failed, falling back to base64 preview:', serverErr);
+          console.warn('Server JSON upload also failed, retaining local optimized image:', serverErr);
         }
+      }
 
-        // Fallback only if server upload failed
-        onChange(base64Data);
-        setUploadStatus('Imported (Local)');
-        setTimeout(() => setUploadStatus(null), 2500);
-      };
-
-      reader.readAsDataURL(file);
+      // 5. If server is completely offline, use lightweight optimized Data URL safely
+      if (!serverSaved) {
+        onChange(optimized.dataUrl);
+        setUploadStatus(
+          optimized.savingsPercent > 0
+            ? `Auto-converted to ${optimized.compressedSizeStr} (Local)`
+            : 'Imported (Local)'
+        );
+        setTimeout(() => setUploadStatus(null), 3500);
+      }
     } catch (err) {
-      console.error('File read error:', err);
-      setUploadStatus('Error reading file');
-      setTimeout(() => setUploadStatus(null), 2500);
+      console.error('File conversion/upload error:', err);
+      setUploadStatus('Error processing image');
+      setTimeout(() => setUploadStatus(null), 3000);
     }
   };
 
@@ -271,7 +335,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               {/* Status Badge */}
               <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md text-[10px] font-bold text-slate-700 flex items-center gap-1.5 border border-slate-200/80 shadow-xs">
                 <Check className="w-3 h-3 text-[#4E9F76]" />
-                <span>Uploaded</span>
+                <span>
+                  {conversionMeta 
+                    ? `Auto-Converted (${conversionMeta.compressedSizeStr})` 
+                    : 'Uploaded'}
+                </span>
               </div>
             </div>
           ) : (
@@ -300,6 +368,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 </p>
               </div>
 
+              {/* Auto MB to KB badge */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-bold">
+                <Zap className="w-3 h-3 text-emerald-600 fill-emerald-500" />
+                <span>Auto MB → KB Compressor Active</span>
+              </div>
+
               <button
                 type="button"
                 className="px-4 py-2 rounded-xl bg-[#4E9F76] hover:bg-[#86C59E] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
@@ -314,8 +388,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
       {/* Progress Toast */}
       {uploadStatus && (
-        <div className="flex items-center gap-2 text-xs font-bold text-[#4E9F76] animate-fadeIn">
-          <FileCheck className="w-4 h-4 text-[#86C59E]" />
+        <div className="flex items-center gap-2 text-xs font-bold text-[#166534] bg-emerald-50/90 border border-emerald-200 px-3 py-1.5 rounded-xl animate-fadeIn">
+          <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse shrink-0" />
           <span>{uploadStatus}</span>
         </div>
       )}

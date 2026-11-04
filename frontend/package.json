@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/cart.test.ts tests/catalog-crud.test.ts tests/auth.test.ts tests/rfq-orders.test.ts tests/cms-settings.test.ts tests/quote-calculator.test.ts"
+    "test": "tsx --test tests/cart.test.ts tests/catalog-crud.test.ts tests/auth.test.ts tests/rfq-orders.test.ts tests/cms-settings.test.ts tests/quote-calculator.test.ts tests/image-compressor.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

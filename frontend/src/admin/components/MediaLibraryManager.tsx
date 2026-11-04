@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useStore, MediaAsset } from '../../store/useStore';
+import { compressAndConvertImage } from '../../utils/imageCompressor';
 
 export const MediaLibraryManager: React.FC = () => {
   const { 
@@ -56,27 +57,44 @@ export const MediaLibraryManager: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        if (result) {
-          addMediaAsset({
-            name: file.name,
-            url: result,
-            size: `${(file.size / 1024).toFixed(0)} KB`,
-            type: file.type
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files)) {
+      try {
+        const optimized = await compressAndConvertImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.82,
+          targetMaxKb: 350
+        });
 
-    setSuccessToast('Assets successfully uploaded to Media Library.');
+        addMediaAsset({
+          name: optimized.file.name,
+          url: optimized.dataUrl,
+          size: optimized.compressedSizeStr,
+          type: optimized.format
+        });
+      } catch (err) {
+        console.warn('Fallback to standard FileReader for asset:', err);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          if (result) {
+            addMediaAsset({
+              name: file.name,
+              url: result,
+              size: `${(file.size / 1024).toFixed(0)} KB`,
+              type: file.type
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    setSuccessToast('Assets successfully converted to KB & uploaded.');
     setTimeout(() => setSuccessToast(null), 3000);
   };
 
