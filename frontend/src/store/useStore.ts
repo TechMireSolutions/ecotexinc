@@ -729,7 +729,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
   getCartItemCount: () => {
     const { cart } = get();
-    return cart.reduce((count, item) => count + item.quantity, 0);
+    return cart.length;
   },
 
   // Auth & Route Protection
