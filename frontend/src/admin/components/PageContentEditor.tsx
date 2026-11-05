@@ -76,6 +76,7 @@ const DEFAULT_PALETTE: ProductColorVariant[] = [
   { id: 'beige-cream', name: 'Beige / Cream', hex: '#f5ecd7', stockQuantity: 35 }
 ];
 import { ImageUploader } from './ImageUploader';
+import { FacilityHubsEditor } from './FacilityHubsEditor';
 
 type EditorTab =
   | 'logo'
@@ -1680,45 +1681,19 @@ export const PageContentEditor: React.FC<PageContentEditorProps> = ({ onNavigate
                   </div>
                 </div>
 
-                {/* Facilities & Logistics Hubs */}
-                <div className="p-5 rounded-2xl bg-[#F4F9F5] border border-[#B2E2C5]/40 space-y-4">
-                  <h4 className="text-xs font-black text-[#166534] uppercase tracking-wider">
-                    Manufacturing & Logistics Hubs (Corona CA & Overseas Mill)
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
-                      <span className="text-[10px] font-bold text-[#166534] uppercase tracking-wider block">
-                        Hub #1: US Distribution Hub
-                      </span>
-                      <input
-                        type="text"
-                        value={formData.facilityAddress || '1200 Industrial Parkway, Corona, CA 92881'}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          facilityAddress: e.target.value
-                        })}
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-800"
-                        placeholder="Corona Facility Address"
-                      />
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
-                      <span className="text-[10px] font-bold text-[#166534] uppercase tracking-wider block">
-                        Hub #2: Heavy Industrial Mill Plant
-                      </span>
-                      <input
-                        type="text"
-                        value={formData.plantAddress || 'Sector 15, Korangi Industrial Area, Karachi, PK'}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          plantAddress: e.target.value
-                        })}
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-800"
-                        placeholder="Mill Plant Address"
-                      />
-                    </div>
-                  </div>
-                </div>
+                {/* Facilities & Logistics Hubs (Dual Manufacturing & Fulfillment Hub Cards) */}
+                <FacilityHubsEditor
+                  facilitiesConfig={formData.facilitiesConfig}
+                  facilityAddress={formData.facilityAddress}
+                  plantAddress={formData.plantAddress}
+                  onChange={(updatedConfig, extraUpdates) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      facilitiesConfig: updatedConfig,
+                      ...(extraUpdates || {})
+                    }));
+                  }}
+                />
               </div>
             )}
 

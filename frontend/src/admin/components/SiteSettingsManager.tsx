@@ -45,6 +45,7 @@ import {
 import { useStore } from '../../store/useStore';
 import { SiteSettings, LogoConfig, OrderNotificationsConfig, ShippingConfig, FooterConfig, SocialLinkItem } from '../../types';
 import { BASE_URL, apiService } from '../../services/apiService';
+import { FacilityHubsEditor } from './FacilityHubsEditor';
 
 interface SiteSettingsManagerProps {
   onLogout?: () => void;
@@ -522,7 +523,7 @@ return () => clearTimeout(timer);
     { id: 'whatsapp', label: 'WhatsApp Order Alerts', desc: 'Order dispatch receiver phone number', icon: MessageSquare },
     { id: 'account', label: 'Admin Security', desc: 'Password & administrator credentials', icon: User },
     { id: 'announcement', label: 'Header Announcement', desc: 'Top notice banner & alerts', icon: Megaphone },
-    { id: 'business', label: 'Business & Contacts', desc: 'Facility addresses & phone lines', icon: Building2 },
+    { id: 'business', label: 'Business & Facilities', desc: 'Facility addresses, 2 hub cards & phones', icon: Building2 },
     { id: 'shipping', label: 'Shipping & Fulfillment', desc: 'Free threshold, rates & logistics', icon: Truck },
     { id: 'footer', label: 'Footer & Policies', desc: 'Newsletter, links & copyright', icon: Layers },
     { id: 'commerce', label: 'Store Defaults', desc: 'Order limits, plates & lead times', icon: DollarSign }
@@ -1582,6 +1583,22 @@ return () => clearTimeout(timer);
                 value={formData.plantAddress || ''}
                 onChange={(e) => handleFieldChange('plantAddress', e.target.value)}
                 className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
+              />
+            </div>
+
+            {/* Dual Manufacturing & Fulfillment Hub Cards Editor */}
+            <div className="sm:col-span-2 pt-6 border-t border-slate-200">
+              <FacilityHubsEditor
+                facilitiesConfig={formData.facilitiesConfig}
+                facilityAddress={formData.facilityAddress}
+                plantAddress={formData.plantAddress}
+                onChange={(updatedConfig, extraUpdates) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    facilitiesConfig: updatedConfig,
+                    ...(extraUpdates || {})
+                  }));
+                }}
               />
             </div>
           </div>
