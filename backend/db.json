@@ -42,7 +42,7 @@
       ],
       "pricePerUnit": 0.25,
       "categoryLabel": "Non-Woven Totes",
-      "stockQuantity": 75,
+      "stockQuantity": 15,
       "certifications": [
         "GRS Certified",
         "100% Recyclable",
@@ -177,7 +177,8 @@
           "hex": "#0f172a",
           "name": "Deep Slate"
         }
-      ]
+      ],
+      "stockQuantity": 45
     },
     {
       "id": "prod-1791183909856",
@@ -285,7 +286,7 @@
       ],
       "pricePerUnit": 0.18,
       "categoryLabel": "T-Shirt Bags",
-      "stockQuantity": 100,
+      "stockQuantity": 94,
       "availableColors": [
         {
           "hex": "#1b4329",
@@ -664,6 +665,120 @@
   ],
   "orders": [
     {
+      "id": "ECX-715380",
+      "buyerName": "Arman Naqvi",
+      "customerName": "Arman Naqvi",
+      "companyName": "kynetic wear",
+      "customerCompany": "kynetic wear",
+      "email": "arman.naqvi@kyneticwear.com",
+      "customerEmail": "arman.naqvi@kyneticwear.com",
+      "phone": "",
+      "address": "5-d, کراچی, CA 75820",
+      "shippingAddress": "5-d, کراچی, CA 75820",
+      "city": "کراچی",
+      "state": "CA",
+      "zip": "75820",
+      "paymentTerms": "Wire Transfer / Pro-Forma Invoice",
+      "subtotal": 19.5035,
+      "shipping": 50,
+      "total": 69.5035,
+      "totalAmount": 69.5035,
+      "status": "Pending",
+      "date": "2026-11-05",
+      "createdAt": "2026-11-05T06:48:49.543Z",
+      "items": [
+        {
+          "productId": "eco-tshirt-grocery",
+          "productName": "Eco-Loop Grocery T-Shirt Sack",
+          "name": "Eco-Loop Grocery T-Shirt Sack",
+          "quantity": 1,
+          "unitPrice": 0.261,
+          "price": 0.261,
+          "totalPrice": 0.261,
+          "color": "Red",
+          "customPrint": false
+        },
+        {
+          "productId": "prod-1793086425671",
+          "productName": "dv lhjdv eagh n",
+          "name": "dv lhjdv eagh n",
+          "quantity": 5,
+          "unitPrice": 0.3625,
+          "price": 0.3625,
+          "totalPrice": 1.8125,
+          "color": "Pure White",
+          "customPrint": false
+        },
+        {
+          "productId": "prod-1793086425671",
+          "productName": "dv lhjdv eagh n",
+          "name": "dv lhjdv eagh n",
+          "quantity": 5,
+          "unitPrice": 0.3625,
+          "price": 0.3625,
+          "totalPrice": 1.8125,
+          "color": "Eco Green",
+          "customPrint": false
+        },
+        {
+          "productId": "prod-1793086425671",
+          "productName": "dv lhjdv eagh n",
+          "name": "dv lhjdv eagh n",
+          "quantity": 25,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 6.25,
+          "color": "Pure White",
+          "customPrint": false
+        },
+        {
+          "productId": "prod-1793086425671",
+          "productName": "dv lhjdv eagh n",
+          "name": "dv lhjdv eagh n",
+          "quantity": 25,
+          "unitPrice": 0.25,
+          "price": 0.25,
+          "totalPrice": 6.25,
+          "color": "Deep Slate",
+          "customPrint": false
+        },
+        {
+          "productId": "eco-tshirt-grocery",
+          "productName": "Eco-Loop Grocery T-Shirt Sack",
+          "name": "Eco-Loop Grocery T-Shirt Sack",
+          "quantity": 5,
+          "unitPrice": 0.261,
+          "price": 0.261,
+          "totalPrice": 1.3050000000000002,
+          "color": "Forest Green",
+          "customPrint": false
+        },
+        {
+          "productId": "prod-1791786437631",
+          "productName": "shahu bondu",
+          "name": "shahu bondu",
+          "quantity": 5,
+          "unitPrice": 0.3625,
+          "price": 0.3625,
+          "totalPrice": 1.8125,
+          "color": "Eco Green",
+          "customPrint": false
+        }
+      ],
+      "notifications": {
+        "email": {
+          "enabled": false,
+          "dispatchedTo": "orders@ecotexinc.com",
+          "timestamp": "2026-11-05T06:48:49.543Z"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "targetPhone": "+92 332 8784515",
+          "timestamp": "2026-11-05T06:48:49.543Z"
+        }
+      }
+    },
+    {
       "id": "ECX-239162",
       "buyerName": "Anonymous Buyer",
       "companyName": "Enterprise Client",
@@ -802,7 +917,7 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-11-05T04:24:59.234Z",
+    "updatedAt": "2026-11-05T06:48:36.652Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {
@@ -1147,7 +1262,7 @@
     "leadTimeCustom": "10-14 Business Days",
     "minOrderNotice": "Free pallet freight on continental US orders over $1,000",
     "secondaryPhone": "+1 (951) 450-9773",
-    "whatsappNumber": "+1 (951) 450-9773",
+    "whatsappNumber": "+92 332 8784515",
     "copyrightNotice": "Copyright 2026 © Ecotex Inc. All rights reserved.",
     "facilityAddress": "1200 Industrial Parkway, Corona, CA 92881",
     "metaDescription": "Vertically integrated manufacturer of circular non-woven polypropylene bags, compostable blends, and reusable commercial textiles. Direct from Corona, CA.",
@@ -1208,7 +1323,7 @@
     },
     "orderNotifications": {
       "emailEnabled": false,
-      "whatsappNumber": "+92 332 8784015",
+      "whatsappNumber": "+92 332 8784515",
       "whatsappEnabled": true,
       "autoOpenWhatsapp": true,
       "whatsappGreeting": "New Wholesale Order Received on EcoTex Storefront",
