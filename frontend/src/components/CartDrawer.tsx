@@ -54,6 +54,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [dispatchedNotifs, setDispatchedNotifs] = useState<{ email?: string; emailEnabled?: boolean; whatsapp?: string; whatsappEnabled?: boolean }>({});
   const { createOrder, siteSettings, categories } = useStore();
 
+  const formatPrice = (val: number) => {
+    if (val >= 1000) return `${Math.round(val).toLocaleString()}`;
+    return `${val.toFixed(2)}`;
+  };
+
   // Close on Escape key and handle body overflow
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -533,13 +538,13 @@ Notification automatically generated via EcoTex Storefront.`;
                                   {item.product.gsm} GSM · {item.product.dimensions}
                                 </p>
                                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                  {(item.orderType === 'wholesale' || (!item.orderType && (item.quantity > 5 || (item.quantity % 5 === 0 && item.unitPrice <= (item.product.pricePerUnit || 0.35))))) ? (
+                                  {item.orderType === 'wholesale' ? (
                                     <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded">
-                                      Wholesale (Min 5 Boxes · Step 5)
+                                      Wholesale (Min {item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5} Boxes · Step 5)
                                     </span>
                                   ) : (
                                     <span className="inline-block text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded">
-                                      Retail (1–5 boxes max)
+                                      Retail ({item.product.retailQuantity ? `${item.product.retailQuantity} boxes` : `1–${item.product.retailMaxBoxes || 15} boxes max`})
                                     </span>
                                   )}
                                   <span className="inline-block text-[10px] font-mono text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
@@ -558,12 +563,13 @@ Notification automatically generated via EcoTex Storefront.`;
                                 </div>
                               </div>
 
-                              {/* 3. Quantity: Responsive Stepper with high-contrast text */}
+                              {/* 3. Quantity: Responsive Stepper with dynamic limits */}
                               {(() => {
-                                const isWholesaleItem = item.orderType === 'wholesale' || (!item.orderType && (item.quantity > 5 || (item.quantity % 5 === 0 && item.unitPrice <= (item.product.pricePerUnit || 0.35))));
+                                const isWholesaleItem = item.orderType === 'wholesale';
                                 const availableStock = typeof item.product.stockQuantity === 'number' ? item.product.stockQuantity : (item.product.inStock !== false ? 50 : 0);
-                                const minQty = isWholesaleItem ? 5 : 1;
-                                const maxQty = isWholesaleItem ? availableStock : Math.min(5, availableStock);
+                                const retailMax = item.product.retailMaxBoxes || item.product.retailQuantity || availableStock;
+                                const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : 1;
+                                const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : Math.min(retailMax, availableStock);
                                 const isAtMin = item.quantity <= minQty;
                                 const isAtMax = item.quantity >= maxQty;
 
@@ -613,7 +619,7 @@ Notification automatically generated via EcoTex Storefront.`;
                                       aria-label="Increase quantity"
                                       title={
                                         isAtMax
-                                          ? (item.quantity >= availableStock ? `Available stock limit reached (${availableStock} boxes in stock)` : 'Retail orders are limited to 5 boxes maximum')
+                                          ? (item.quantity >= availableStock ? `Available stock limit reached (${availableStock} boxes in stock)` : `Retail orders are limited to ${maxQty} boxes maximum`)
                                           : (isWholesaleItem ? 'Increase by 5 boxes' : 'Increase quantity')
                                       }
                                     >
@@ -690,7 +696,7 @@ Notification automatically generated via EcoTex Storefront.`;
                         <div className="py-3.5 space-y-2.5 text-sm font-serif text-[#1c1b18]">
                           <div className="flex items-center justify-between">
                             <span className="text-[#666]">Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})</span>
-                            <span className="font-mono font-medium">${Math.round(subtotal).toLocaleString()}</span>
+                            <span className="font-mono font-medium">{formatPrice(subtotal)}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-[#666]">Freight Shipping</span>
@@ -702,7 +708,7 @@ Notification automatically generated via EcoTex Storefront.`;
                         <div className="bg-[#ece4db] px-5 py-4 rounded-lg flex items-center justify-between font-serif text-lg text-[#1c1b18] mt-1 shadow-2xs">
                           <span className="font-medium">Total</span>
                           <span className="font-normal font-mono text-xl text-[#166534]">
-                            ${Math.round(grandTotal).toLocaleString()}
+                            {formatPrice(grandTotal)}
                           </span>
                         </div>
 

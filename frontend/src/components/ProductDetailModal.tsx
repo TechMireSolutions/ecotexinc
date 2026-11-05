@@ -26,9 +26,9 @@ import { DYE_COLORS, DyeColor } from '../data/colors';
 interface ProductDetailModalProps {
   product: Product | null;
   onClose: () => void;
-  onAddToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => void;
+  onAddToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => void;
   onOpenQuote: (product: Product) => void;
-  onExpressCheckout?: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => void;
+  onExpressCheckout?: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => void;
 }
 
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
@@ -91,7 +91,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   }, [onClose]);
 
   // Pricing calculations
-  const retailUnitPrice = product.pricePerUnit ? (product.pricePerUnit * 1.45) : 0.45;
+  const retailUnitPrice = product.retailPricePerUnit !== undefined && product.retailPricePerUnit > 0 ? product.retailPricePerUnit : (product.pricePerUnit ? (product.pricePerUnit * 1.45) : 0.45);
   const wholesaleUnitPrice = product.pricePerUnit || 0.25;
   const currentPrice = orderType === 'retail' ? retailUnitPrice : wholesaleUnitPrice;
   const originalPrice = (currentPrice * 1.25);
@@ -163,14 +163,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         return;
       }
     }
-    if (orderType === 'retail' && quantity > 5) {
-      setMoqWarning('Retail orders are limited to a maximum of 5 boxes. Please switch to Wholesale Order for larger quantities.');
-      setQuantity(Math.min(5, availableStock));
+    const retailLimit = product.retailMaxBoxes || product.retailQuantity || availableStock;
+    if (orderType === 'retail' && quantity > retailLimit) {
+      setMoqWarning(`Retail orders are limited to a maximum of ${retailLimit} boxes. Please switch to Wholesale Order for larger quantities.`);
+      setQuantity(Math.min(retailLimit, availableStock));
       setTimeout(() => setMoqWarning(null), 4000);
       return;
     }
     setMoqWarning(null);
-    onAddToCart(product, selectedColor.name, quantity, orderType);
+    onAddToCart(product, selectedColor.name, quantity, orderType, currentPrice);
     setAddedToast(true);
     setTimeout(() => setAddedToast(false), 2500);
   };
@@ -210,7 +211,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     }
     setMoqWarning(null);
     if (onExpressCheckout) {
-      onExpressCheckout(product, selectedColor.name, quantity, orderType);
+      onExpressCheckout(product, selectedColor.name, quantity, orderType, currentPrice);
     } else {
       onAddToCart(product, selectedColor.name, quantity, orderType);
       onClose();

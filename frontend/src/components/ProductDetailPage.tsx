@@ -42,9 +42,9 @@ interface ProductDetailPageProps {
   product: Product;
   onBack: () => void;
   onNavigateHome: () => void;
-  onAddToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => void;
+  onAddToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => void;
   onOpenQuote: (product: Product) => void;
-  onExpressCheckout?: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => void;
+  onExpressCheckout?: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => void;
   onSelectProduct?: (product: Product) => void;
   onEditProduct?: (product: Product) => void;
 }
@@ -258,7 +258,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       if (quantity >= maxQuantity) {
         setMoqWarning(maxQuantity < 5 
           ? `Stock limit reached: only ${availableStock} boxes available in stock.`
-          : 'Retail orders are limited to a maximum of 5 boxes. For larger orders, please switch to Wholesale Order.');
+          : `Retail orders are limited to a maximum of ${maxQuantity} boxes. For larger orders, please switch to Wholesale Order.`);
         setTimeout(() => setMoqWarning(null), 4000);
         return;
       }
@@ -335,7 +335,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       }
     }
     setMoqWarning(null);
-    onAddToCart(product, selectedColor.name, quantity, orderType);
+    onAddToCart(product, selectedColor.name, quantity, orderType, currentPrice);
     setAddedToast(true);
     setTimeout(() => setAddedToast(false), 2500);
   };
@@ -377,7 +377,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     }
     setMoqWarning(null);
     if (onExpressCheckout) {
-      onExpressCheckout(product, selectedColor.name, quantity, orderType);
+      onExpressCheckout(product, selectedColor.name, quantity, orderType, currentPrice);
     } else {
       onAddToCart(product, selectedColor.name, quantity, orderType);
     }
@@ -823,7 +823,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     aria-label="Increase quantity"
                     title={
                       quantity >= maxQuantity
-                        ? (quantity >= availableStock ? `Stock limit reached (${availableStock} boxes available)` : 'Retail order limit is 5 boxes')
+                        ? (quantity >= availableStock ? `Stock limit reached (${availableStock} boxes available)` : `Retail order limit is ${maxQuantity} boxes`)
                         : (orderType === 'wholesale' ? 'Increase by 5 boxes' : 'Increase')
                     }
                   >

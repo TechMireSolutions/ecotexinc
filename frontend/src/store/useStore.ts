@@ -51,7 +51,7 @@ export interface StoreState {
   cart: CartItem[];
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
-  addToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => void;
+  addToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => void;
   updateCartQuantity: (itemId: string, delta: number) => void;
   removeFromCart: (itemId: string) => void;
   clearCart: () => void;
@@ -601,7 +601,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
   setIsCartOpen: (isOpen: boolean) => set({ isCartOpen: isOpen }),
 
-  addToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => {
+  addToCart: (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', customUnitPrice?: number) => {
     // Guard: Out of stock check - visible on storefront but cannot be purchased
     const isOutOfStock = product.inStock === false || (typeof product.stockQuantity === 'number' && product.stockQuantity <= 0);
     if (isOutOfStock) {
@@ -610,17 +610,22 @@ export const useStore = create<StoreState>((set, get) => ({
     }
 
     const availableStock = typeof product.stockQuantity === 'number' ? product.stockQuantity : (product.inStock !== false ? 50 : 0);
-    const determinedOrderType: 'retail' | 'wholesale' = orderType || (quantity > 5 ? 'wholesale' : 'retail');
+    const retailMax = product.retailMaxBoxes || product.retailQuantity || availableStock;
+    const determinedOrderType: 'retail' | 'wholesale' = orderType || (quantity > retailMax ? 'wholesale' : 'retail');
     const isRetail = determinedOrderType === 'retail';
-    const maxAllowed = isRetail ? Math.min(5, availableStock) : availableStock;
+    const maxAllowed = isRetail ? Math.min(retailMax, availableStock) : (product.wholesaleMaxBoxes ? Math.min(product.wholesaleMaxBoxes, availableStock) : availableStock);
     const clampedQty = Math.max(1, Math.min(quantity, maxAllowed));
 
     // Pricing calculation
-    let unitPrice = isRetail
-      ? (product.pricePerUnit ? product.pricePerUnit * 1.45 : 0.45)
-      : (product.pricePerUnit || 0.25);
+    let unitPrice = customUnitPrice !== undefined && customUnitPrice > 0
+      ? customUnitPrice
+      : isRetail
+        ? (product.retailPricePerUnit !== undefined && product.retailPricePerUnit > 0
+            ? product.retailPricePerUnit
+            : (product.pricePerUnit ? Number((product.pricePerUnit * 1.45).toFixed(2)) : 0.45))
+        : (product.pricePerUnit || 0.25);
 
-    if (!isRetail && product.volumeTiers && product.volumeTiers.length > 0) {
+    if (!isRetail && product.volumeTiers && product.volumeTiers.length > 0 && customUnitPrice === undefined) {
       for (const tier of product.volumeTiers) {
         if (clampedQty >= tier.minQty) {
           unitPrice = tier.price;
@@ -632,7 +637,7 @@ export const useStore = create<StoreState>((set, get) => ({
       const existingIndex = state.cart.findIndex(
         (item) => item.product.id === product.id && 
                   item.selectedColor === selectedColor && 
-                  (item.orderType || (item.quantity > 5 ? 'wholesale' : 'retail')) === determinedOrderType
+                  (item.orderType || (item.quantity > retailMax ? 'wholesale' : 'retail')) === determinedOrderType
       );
 
       let updatedCart: CartItem[];
@@ -643,8 +648,8 @@ export const useStore = create<StoreState>((set, get) => ({
             if (newQty > maxAllowed) {
               newQty = maxAllowed;
             }
-            let updatedPrice = unitPrice;
-            if (!isRetail && product.volumeTiers) {
+            let updatedPrice = (customUnitPrice !== undefined && customUnitPrice > 0) ? customUnitPrice : (unitPrice || item.unitPrice);
+            if (!isRetail && product.volumeTiers && customUnitPrice === undefined) {
               for (const tier of product.volumeTiers) {
                 if (newQty >= tier.minQty) updatedPrice = tier.price;
               }
@@ -679,15 +684,16 @@ export const useStore = create<StoreState>((set, get) => ({
             if (newQty <= 0) return null;
 
             const availableStock = typeof item.product.stockQuantity === 'number' ? item.product.stockQuantity : (item.product.inStock !== false ? 50 : 0);
-            const isRetail = item.orderType === 'retail' || (!item.orderType && item.quantity <= 5);
-            const maxAllowed = isRetail ? Math.min(5, availableStock) : availableStock;
+            const isRetail = item.orderType === 'retail';
+            const retailMax = item.product.retailMaxBoxes || item.product.retailQuantity || availableStock;
+            const maxAllowed = isRetail ? Math.min(retailMax, availableStock) : (item.product.wholesaleMaxBoxes ? Math.min(item.product.wholesaleMaxBoxes, availableStock) : availableStock);
             if (newQty > maxAllowed) {
               newQty = maxAllowed;
             }
 
-            // Recalculate tier
-            let unitPrice = item.product.pricePerUnit;
-            if (item.product.volumeTiers) {
+            // Recalculate tier for wholesale if volume tiers exist
+            let unitPrice = item.unitPrice;
+            if (!isRetail && item.product.volumeTiers) {
               for (const tier of item.product.volumeTiers) {
                 if (newQty >= tier.minQty) unitPrice = tier.price;
               }

@@ -94,8 +94,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleExpressCheckout = (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale') => {
-    addToCart(product, selectedColor, quantity, orderType);
+  const handleExpressCheckout = (product: Product, selectedColor: string, quantity: number, orderType?: 'retail' | 'wholesale', unitPrice?: number) => {
+    addToCart(product, selectedColor, quantity, orderType, unitPrice);
     setCartInitialStep('checkout');
     setIsCartOpen(true);
     setQuickViewProduct(null);
@@ -247,7 +247,7 @@ export default function App() {
               onNavigateHome={() => {
                 handleNavigate('home');
               }}
-              onAddToCart={(p, color, qty, oType) => addToCart(p, color, qty, oType)}
+              onAddToCart={(p, color, qty, oType, price) => addToCart(p, color, qty, oType, price)}
               onOpenQuote={handleOpenQuoteForProduct}
               onExpressCheckout={handleExpressCheckout}
               onSelectProduct={handleOpenProductDetail}
@@ -286,7 +286,7 @@ export default function App() {
         <ProductDetailModal
           product={quickViewProduct}
           onClose={() => setQuickViewProduct(null)}
-          onAddToCart={(p, color, qty, oType) => addToCart(p, color, qty, oType)}
+          onAddToCart={(p, color, qty, oType, price) => addToCart(p, color, qty, oType, price)}
           onOpenQuote={handleOpenQuoteForProduct}
           onExpressCheckout={handleExpressCheckout}
         />
