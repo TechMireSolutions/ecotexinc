@@ -47,23 +47,15 @@ copyDirSync(frontendDist, path.join(outDir, 'public'));
 console.log('📂 Step 4: Copying backend server source...');
 copyDirSync(path.join(rootDir, 'backend', 'src'), path.join(outDir, 'src'));
 
-// 5. Copy backend root files & SQL schema
-console.log('📂 Step 5: Copying core backend files, database & SQL schema...');
+// 5. Copy backend root files
+console.log('📂 Step 5: Copying core backend files & database...');
 fs.copyFileSync(path.join(rootDir, 'backend', 'index.js'), path.join(outDir, 'index.js'));
 fs.copyFileSync(path.join(rootDir, 'backend', 'db.json'), path.join(outDir, 'db.json'));
 if (fs.existsSync(path.join(rootDir, 'backend', 'db.backup.json'))) {
   fs.copyFileSync(path.join(rootDir, 'backend', 'db.backup.json'), path.join(outDir, 'db.backup.json'));
 }
-
-// Generate & copy MySQL schema
-try {
-  execSync('node scripts/generate-sql.js', { stdio: 'inherit', cwd: rootDir });
-  if (fs.existsSync(path.join(rootDir, 'backend', 'database_schema.sql'))) {
-    fs.copyFileSync(path.join(rootDir, 'backend', 'database_schema.sql'), path.join(outDir, 'database_schema.sql'));
-    fs.copyFileSync(path.join(rootDir, 'backend', 'database_schema.sql'), path.join(outDir, 'schema.sql'));
-  }
-} catch (sqlGenErr) {
-  console.warn('SQL generation notice:', sqlGenErr.message);
+if (fs.existsSync(path.join(rootDir, 'backend', 'schema.sql'))) {
+  fs.copyFileSync(path.join(rootDir, 'backend', 'schema.sql'), path.join(outDir, 'schema.sql'));
 }
 
 // 6. Ensure uploads folder exists
@@ -149,7 +141,7 @@ RATE_LIMIT_MAX_REQUESTS=2500
 AUTH_RATE_LIMIT_MAX_REQUESTS=50
 MAX_UPLOAD_SIZE_MB=50
 
-# cPanel MySQL Database Configuration (Active)
+# cPanel MySQL Configuration
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=mkbrothe_ecotexinc_user
@@ -242,20 +234,11 @@ STEP 3: Files Upload Karein (cPanel File Manager Se)
 5. Upload complete hone ke baad wapas File Manager mein aayein.
 6. "ecotex-cpanel-production.zip" par right-click karein aur "Extract" (Extract Here) par click karein.
 
-STEP 4 (Optional): MySQL Database Tables Verify / Import Karein
-Note: Application start hote hi tables ko automatic check aur create kar leti hai.
-Agar DevOps ne phpMyAdmin se manually import karna ho:
-1. cPanel mein "phpMyAdmin" open karein.
-2. Database "mkbrothe_ecotexinc" par click karein.
-3. Top navigation mein "Import" par click karein.
-4. "database_schema.sql" (ya "schema.sql") file choose karein jo extracted folder mein maujood hai.
-5. Neeche "Go" button dabayein. Saari tables aur latest CMS data pre-load ho jayega!
-
-STEP 5: App Start / Restart Karein
+STEP 4: App Start / Restart Karein
 1. Wapas "Setup Node.js App" page par jayein.
 2. Apni application ke samne "Restart" (ya "Run JS Script") button par click karein.
 
-STEP 6: Check Karein
+STEP 5: Check Karein
 1. Apne browser mein open karein:
    - https://ecotexinc.com
      -> Yahan aapka main frontend website (Storefront) khulega.

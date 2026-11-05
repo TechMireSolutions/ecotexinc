@@ -32,6 +32,7 @@ export function getAuthHeaders(): Record<string, string> {
  * 1. Queries primary URL (/admin/api by default).
  * 2. Checks content-type so HTML SPA fallbacks (e.g. index.html) are detected.
  * 3. Tries alternate endpoint (/api vs /admin/api) if primary fails.
+ * 4. Cleans stale auth headers on 401/403 and never retries unauthorized calls.
  */
 export async function safeFetchJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -43,6 +44,12 @@ export async function safeFetchJson<T>(endpoint: string, options?: RequestInit):
   const attempt = async (url: string): Promise<T> => {
     const res = await fetch(url, options);
     if (!res.ok) {
+      if ((res.status === 401 || res.status === 403) && typeof window !== 'undefined') {
+        localStorage.removeItem('ecotex_admin_token');
+        localStorage.removeItem('ecotex_admin_user');
+        sessionStorage.removeItem('ecotex_admin_token');
+        sessionStorage.removeItem('ecotex_admin_user');
+      }
       throw new Error(`HTTP ${res.status} from ${url}`);
     }
     const contentType = res.headers.get('content-type') || '';
@@ -54,7 +61,11 @@ export async function safeFetchJson<T>(endpoint: string, options?: RequestInit):
 
   try {
     return await attempt(primaryUrl);
-  } catch (primaryErr) {
+  } catch (primaryErr: any) {
+    // If unauthorized, do not retry secondary endpoint
+    if (primaryErr?.message?.includes('HTTP 401') || primaryErr?.message?.includes('HTTP 403')) {
+      throw primaryErr;
+    }
     if (fallbackUrl !== primaryUrl) {
       try {
         return await attempt(fallbackUrl);
@@ -195,9 +206,16 @@ export const apiService = {
     if (!authHeaders.Authorization) {
       return [];
     }
-    return safeFetchJson<Order[]>('/orders', {
-      headers: { ...authHeaders },
-    });
+    try {
+      return await safeFetchJson<Order[]>('/orders', {
+        headers: { ...authHeaders },
+      });
+    } catch (err: any) {
+      if (err?.message?.includes('HTTP 401') || err?.message?.includes('HTTP 403')) {
+        return [];
+      }
+      throw err;
+    }
   },
 
   async createOrder(order: Partial<Order>): Promise<Order> {
@@ -245,9 +263,16 @@ export const apiService = {
     if (!authHeaders.Authorization) {
       return [];
     }
-    return safeFetchJson<QuoteSubmission[]>('/quotes', {
-      headers: { ...authHeaders },
-    });
+    try {
+      return await safeFetchJson<QuoteSubmission[]>('/quotes', {
+        headers: { ...authHeaders },
+      });
+    } catch (err: any) {
+      if (err?.message?.includes('HTTP 401') || err?.message?.includes('HTTP 403')) {
+        return [];
+      }
+      throw err;
+    }
   },
 
   async createQuote(quote: Partial<QuoteSubmission>): Promise<QuoteSubmission> {

@@ -7,15 +7,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootBackendDir = path.resolve(__dirname, '..', '..');
 
-// Load root .env if present, followed by backend/.env (allowing override)
+// Load root .env if present, followed by backend/.env and current working directory .env
 const rootEnvPath = path.resolve(rootBackendDir, '..', '.env');
 const backendEnvPath = path.join(rootBackendDir, '.env');
+const cwdEnvPath = path.resolve(process.cwd(), '.env');
 
 if (fs.existsSync(rootEnvPath)) {
   dotenv.config({ path: rootEnvPath });
 }
 if (fs.existsSync(backendEnvPath)) {
   dotenv.config({ path: backendEnvPath, override: true });
+}
+if (fs.existsSync(cwdEnvPath)) {
+  dotenv.config({ path: cwdEnvPath, override: true });
 }
 
 export const config = Object.freeze({

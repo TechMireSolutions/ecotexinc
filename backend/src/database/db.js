@@ -109,9 +109,12 @@ export async function initDb() {
 
       // Seed to MySQL if connection active
       if (isMysqlActive()) {
-        saveAllCollectionsToMysql(memoryDb).catch((err) => {
+        try {
+          await saveAllCollectionsToMysql(memoryDb);
+          logger.info(`Successfully seeded ${Object.keys(memoryDb).length} initial collections to MySQL tables.`);
+        } catch (err) {
           logger.warn('Could not seed initial collections to MySQL:', err.message || err);
-        });
+        }
       }
       // Or seed to Neon PostgreSQL if connection available
       else if (config.databaseUrl) {

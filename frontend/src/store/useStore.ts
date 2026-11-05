@@ -855,7 +855,8 @@ export const useStore = create<StoreState>((set, get) => ({
   fetchAllData: async () => {
     try {
       const authHeaders = getAuthHeaders();
-      const isAdminLoggedIn = Boolean(authHeaders.Authorization);
+      const isAdminPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+      const isAdminLoggedIn = Boolean(authHeaders.Authorization) && isAdminPath;
 
       const [settingsRes, prodRes, catRes, ordsRes, qtsRes, statsRes, msgsRes] = await Promise.allSettled([
         apiService.getSettings(),
@@ -863,8 +864,8 @@ export const useStore = create<StoreState>((set, get) => ({
         apiService.getCategories(),
         isAdminLoggedIn ? apiService.getOrders() : Promise.resolve([]),
         isAdminLoggedIn ? apiService.getQuotes() : Promise.resolve([]),
-        apiService.getStats(),
-        apiService.getMessages(),
+        isAdminLoggedIn ? apiService.getStats() : Promise.resolve(null),
+        isAdminLoggedIn ? apiService.getMessages() : Promise.resolve([]),
       ]);
 
       if (settingsRes.status === 'fulfilled' && settingsRes.value) {
@@ -1176,6 +1177,10 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await fetch(`${BASE_URL}/orders`, {
         headers: { ...authHeaders },
       });
+      if (res.status === 401 || res.status === 403) {
+        get().logout();
+        return get().orders;
+      }
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -1220,6 +1225,10 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await fetch(`${BASE_URL}/quotes`, {
         headers: { ...authHeaders },
       });
+      if (res.status === 401 || res.status === 403) {
+        get().logout();
+        return get().quotes;
+      }
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {

@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch-path=src --watch-path=index.js index.js",
-    "test": "node --test tests/unit/orders.test.js tests/unit/auth.test.js tests/unit/settings.test.js tests/unit/messages.test.js && node test.js",
-    "test:unit": "node --test tests/unit/orders.test.js tests/unit/auth.test.js tests/unit/settings.test.js tests/unit/messages.test.js",
+    "test": "node --test tests/unit/orders.test.js tests/unit/auth.test.js tests/unit/settings.test.js tests/unit/messages.test.js tests/unit/mysql.test.js && node test.js",
+    "test:unit": "node --test tests/unit/orders.test.js tests/unit/auth.test.js tests/unit/settings.test.js tests/unit/messages.test.js tests/unit/mysql.test.js",
     "test:integration": "node test.js"
   },
   "dependencies": {
