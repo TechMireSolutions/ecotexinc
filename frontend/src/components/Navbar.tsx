@@ -23,7 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { siteSettings } = useStore();
+  const { siteSettings, cart } = useStore();
+  const displayCartCount = Array.isArray(cart) ? cart.length : (cartCount || 0);
 
   const ctaText = siteSettings?.navbarConfig?.ctaButtonText || siteSettings?.heroButtonText || 'START SHOP';
   const announcementText = siteSettings?.navbarConfig?.announcementText || siteSettings?.announcement || '🌱 Certified Recycled & Compostable Wholesale Packaging · Direct from Corona, CA Facility';
@@ -152,12 +153,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={onOpenCart}
                   className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-full transition-colors cursor-pointer"
-                  aria-label={`Shopping bag with ${cartCount} items`}
+                  aria-label={`Shopping bag with ${displayCartCount} entries`}
                 >
                   <ShoppingBag className="w-4.5 h-4.5" />
-                  {cartCount > 0 && (
+                  {displayCartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#166534] text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center font-mono shadow-xs">
-                      {cartCount > 99 ? '99+' : cartCount}
+                      {displayCartCount > 99 ? '99+' : displayCartCount}
                     </span>
                   )}
                 </button>

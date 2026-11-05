@@ -156,7 +156,7 @@ export default function App() {
     );
   }
 
-  const cartItemCount = getCartItemCount();
+  const cartItemCount = Array.isArray(cart) ? cart.length : getCartItemCount();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F4F9F5] text-[#0f172a] font-sans antialiased selection:bg-[#B2E2C5]/40 selection:text-[#4E9F76]">
