@@ -195,3 +195,4 @@ sql += `SET FOREIGN_KEY_CHECKS = 1;\n-- Migration Complete\n`;
 
 fs.writeFileSync(outSqlPath, sql, 'utf8');
 console.log(`✅ MySQL schema & migration successfully generated at: ${outSqlPath} (${(sql.length / 1024).toFixed(1)} KB)`);
+

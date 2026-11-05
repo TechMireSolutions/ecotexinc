@@ -67,3 +67,4 @@ describe('Backend MySQL Driver & Schema Validation Tests', () => {
     assert.ok(content.includes('INSERT INTO `categories`'), 'schema.sql must contain seed data for categories');
   });
 });
+
