@@ -50,7 +50,7 @@ interface SiteSettingsManagerProps {
   onLogout?: () => void;
 }
 
-type SettingsTab = 'identity' | 'shipping' | 'footer' | 'commerce' | 'announcement' | 'business' | 'account';
+type SettingsTab = 'identity' | 'whatsapp' | 'shipping' | 'footer' | 'commerce' | 'announcement' | 'business' | 'account';
 
 export const SiteSettingsManager: React.FC<SiteSettingsManagerProps> = ({ onLogout }) => {
   const { siteSettings, updateSiteSettings, adminUser, logout } = useStore();
@@ -519,6 +519,7 @@ return () => clearTimeout(timer);
 
   const settingsTabs: { id: SettingsTab; label: string; desc: string; icon: React.ElementType }[] = [
     { id: 'identity', label: 'Site Identity & SEO', desc: 'Brand title, favicon & SEO meta', icon: Globe },
+    { id: 'whatsapp', label: 'WhatsApp Order Alerts', desc: 'Order dispatch receiver phone number', icon: MessageSquare },
     { id: 'account', label: 'Admin Security', desc: 'Password & administrator credentials', icon: User },
     { id: 'announcement', label: 'Header Announcement', desc: 'Top notice banner & alerts', icon: Megaphone },
     { id: 'business', label: 'Business & Contacts', desc: 'Facility addresses & phone lines', icon: Building2 },
@@ -564,8 +565,22 @@ return () => clearTimeout(timer);
           </p>
         </div>
 
-        {/* Global Save Button */}
-        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto shrink-0 justify-end">
+        {/* Header Action Buttons & Quick WhatsApp Alert Pill */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto shrink-0 justify-end">
+          <button
+            type="button"
+            onClick={() => setActiveTab('whatsapp')}
+            title="Click to view or edit WhatsApp Order Dispatch number"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer group"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <MessageSquare className="w-4 h-4 text-[#059669] shrink-0" />
+            <span className="text-slate-700 font-semibold">WhatsApp Alerts:</span>
+            <span className="bg-white px-2 py-0.5 rounded-md border border-emerald-300 font-mono text-[11px] font-black text-slate-900 group-hover:text-[#166534]">
+              {formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || '+92 332 8784015'}
+            </span>
+            <Edit2 className="w-3 h-3 text-emerald-600 opacity-70 group-hover:opacity-100 shrink-0" />
+          </button>
           <button
             type="button"
             onClick={handleSaveSettings}
@@ -641,6 +656,220 @@ return () => clearTimeout(timer);
       {/* ========================================================
           TAB 1: SITE IDENTITY & SEO (FAVICON, SITE TITLE, META)
          ======================================================== */}
+      {/* ========================================================
+          TAB: WHATSAPP ORDER NOTIFICATIONS & DISPATCH
+         ======================================================== */}
+      {activeTab === 'whatsapp' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Top Banner Card */}
+          <div className="bg-gradient-to-r from-emerald-900 via-[#166534] to-[#0f4724] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-emerald-700/50 relative overflow-hidden">
+            <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="p-2 rounded-xl bg-white/10 text-emerald-300">
+                    <MessageSquare className="w-5 h-5" />
+                  </span>
+                  <span className="text-[10px] font-black tracking-widest uppercase text-emerald-200">
+                    Real-Time Order Dispatch Alerts
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">
+                  WhatsApp Order Alerts Number
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm text-emerald-100/90 max-w-xl">
+                  Jab bhi koi customer storefront par wholesale RFQ ya Order place karta hai, ye phone number real-time WhatsApp alert receive karta hai.
+                </p>
+              </div>
+
+              {/* Exact WhatsApp Alerts Pill Display matching user screenshot */}
+              <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 shadow-inner flex flex-col items-start gap-1 shrink-0">
+                <span className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Current Active Alert Status</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-white text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-300" />
+                  <span className="text-emerald-100 font-bold">WhatsApp Alerts:</span>
+                  <span className="bg-white px-2 py-0.5 rounded-md font-mono text-[11px] font-black text-slate-900 shadow-2xs">
+                    {formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || '+92 332 8784015'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Edit Form Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#B2E2C5]/50 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h4 className="text-base font-black text-slate-900 uppercase">
+                  Alert Receiver Configuration
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Ye number storefront checkout aur Orders Inbox dono par dynamically link hota hai.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.orderNotifications?.whatsappEnabled !== false}
+                    onChange={(e) => handleOrderNotificationsChange('whatsappEnabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                  <span className="ml-2 text-xs font-bold text-slate-800">
+                    {formData.orderNotifications?.whatsappEnabled !== false ? 'WhatsApp Alert ON' : 'Alerts Paused'}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* WhatsApp Phone Number */}
+              <div className="md:col-span-2 bg-emerald-50/60 p-5 rounded-2xl border-2 border-emerald-300/80">
+                <label className="block text-xs font-black text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-emerald-950 font-extrabold text-sm">
+                    <MessageSquare className="w-4 h-4 text-[#25D366]" />
+                    WhatsApp Phone Number (Order Receiver) *
+                  </span>
+                  <span className="text-[11px] font-bold text-[#166534] bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                    Live Dispatch Target
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="+92 332 8784015 or +1 (951) 450-9773"
+                    value={formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleOrderNotificationsChange('whatsappNumber', val);
+                      handleFieldChange('whatsappNumber', val);
+                    }}
+                    className="w-full pl-11 pr-4 py-3 text-base bg-white border-2 border-emerald-400 focus:border-[#166534] rounded-xl focus:outline-none font-bold font-mono text-slate-900 shadow-inner"
+                  />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg bg-[#25D366] text-white flex items-center justify-center text-xs font-bold shadow-2xs pointer-events-none">
+                    wa
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-3 pt-2 border-t border-emerald-200/60 text-xs">
+                  <p className="text-slate-600">
+                    Country code zaroor shamil karein (jaise <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+92</code> ya <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+1</code>).
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-slate-500 font-medium">Quick Preset:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleOrderNotificationsChange('whatsappNumber', '+92 332 8784015');
+                        handleFieldChange('whatsappNumber', '+92 332 8784015');
+                      }}
+                      className="px-2 py-1 text-[11px] font-bold font-mono bg-white hover:bg-emerald-100 border border-emerald-300 rounded text-emerald-900 cursor-pointer transition-all"
+                    >
+                      +92 332 8784015
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleOrderNotificationsChange('whatsappNumber', '+1 (951) 450-9773');
+                        handleFieldChange('whatsappNumber', '+1 (951) 450-9773');
+                      }}
+                      className="px-2 py-1 text-[11px] font-bold font-mono bg-white hover:bg-emerald-100 border border-emerald-300 rounded text-emerald-900 cursor-pointer transition-all"
+                    >
+                      +1 (951) 450-9773
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Copy Email */}
+              <div>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  Order Copy Email (Notification Email)
+                </label>
+                <input
+                  type="email"
+                  placeholder="orders@ecotexinc.com"
+                  value={formData.orderNotifications?.notificationEmail || formData.email || ''}
+                  onChange={(e) => handleOrderNotificationsChange('notificationEmail', e.target.value)}
+                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Har new order ki backup copy is address par mail hogi.
+                </p>
+              </div>
+
+              {/* Auto Open WhatsApp Toggle */}
+              <div>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  Direct Dispatch Behavior
+                </label>
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">Auto-Open WhatsApp On Checkout</span>
+                    <span className="text-[11px] text-slate-500">Order submit hote hi customer ke device par WhatsApp prompt open karein</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.orderNotifications?.autoOpenWhatsapp !== false}
+                    onChange={(e) => handleOrderNotificationsChange('autoOpenWhatsapp', e.target.checked)}
+                    className="w-4 h-4 text-[#166534] rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* WhatsApp Alert Message Heading / Greeting */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  WhatsApp Alert Message Greeting / Heading
+                </label>
+                <input
+                  type="text"
+                  placeholder="New Wholesale Order Received on EcoTex Storefront"
+                  value={formData.orderNotifications?.whatsappGreeting || 'New Wholesale Order Received on EcoTex Storefront'}
+                  onChange={(e) => handleOrderNotificationsChange('whatsappGreeting', e.target.value)}
+                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#25D366] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Test & Action Bar */}
+            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse"></span>
+                <span className="text-xs font-medium text-slate-700">
+                  Target Destination: <strong className="font-mono text-emerald-950 font-bold">{formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || 'Not Configured'}</strong>
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={`https://wa.me/${(formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Test wholesale alert from EcoTex Inc. Admin Studio')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-white hover:bg-emerald-100 text-[#166534] border border-emerald-300 font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Test WhatsApp Link</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="px-5 py-2 bg-[#166534] hover:bg-[#15803d] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isSaving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'identity' && (
         <div className="space-y-8 animate-fadeIn">
           
