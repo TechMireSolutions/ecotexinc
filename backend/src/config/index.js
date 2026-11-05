@@ -22,10 +22,14 @@ if (fs.existsSync(cwdEnvPath)) {
   dotenv.config({ path: cwdEnvPath, override: true });
 }
 
+const isDevMode = process.env.npm_lifecycle_event === 'dev' || process.env.DEV_MODE === 'true' || process.argv.includes('--dev');
+const isProd = !isDevMode && process.env.NODE_ENV === 'production';
+let configuredPort = isDevMode ? 3001 : parseInt(process.env.PORT || '3000', 10);
+
 export const config = Object.freeze({
-  env: process.env.NODE_ENV || 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  port: parseInt(process.env.PORT || '3001', 10),
+  env: isProd ? 'production' : 'development',
+  isProduction: isProd,
+  port: configuredPort,
   host: process.env.HOST || '0.0.0.0',
 
   // MySQL Database Configuration

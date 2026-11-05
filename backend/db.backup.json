@@ -1329,8 +1329,8 @@
   "adminAuth": {
     "name": "Operations Director",
     "email": "admin@ecotexinc.com",
-    "password": "$2b$10$88Wkpum/LaXrkS5w/TekP.hyKmpM1oyntcG1Cbj9WwJxkiqnKjjGy",
-    "updatedAt": "2026-11-04T11:54:40.264Z"
+    "password": "$2b$10$WLWiub4vMYSxWNCj9gOFN.NNGLzyT6TomrOqm7HkRn5UsSajzjHVy",
+    "updatedAt": "2026-11-05T06:20:03.281Z"
   },
   "customerMessages": [
     {

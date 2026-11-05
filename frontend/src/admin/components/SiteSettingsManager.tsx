@@ -39,7 +39,8 @@ import {
   Facebook,
   Linkedin,
   Instagram,
-  Youtube
+  Youtube,
+  MessageSquare
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { SiteSettings, LogoConfig, OrderNotificationsConfig, ShippingConfig, FooterConfig, SocialLinkItem } from '../../types';
@@ -275,6 +276,31 @@ return () => clearTimeout(timer);
         };
       }
       return { ...prev, ...updates };
+    });
+  };
+
+  // Order Notifications & WhatsApp Dispatch Updater
+  const handleOrderNotificationsChange = (field: keyof OrderNotificationsConfig, value: any) => {
+    setFormData(prev => {
+      const currentNotifs = prev.orderNotifications || {
+        emailEnabled: true,
+        notificationEmail: prev.email || 'orders@ecotexinc.com',
+        whatsappEnabled: true,
+        whatsappNumber: prev.whatsappNumber || '+92 332 8784015',
+        whatsappGreeting: 'New Wholesale Order Received on EcoTex Storefront',
+        autoOpenWhatsapp: true
+      };
+
+      const nextNotifs = {
+        ...currentNotifs,
+        [field]: value
+      };
+
+      return {
+        ...prev,
+        orderNotifications: nextNotifs,
+        ...(field === 'whatsappNumber' ? { whatsappNumber: value } : {})
+      };
     });
   };
 
@@ -1152,16 +1178,134 @@ return () => clearTimeout(timer);
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                <span>Official Desk WhatsApp Number</span>
+                <span>Customer Desk WhatsApp Number</span>
                 <span className="text-[10px] text-[#25D366] font-bold">Website Floating Button</span>
               </label>
               <input
                 type="text"
-                placeholder="+1 (951) 450-9773 or +92 330 8738606"
-                value={formData.whatsappNumber || formData.orderNotifications?.whatsappNumber || ''}
+                placeholder="+1 (951) 450-9773 or +92 332 8784015"
+                value={formData.whatsappNumber || ''}
                 onChange={(e) => handleFieldChange('whatsappNumber', e.target.value)}
                 className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#25D366] focus:outline-none font-semibold text-slate-900"
               />
+              <p className="text-[11px] text-slate-400 mt-1">Customer support floating button ke liye phone number.</p>
+            </div>
+
+            {/* Dedicated WhatsApp Order Dispatch & Alert Settings Card */}
+            <div className="sm:col-span-2 mt-4 p-5 sm:p-6 bg-gradient-to-br from-emerald-50/70 via-white to-green-50/40 rounded-2xl border-2 border-[#25D366]/50 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center shadow-md shadow-[#25D366]/20 shrink-0">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                      <span>WhatsApp Order Notification & Dispatch Settings</span>
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-[#166534] border border-emerald-200">
+                        Order Alert Destination
+                      </span>
+                    </h4>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Jab bhi koi customer storefront par order submit karega, ye number real-time WhatsApp alert receive karega.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.orderNotifications?.whatsappEnabled !== false}
+                      onChange={(e) => handleOrderNotificationsChange('whatsappEnabled', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#25D366]"></div>
+                    <span className="ml-2 text-xs font-bold text-slate-700">
+                      {formData.orderNotifications?.whatsappEnabled !== false ? 'WhatsApp Alert ON' : 'Alerts Paused'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Order Alert WhatsApp Number *</span>
+                    <span className="text-[10px] text-emerald-700 font-bold">Admin Alert Receiver</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="+92 332 8784015 or +1 (951) 450-9773"
+                      value={formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || ''}
+                      onChange={(e) => handleOrderNotificationsChange('whatsappNumber', e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-white border-2 border-emerald-300 focus:border-[#25D366] rounded-xl focus:outline-none font-bold text-slate-900 shadow-2xs"
+                    />
+                    <MessageSquare className="w-4 h-4 text-[#25D366] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Format: <code className="font-mono text-emerald-800 font-bold">+92 332 8784015</code> (Country code lazmi lagayein)
+                    </p>
+                    {formData.whatsappNumber && formData.whatsappNumber !== formData.orderNotifications?.whatsappNumber && (
+                      <button
+                        type="button"
+                        onClick={() => handleOrderNotificationsChange('whatsappNumber', formData.whatsappNumber)}
+                        className="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
+                      >
+                        Copy Floating Number
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                    Order Copy Notification Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="orders@ecotexinc.com"
+                    value={formData.orderNotifications?.notificationEmail || formData.email || ''}
+                    onChange={(e) => handleOrderNotificationsChange('notificationEmail', e.target.value)}
+                    className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5">
+                    Order confirmation email copy is address par dispatch hogi.
+                  </p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                    WhatsApp Message Alert Greeting / Heading
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="New Wholesale Order Received on EcoTex Storefront"
+                    value={formData.orderNotifications?.whatsappGreeting || 'New Wholesale Order Received on EcoTex Storefront'}
+                    onChange={(e) => handleOrderNotificationsChange('whatsappGreeting', e.target.value)}
+                    className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#25D366] focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-emerald-100/50 rounded-xl border border-emerald-200 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] animate-pulse"></span>
+                    <span className="font-medium text-slate-700">
+                      Current Alert Receiver: <strong className="font-mono text-emerald-950 font-bold">{formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || 'Not Configured'}</strong>
+                    </span>
+                  </div>
+                  <a
+                    href={`https://wa.me/${(formData.orderNotifications?.whatsappNumber || formData.whatsappNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Test order notification alert from Ecotex Inc Admin Studio')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-[#166534] border border-emerald-300 font-bold text-[11px] rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Test WhatsApp Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
             </div>
 
             <div>

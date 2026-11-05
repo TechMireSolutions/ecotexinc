@@ -12,7 +12,8 @@ const npmCmd = isWindows ? 'npm.cmd' : 'npm';
 const backend = spawn(npmCmd, ['run', 'dev'], {
   cwd: path.resolve('./backend'),
   stdio: 'inherit',
-  shell: true
+  shell: true,
+  env: { ...process.env, PORT: '3001', NODE_ENV: 'development', DEV_MODE: 'true' }
 });
 
 const frontend = spawn(npmCmd, ['run', 'dev'], {
@@ -30,4 +31,3 @@ function handleExit(code) {
 process.on('SIGINT', () => handleExit(0));
 process.on('SIGTERM', () => handleExit(0));
 process.on('exit', () => handleExit(0));
-
