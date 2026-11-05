@@ -22,8 +22,8 @@
       "subtitle": "Commercial Wholesale Series",
       "createdAt": "2026-10-27T07:33:45.681Z",
       "ecoImpact": "Displaces up to 250 single-use plastic carrier bags per unit lifetime.",
-      "pcsPerBox": 201,
-      "updatedAt": "2026-11-04T10:43:58.652Z",
+      "pcsPerBox": 300,
+      "updatedAt": "2026-11-05T11:51:50.661Z",
       "dimensions": "12\"W x 14\"H x 4\"D",
       "description": "High tensile enterprise carrier bag manufactured for supermarkets, boutique retail, and trade exhibitions.",
       "volumeTiers": [
@@ -40,9 +40,9 @@
           "minQty": 10000
         }
       ],
-      "pricePerUnit": 0.25,
+      "pricePerUnit": 60,
       "categoryLabel": "Non-Woven Totes",
-      "stockQuantity": 15,
+      "stockQuantity": 225,
       "certifications": [
         "GRS Certified",
         "100% Recyclable",
@@ -69,7 +69,7 @@
         }
       ],
       "originalPrice": 0.31,
-      "retailPricePerUnit": 0.36,
+      "retailPricePerUnit": 66,
       "retailOriginalPrice": 0.45,
       "retailMinBoxes": 15,
       "retailMaxBoxes": 15,
@@ -917,7 +917,7 @@
     "tagline": "Certified Sustainable Wholesale Packaging Direct From Manufacturer",
     "heroTitle": "It's time to pack better.",
     "siteTitle": "Ecotex Inc. | Wholesale Sustainable Packaging & Polypropylene Bags",
-    "updatedAt": "2026-11-05T06:48:36.652Z",
+    "updatedAt": "2026-11-05T10:13:48.244Z",
     "aboutStory": "Founded to combat the global crisis of single-use plastic waste, Ecotex Inc. operates as a vertically integrated packaging manufacturer. We specialize in high-tensile reusable non-woven polypropylene totes, certified compostable cornstarch blends, and reclaimed post-industrial cotton wiping textiles.",
     "aboutTitle": "Engineered For Durability. Designed For Circularity.",
     "dealConfig": {

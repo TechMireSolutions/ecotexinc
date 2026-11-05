@@ -644,6 +644,10 @@ export const useStore = create<StoreState>((set, get) => ({
       if (existingIndex > -1) {
         updatedCart = state.cart.map((item, index) => {
           if (index === existingIndex) {
+            if (isRetail) {
+              // Retail order quantity is fixed (e.g. 15 boxes). Keep clamped fixed quantity and do not stack
+              return { ...item, quantity: clampedQty, unitPrice, orderType: determinedOrderType };
+            }
             let newQty = item.quantity + clampedQty;
             if (newQty > maxAllowed) {
               newQty = maxAllowed;
@@ -680,6 +684,13 @@ export const useStore = create<StoreState>((set, get) => ({
       const updatedCart = state.cart
         .map((item) => {
           if (item.id === itemId) {
+            const isWholesaleItem = item.orderType === 'wholesale';
+            const isRetailFixed = !isWholesaleItem;
+            if (isRetailFixed) {
+              // Retail quantity is locked and cannot be altered in cart
+              return item;
+            }
+
             let newQty = item.quantity + delta;
             if (newQty <= 0) return null;
 

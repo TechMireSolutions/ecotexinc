@@ -415,11 +415,12 @@ Notification automatically generated via EcoTex Storefront.`;
 
                           const isWholesaleItem = item.orderType === 'wholesale' || (!item.orderType && (item.quantity > 5 || (item.quantity % 5 === 0 && item.unitPrice <= (item.product.pricePerUnit || 0.35))));
                           const availableStock = typeof item.product.stockQuantity === 'number' ? item.product.stockQuantity : (item.product.inStock !== false ? 50 : 0);
-                          const retailFixed = item.product.retailQuantity || 15;
-                                const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : retailFixed;
-                                const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : Math.min(retailFixed, availableStock);
-                          const isAtMin = item.quantity <= minQty;
-                          const isAtMax = item.quantity >= maxQty;
+                          const retailFixedQty = item.product.retailQuantity || item.product.retailMinBoxes || 15;
+                          const isRetailFixed = !isWholesaleItem;
+                          const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : retailFixedQty;
+                          const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : retailFixedQty;
+                          const isAtMin = isRetailFixed || item.quantity <= minQty;
+                          const isAtMax = isRetailFixed || item.quantity >= maxQty;
 
                           return (
                             <motion.div 
@@ -475,15 +476,17 @@ Notification automatically generated via EcoTex Storefront.`;
                                     <button
                                       type="button"
                                       disabled={isAtMin}
+                                      title={isRetailFixed ? `Retail order quantity is fixed at ${retailFixedQty} boxes` : (isWholesaleItem ? 'Decrease by 5 boxes' : 'Decrease')}
                                       onClick={() => {
+                                        if (isRetailFixed || isAtMin) return;
                                         if (isWholesaleItem) {
-                                          onUpdateQuantity(item.id, Math.max(5, item.quantity - 5));
+                                          onUpdateQuantity(item.id, Math.max(minQty, item.quantity - 5));
                                         } else {
-                                          onUpdateQuantity(item.id, Math.max(1, item.quantity - 1));
+                                          onUpdateQuantity(item.id, Math.max(minQty, item.quantity - 1));
                                         }
                                       }}
-                                      className={`w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm cursor-pointer ${
-                                        isAtMin ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed' : 'border-[#cfc8bd] text-[#1c1b18] hover:bg-white'
+                                      className={`w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm ${
+                                        isAtMin ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed' : 'border-[#cfc8bd] text-[#1c1b18] hover:bg-white cursor-pointer'
                                       }`}
                                     >
                                       –
@@ -494,20 +497,26 @@ Notification automatically generated via EcoTex Storefront.`;
                                     <button
                                       type="button"
                                       disabled={isAtMax}
+                                      title={isRetailFixed ? `Retail order quantity is fixed at ${retailFixedQty} boxes` : (isWholesaleItem ? 'Increase by 5 boxes' : 'Increase')}
                                       onClick={() => {
-                                        if (isAtMax) return;
+                                        if (isRetailFixed || isAtMax) return;
                                         if (isWholesaleItem) {
                                           onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 5));
                                         } else {
                                           onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 1));
                                         }
                                       }}
-                                      className={`w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm cursor-pointer ${
-                                        isAtMax ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed' : 'border-[#cfc8bd] text-[#1c1b18] hover:bg-white'
+                                      className={`w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm ${
+                                        isAtMax ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed' : 'border-[#cfc8bd] text-[#1c1b18] hover:bg-white cursor-pointer'
                                       }`}
                                     >
                                       +
                                     </button>
+                                    {isRetailFixed && (
+                                      <span className="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-mono font-medium">
+                                        🔒 Fixed
+                                      </span>
+                                    )}
                                   </div>
 
                                   <div className="text-right font-serif text-base font-bold text-[#166534]">
@@ -567,64 +576,75 @@ Notification automatically generated via EcoTex Storefront.`;
                               {(() => {
                                 const isWholesaleItem = item.orderType === 'wholesale';
                                 const availableStock = typeof item.product.stockQuantity === 'number' ? item.product.stockQuantity : (item.product.inStock !== false ? 50 : 0);
-                                const retailMax = item.product.retailMaxBoxes || item.product.retailQuantity || availableStock;
-                                const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : 1;
-                                const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : Math.min(retailMax, availableStock);
-                                const isAtMin = item.quantity <= minQty;
-                                const isAtMax = item.quantity >= maxQty;
+                                const retailFixedQty = item.product.retailQuantity || item.product.retailMinBoxes || 15;
+                                const isRetailFixed = !isWholesaleItem;
+                                const minQty = isWholesaleItem ? (item.product.wholesaleMinBoxes || item.product.wholesaleMoq || 5) : retailFixedQty;
+                                const maxQty = isWholesaleItem ? (item.product.wholesaleMaxBoxes || availableStock) : retailFixedQty;
+                                const isAtMin = isRetailFixed || item.quantity <= minQty;
+                                const isAtMax = isRetailFixed || item.quantity >= maxQty;
 
                                 return (
-                                  <div className="col-span-2 flex items-center justify-center gap-1.5 sm:gap-2.5 text-xs sm:text-sm font-serif select-none">
-                                    <motion.button
-                                      whileTap={{ scale: isAtMin ? 1 : 0.8 }}
-                                      type="button"
-                                      disabled={isAtMin}
-                                      onClick={() => {
-                                        if (isWholesaleItem) {
-                                          onUpdateQuantity(item.id, Math.max(5, item.quantity - 5));
-                                        } else {
-                                          onUpdateQuantity(item.id, Math.max(1, item.quantity - 1));
+                                  <div className="col-span-2 flex flex-col items-center justify-center select-none">
+                                    <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 text-xs sm:text-sm font-serif">
+                                      <motion.button
+                                        whileTap={{ scale: isAtMin ? 1 : 0.8 }}
+                                        type="button"
+                                        disabled={isAtMin}
+                                        onClick={() => {
+                                          if (isRetailFixed || isAtMin) return;
+                                          if (isWholesaleItem) {
+                                            onUpdateQuantity(item.id, Math.max(minQty, item.quantity - 5));
+                                          } else {
+                                            onUpdateQuantity(item.id, Math.max(minQty, item.quantity - 1));
+                                          }
+                                        }}
+                                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors text-sm leading-none font-bold ${
+                                          isAtMin
+                                            ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+                                            : 'border-[#cfc8bd] hover:border-[#1c1b18] hover:bg-white text-[#1c1b18] cursor-pointer'
+                                        }`}
+                                        aria-label="Decrease quantity"
+                                        title={isRetailFixed ? `Retail quantity is locked at ${retailFixedQty} boxes` : (isWholesaleItem ? 'Wholesale step is 5 boxes' : 'Decrease')}
+                                      >
+                                        –
+                                      </motion.button>
+                                      <span className={`font-mono text-xs sm:text-sm font-bold tabular-nums min-w-[28px] text-center px-1 ${item.quantity > availableStock ? 'text-rose-600' : 'text-[#1c1b18]'}`}>
+                                        {item.quantity < 1000 ? item.quantity : `${item.quantity.toLocaleString()}`}
+                                      </span>
+                                      <motion.button
+                                        whileTap={{ scale: isAtMax ? 1 : 0.8 }}
+                                        type="button"
+                                        disabled={isAtMax}
+                                        onClick={() => {
+                                          if (isRetailFixed || isAtMax) return;
+                                          if (isWholesaleItem) {
+                                            onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 5));
+                                          } else {
+                                            onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 1));
+                                          }
+                                        }}
+                                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors text-sm leading-none font-bold ${
+                                          isAtMax
+                                            ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+                                            : 'border-[#cfc8bd] hover:border-[#1c1b18] hover:bg-white text-[#1c1b18] cursor-pointer'
+                                        }`}
+                                        aria-label="Increase quantity"
+                                        title={
+                                          isRetailFixed
+                                            ? `Retail quantity is locked at ${retailFixedQty} boxes`
+                                            : (isAtMax
+                                                ? (item.quantity >= availableStock ? `Available stock limit reached (${availableStock} boxes in stock)` : `Maximum wholesale order reached`)
+                                                : (isWholesaleItem ? 'Increase by 5 boxes' : 'Increase quantity'))
                                         }
-                                      }}
-                                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors text-sm leading-none font-bold ${
-                                        isAtMin
-                                          ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
-                                          : 'border-[#cfc8bd] hover:border-[#1c1b18] hover:bg-white text-[#1c1b18] cursor-pointer'
-                                      }`}
-                                      aria-label="Decrease quantity"
-                                      title={isAtMin ? (isWholesaleItem ? 'Wholesale minimum is 5 boxes' : 'Minimum order is 1 box') : 'Decrease'}
-                                    >
-                                      –
-                                    </motion.button>
-                                    <span className={`font-mono text-xs sm:text-sm font-bold tabular-nums min-w-[28px] text-center px-1 ${item.quantity > availableStock ? 'text-rose-600' : 'text-[#1c1b18]'}`}>
-                                      {item.quantity < 1000 ? item.quantity : `${item.quantity.toLocaleString()}`}
-                                    </span>
-                                    <motion.button
-                                      whileTap={{ scale: isAtMax ? 1 : 0.8 }}
-                                      type="button"
-                                      disabled={isAtMax}
-                                      onClick={() => {
-                                        if (isAtMax) return;
-                                        if (isWholesaleItem) {
-                                          onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 5));
-                                        } else {
-                                          onUpdateQuantity(item.id, Math.min(maxQty, item.quantity + 1));
-                                        }
-                                      }}
-                                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center transition-colors text-sm leading-none font-bold ${
-                                        isAtMax
-                                          ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
-                                          : 'border-[#cfc8bd] hover:border-[#1c1b18] hover:bg-white text-[#1c1b18] cursor-pointer'
-                                      }`}
-                                      aria-label="Increase quantity"
-                                      title={
-                                        isAtMax
-                                          ? (item.quantity >= availableStock ? `Available stock limit reached (${availableStock} boxes in stock)` : `Retail orders are limited to ${maxQty} boxes maximum`)
-                                          : (isWholesaleItem ? 'Increase by 5 boxes' : 'Increase quantity')
-                                      }
-                                    >
-                                      +
-                                    </motion.button>
+                                      >
+                                        +
+                                      </motion.button>
+                                    </div>
+                                    {isRetailFixed && (
+                                      <span className="text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-sans font-medium mt-1">
+                                        🔒 Fixed {retailFixedQty} boxes
+                                      </span>
+                                    )}
                                   </div>
                                 );
                               })()}
