@@ -182,8 +182,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json image/svg+xml
 </IfModule>
 
-# 5. Allow up to 50MB request payloads
-LimitRequestBody 52428800
+# 5. Allow up to 100MB request payloads (comfortably handles 50MB+ high-res photos)
+LimitRequestBody 104857600
 
 # 6. Phusion Passenger Configuration (CloudLinux "Setup Node.js App")
 <IfModule mod_passenger.c>

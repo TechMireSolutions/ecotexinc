@@ -232,11 +232,11 @@ export async function updateDb(updater) {
         }
         await writeToDiskAtomic(memoryDb);
         if (isMysqlActive()) {
-          saveAllCollectionsToMysql(memoryDb).catch((err) => {
+          await saveAllCollectionsToMysql(memoryDb).catch((err) => {
             logger.warn('Failed to sync update to MySQL:', err.message || err);
           });
         } else if (config.databaseUrl) {
-          saveAllCollectionsToNeon(memoryDb).catch((err) => {
+          await saveAllCollectionsToNeon(memoryDb).catch((err) => {
             logger.warn('Failed to sync update to Neon PostgreSQL:', err.message || err);
           });
         }

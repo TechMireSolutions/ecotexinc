@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 const uploadMiddleware = multer({
   storage,
   limits: {
-    fileSize: config.upload.maxSizeBytes,
+    fileSize: Math.max(config.upload.maxSizeBytes, 100 * 1024 * 1024), // Supports up to 100MB direct file uploads
   },
   fileFilter: (req, file, cb) => {
     if (config.upload.allowedMimeTypes.includes(file.mimetype)) {

@@ -35,9 +35,10 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(config.isProduction ? 'combined' : 'dev'));
 }
 
-// Body parsers
-app.use(express.json({ limit: `${config.upload.maxSizeMb}mb` }));
-app.use(express.urlencoded({ extended: true, limit: `${config.upload.maxSizeMb}mb` }));
+// Body parsers with generous limits (handles large 50MB+ image uploads & base64 encoding)
+const bodyLimit = `${Math.max(100, (config.upload?.maxSizeMb || 50) * 2)}mb`;
+app.use(express.json({ limit: bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 
 // Global Rate Limiting
 app.use(generalLimiter);
