@@ -209,9 +209,10 @@ export const ProductCatalogManager: React.FC = () => {
     trustBadge1: 'Fast Delivery',
     trustBadge2: 'Secure Store',
     trustBadge3: 'Easy Return',
-    retailPolicyText: 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
-    wholesalePolicyText: 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
-    outOfStockNotice: 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
+    retailPolicyText: 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
+    wholesalePolicyText: 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
+    outOfStockTitle: 'This item is currently out of stock',
+    outOfStockNotice: 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
     checkoutButtonText: '→ Express Checkout',
     outOfStockButtonText: 'Purchases Temporarily Closed (Sold Out)',
     retailTabLabel: 'Retail Order',
@@ -308,9 +309,10 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge1: 'Fast Delivery',
       trustBadge2: 'Secure Store',
       trustBadge3: 'Easy Return',
-      retailPolicyText: 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
-      wholesalePolicyText: 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
-      outOfStockNotice: 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
+      retailPolicyText: 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
+      wholesalePolicyText: 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
+      outOfStockTitle: 'This item is currently out of stock',
+      outOfStockNotice: 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
       checkoutButtonText: '→ Express Checkout',
       outOfStockButtonText: 'Purchases Temporarily Closed (Sold Out)',
       retailTabLabel: 'Retail Order',
@@ -409,9 +411,10 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge1: p.trustBadge1 || 'Fast Delivery',
       trustBadge2: p.trustBadge2 || 'Secure Store',
       trustBadge3: p.trustBadge3 || 'Easy Return',
-      retailPolicyText: p.retailPolicyText || 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
-      wholesalePolicyText: p.wholesalePolicyText || 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
-      outOfStockNotice: p.outOfStockNotice || 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
+      retailPolicyText: (p.retailPolicyText && !p.retailPolicyText.includes('barah-e-karam')) ? p.retailPolicyText : 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
+      wholesalePolicyText: (p.wholesalePolicyText && !p.wholesalePolicyText.includes('starting 5 boxes se hai')) ? p.wholesalePolicyText : 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
+      outOfStockTitle: p.outOfStockTitle || 'This item is currently out of stock',
+      outOfStockNotice: (p.outOfStockNotice && !p.outOfStockNotice.includes('check ki ja sakti hain')) ? p.outOfStockNotice : 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
       checkoutButtonText: p.checkoutButtonText || '→ Express Checkout',
       outOfStockButtonText: p.outOfStockButtonText || 'Purchases Temporarily Closed (Sold Out)',
       retailTabLabel: p.retailTabLabel || 'Retail Order',
@@ -501,6 +504,7 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge3: formData.trustBadge3.trim(),
       retailPolicyText: formData.retailPolicyText.trim(),
       wholesalePolicyText: formData.wholesalePolicyText.trim(),
+      outOfStockTitle: formData.outOfStockTitle.trim(),
       outOfStockNotice: formData.outOfStockNotice.trim(),
       checkoutButtonText: formData.checkoutButtonText.trim(),
       outOfStockButtonText: formData.outOfStockButtonText.trim(),
@@ -2028,22 +2032,39 @@ export const ProductCatalogManager: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Out of Stock Notice Banner */}
-                  <div className="bg-rose-50/70 p-4 rounded-2xl border border-rose-200/80 space-y-2">
+                  {/* Out of Stock Notice Banner Customization */}
+                  <div className="bg-rose-50/70 p-4 rounded-2xl border border-rose-200/80 space-y-3">
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
                       <AlertCircle className="w-4 h-4 text-rose-600" />
-                      <span>Out of Stock Notification Message (When Stock is 0 Boxes)</span>
+                      <span>Out of Stock Notification Settings (When Stock is 0 Boxes)</span>
                     </h4>
                     <p className="text-[11px] text-rose-700/80">
-                      Yeh text customer ko tab show hoga jab is product ka stock 0 boxes ho jaye.
+                      Configure the alert header and message displayed to customers when inventory reaches 0 boxes.
                     </p>
-                    <textarea
-                      rows={2}
-                      value={formData.outOfStockNotice}
-                      onChange={(e) => setFormData({ ...formData, outOfStockNotice: e.target.value })}
-                      className="w-full p-2.5 rounded-xl border border-rose-200 text-xs font-medium bg-white text-rose-900 focus:outline-none focus:border-rose-500"
-                      placeholder="Product specifications aur details check ki ja sakti hain..."
-                    />
+                    <div>
+                      <label className="block text-xs font-bold text-rose-900 mb-1">
+                        Out of Stock Heading / Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.outOfStockTitle}
+                        onChange={(e) => setFormData({ ...formData, outOfStockTitle: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl border border-rose-200 text-xs font-bold bg-white text-rose-900 focus:outline-none focus:border-rose-500"
+                        placeholder="This item is currently out of stock"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-rose-900 mb-1">
+                        Out of Stock Message Body
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.outOfStockNotice}
+                        onChange={(e) => setFormData({ ...formData, outOfStockNotice: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-rose-200 text-xs font-medium bg-white text-rose-900 focus:outline-none focus:border-rose-500"
+                        placeholder="Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished."
+                      />
+                    </div>
                   </div>
 
                   {/* Buttons & Related Products Section Customizer */}

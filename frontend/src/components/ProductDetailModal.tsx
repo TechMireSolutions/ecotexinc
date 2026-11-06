@@ -648,9 +648,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <div className="mt-3 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 animate-fadeIn">
                     <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-bold">Yeh item abhi out of stock ho chuka hai</p>
+                      <p className="font-bold">{product.outOfStockTitle || 'This item is currently out of stock'}</p>
                       <p className="mt-0.5 text-rose-700/90 leading-relaxed">
-                        Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.
+                        {product.outOfStockNotice || 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.'}
                       </p>
                     </div>
                   </div>
@@ -668,7 +668,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {orderType === 'retail' && !moqWarning && !isOutOfStock && (
                   <div className="mt-2 text-[11px] text-amber-900 bg-amber-50/80 border border-amber-200/70 rounded-xl px-3 py-1.5 flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                    <span>Retail order policy: <strong>1 se 5 boxes maximum</strong>. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar <strong>Wholesale Order</strong> select karein.</span>
+                    <span>{product.retailPolicyText ? product.retailPolicyText : <>Retail order policy: <strong>Fixed 15 boxes</strong> per order. For lower or custom bulk volumes, please select <strong>Wholesale Order</strong> above.</>}</span>
                   </div>
                 )}
 
@@ -676,7 +676,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {orderType === 'wholesale' && !moqWarning && !isOutOfStock && (
                   <div className="mt-2 text-[11px] text-emerald-800 bg-emerald-50/70 border border-emerald-200/60 rounded-xl px-3 py-1.5 flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Wholesale order: starting <strong>5 boxes</strong> se hai aur sabhi orders <strong>5 ke multiples</strong> mein place hote hain (5, 10, 15, 20...).</span>
+                    <span>{product.wholesalePolicyText ? product.wholesalePolicyText : <>Wholesale order: starting from <strong>{wholesaleMoq} boxes</strong> minimum and placed in <strong>increments of 5 boxes</strong>.</>}</span>
                   </div>
                 )}
               </div>
