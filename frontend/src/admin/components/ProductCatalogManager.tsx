@@ -209,10 +209,9 @@ export const ProductCatalogManager: React.FC = () => {
     trustBadge1: 'Fast Delivery',
     trustBadge2: 'Secure Store',
     trustBadge3: 'Easy Return',
-    retailPolicyText: 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
-    wholesalePolicyText: 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
-    outOfStockTitle: 'This item is currently out of stock',
-    outOfStockNotice: 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
+    retailPolicyText: 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
+    wholesalePolicyText: 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
+    outOfStockNotice: 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
     checkoutButtonText: '→ Express Checkout',
     outOfStockButtonText: 'Purchases Temporarily Closed (Sold Out)',
     retailTabLabel: 'Retail Order',
@@ -309,10 +308,9 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge1: 'Fast Delivery',
       trustBadge2: 'Secure Store',
       trustBadge3: 'Easy Return',
-      retailPolicyText: 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
-      wholesalePolicyText: 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
-      outOfStockTitle: 'This item is currently out of stock',
-      outOfStockNotice: 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
+      retailPolicyText: 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
+      wholesalePolicyText: 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
+      outOfStockNotice: 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
       checkoutButtonText: '→ Express Checkout',
       outOfStockButtonText: 'Purchases Temporarily Closed (Sold Out)',
       retailTabLabel: 'Retail Order',
@@ -411,10 +409,9 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge1: p.trustBadge1 || 'Fast Delivery',
       trustBadge2: p.trustBadge2 || 'Secure Store',
       trustBadge3: p.trustBadge3 || 'Easy Return',
-      retailPolicyText: (p.retailPolicyText && !p.retailPolicyText.includes('barah-e-karam')) ? p.retailPolicyText : 'Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above.',
-      wholesalePolicyText: (p.wholesalePolicyText && !p.wholesalePolicyText.includes('starting 5 boxes se hai')) ? p.wholesalePolicyText : 'Wholesale order: starting from 5 boxes minimum and placed in increments of 5 boxes (5, 10, 15, 20...).',
-      outOfStockTitle: p.outOfStockTitle || 'This item is currently out of stock',
-      outOfStockNotice: (p.outOfStockNotice && !p.outOfStockNotice.includes('check ki ja sakti hain')) ? p.outOfStockNotice : 'Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished.',
+      retailPolicyText: p.retailPolicyText || 'Retail order policy: 1 se 5 boxes maximum. Agar aapko 5 se zyada quantity chahiye, toh barah-e-karam upar Wholesale Order select karein.',
+      wholesalePolicyText: p.wholesalePolicyText || 'Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain (5, 10, 15, 20...).',
+      outOfStockNotice: p.outOfStockNotice || 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.',
       checkoutButtonText: p.checkoutButtonText || '→ Express Checkout',
       outOfStockButtonText: p.outOfStockButtonText || 'Purchases Temporarily Closed (Sold Out)',
       retailTabLabel: p.retailTabLabel || 'Retail Order',
@@ -504,7 +501,6 @@ export const ProductCatalogManager: React.FC = () => {
       trustBadge3: formData.trustBadge3.trim(),
       retailPolicyText: formData.retailPolicyText.trim(),
       wholesalePolicyText: formData.wholesalePolicyText.trim(),
-      outOfStockTitle: formData.outOfStockTitle.trim(),
       outOfStockNotice: formData.outOfStockNotice.trim(),
       checkoutButtonText: formData.checkoutButtonText.trim(),
       outOfStockButtonText: formData.outOfStockButtonText.trim(),
@@ -1098,7 +1094,7 @@ export const ProductCatalogManager: React.FC = () => {
                           <span>Master Packaging Spec (Pieces Per Box)</span>
                         </h4>
                         <p className="text-[11px] text-emerald-800/80 mt-0.5">
-                          Number of pieces packed per box. This pack spec dynamically applies to both wholesale and retail tier pricing.
+                          Har 1 box mein kitne pieces pack hain. Yeh calculation Wholesale & Retail dono prices pr live apply hoti hai.
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1221,7 +1217,7 @@ export const ProductCatalogManager: React.FC = () => {
                           value={formData.wholesalePolicyText}
                           onChange={(e) => setFormData({ ...formData, wholesalePolicyText: e.target.value })}
                           className="w-full p-2 rounded-xl border border-emerald-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-emerald-600"
-                          placeholder="Wholesale orders start at 5 boxes minimum and are placed in increments of 5 boxes (5, 10, 15, 20...)."
+                          placeholder="Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain..."
                         />
                       </div>
                     </div>
@@ -1331,7 +1327,7 @@ export const ProductCatalogManager: React.FC = () => {
                           value={formData.retailPolicyText}
                           onChange={(e) => setFormData({ ...formData, retailPolicyText: e.target.value })}
                           className="w-full p-2 rounded-xl border border-amber-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-amber-600"
-                          placeholder="Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above."
+                          placeholder="Retail order policy: Fixed 15 boxes per order. Isse kam ya zyada quantity ke liye barah-e-karam Wholesale Order select karein."
                         />
                       </div>
                     </div>
@@ -1345,7 +1341,7 @@ export const ProductCatalogManager: React.FC = () => {
                           Available Stock (Boxes) *
                         </label>
                         <p className="text-[10px] text-slate-500">
-                          When inventory reaches 0 boxes, the Out of Stock notification banner is automatically activated on the product page.
+                          Jab stock 0 hoga toh single product page pr Out of Stock banner active ho jayega.
                         </p>
                       </div>
 
@@ -1417,7 +1413,7 @@ export const ProductCatalogManager: React.FC = () => {
                           <span>Dynamic Color Palette & Stock Inventory</span>
                         </h4>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Add any custom color variant, select shade via color picker, and configure available inventory per variant (e.g., Red with 20 boxes).
+                          Apni marzi se koi bhi naya colour add karein, color picker se shade chunein, aur har colour ka stock set karein (jaise Red mein 20 boxes).
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -1462,13 +1458,13 @@ export const ProductCatalogManager: React.FC = () => {
                     {/* Color items list */}
                     {(!formData.availableColors || formData.availableColors.length === 0) ? (
                       <div className="text-center py-6 bg-white rounded-xl border border-dashed border-slate-300 space-y-2">
-                        <p className="text-xs text-slate-500">No color variants added yet.</p>
+                        <p className="text-xs text-slate-500">Abhi koi colour add nahi hai.</p>
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, availableColors: DEFAULT_PALETTE.map(c => ({ ...c })) })}
                           className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-xs font-bold rounded-xl cursor-pointer"
                         >
-                          Load Standard 10 Colors
+                          Standard 10 Colors Load Karein
                         </button>
                       </div>
                     ) : (
@@ -2032,39 +2028,22 @@ export const ProductCatalogManager: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Out of Stock Notice Banner Customization */}
-                  <div className="bg-rose-50/70 p-4 rounded-2xl border border-rose-200/80 space-y-3">
+                  {/* Out of Stock Notice Banner */}
+                  <div className="bg-rose-50/70 p-4 rounded-2xl border border-rose-200/80 space-y-2">
                     <h4 className="text-xs font-extrabold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
                       <AlertCircle className="w-4 h-4 text-rose-600" />
-                      <span>Out of Stock Notification Settings (When Stock is 0 Boxes)</span>
+                      <span>Out of Stock Notification Message (When Stock is 0 Boxes)</span>
                     </h4>
                     <p className="text-[11px] text-rose-700/80">
-                      Configure the alert header and message displayed to customers when inventory reaches 0 boxes.
+                      Yeh text customer ko tab show hoga jab is product ka stock 0 boxes ho jaye.
                     </p>
-                    <div>
-                      <label className="block text-xs font-bold text-rose-900 mb-1">
-                        Out of Stock Heading / Title
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.outOfStockTitle}
-                        onChange={(e) => setFormData({ ...formData, outOfStockTitle: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-rose-200 text-xs font-bold bg-white text-rose-900 focus:outline-none focus:border-rose-500"
-                        placeholder="This item is currently out of stock"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-rose-900 mb-1">
-                        Out of Stock Message Body
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={formData.outOfStockNotice}
-                        onChange={(e) => setFormData({ ...formData, outOfStockNotice: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-rose-200 text-xs font-medium bg-white text-rose-900 focus:outline-none focus:border-rose-500"
-                        placeholder="Product specifications and details can be reviewed, but ordering is temporarily unavailable. The purchase button will be re-enabled as soon as inventory is replenished."
-                      />
-                    </div>
+                    <textarea
+                      rows={2}
+                      value={formData.outOfStockNotice}
+                      onChange={(e) => setFormData({ ...formData, outOfStockNotice: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-rose-200 text-xs font-medium bg-white text-rose-900 focus:outline-none focus:border-rose-500"
+                      placeholder="Product specifications aur details check ki ja sakti hain..."
+                    />
                   </div>
 
                   {/* Buttons & Related Products Section Customizer */}

@@ -274,7 +274,7 @@ export const FacilityHubsEditor: React.FC<FacilityHubsEditorProps> = ({
                       placeholder={idx === 0 ? 'US HEADQUARTERS & FULFILLMENT' : 'HEAVY INDUSTRIAL PRODUCTION'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#166534]"
                     />
-                    <p className="text-[11px] text-slate-400 mt-1">Floating pill badge text displayed above the photo.</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Photo ke upar floating pill badge text.</p>
                   </div>
 
                   <div>
@@ -288,7 +288,7 @@ export const FacilityHubsEditor: React.FC<FacilityHubsEditorProps> = ({
                       placeholder={idx === 0 ? 'Corona Distribution & Testing Hub' : 'Primary Manufacturing Plant'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-white focus:outline-none focus:border-[#166534]"
                     />
-                    <p className="text-[11px] text-slate-400 mt-1">Main heading title for this facility card.</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Card ka main heading title.</p>
                   </div>
                 </div>
 
@@ -308,7 +308,7 @@ export const FacilityHubsEditor: React.FC<FacilityHubsEditorProps> = ({
                     placeholder={idx === 0 ? '1200 Industrial Parkway, Corona, CA 92881' : 'Sector 15, Korangi Industrial Area, Karachi, PK'}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 bg-white focus:outline-none focus:border-[#166534]"
                   />
-                  <p className="text-[11px] text-slate-400 mt-1">Updating the address also automatically syncs with the main site contact addresses.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Address update hone par site settings ke main addresses se bhi sync ho jata hai.</p>
                 </div>
 
                 {/* 4. Google Maps & Directions Link */}
@@ -334,7 +334,7 @@ export const FacilityHubsEditor: React.FC<FacilityHubsEditorProps> = ({
                     placeholder="https://maps.google.com/?q=..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 bg-white focus:outline-none focus:border-[#166534]"
                   />
-                  <p className="text-[11px] text-slate-400 mt-1">Destination URL opened when users click "Open Map & Directions".</p>
+                  <p className="text-[11px] text-slate-400 mt-1">"Open Map & Directions" link par click karne par yeh URL open hoga.</p>
                 </div>
 
                 {/* 5. Key Facility Capabilities Pills */}
@@ -496,7 +496,7 @@ export const FacilityHubsEditor: React.FC<FacilityHubsEditorProps> = ({
 
                 <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-900 flex items-center gap-2">
                   <Check className="w-4 h-4 text-[#166534] shrink-0" />
-                  <span>Click "Save All Changes" after making edits to update the live storefront immediately.</span>
+                  <span>Koi bhi changes karte hi Save All Changes par click karein taake live site update ho jaye.</span>
                 </div>
               </div>
 

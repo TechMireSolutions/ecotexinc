@@ -679,7 +679,7 @@ return () => clearTimeout(timer);
                   WhatsApp Order Alerts Number
                 </h3>
                 <p className="mt-1 text-xs sm:text-sm text-emerald-100/90 max-w-xl">
-                  Whenever a customer places an order or submits an RFQ on the storefront, this phone number receives real-time WhatsApp order alerts.
+                  Jab bhi koi customer storefront par wholesale RFQ ya Order place karta hai, ye phone number real-time WhatsApp alert receive karta hai.
                 </p>
               </div>
 
@@ -706,7 +706,7 @@ return () => clearTimeout(timer);
                   Alert Receiver Configuration
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  This phone number dynamically links to both storefront checkout dispatch and the admin Orders Inbox.
+                  Ye number storefront checkout aur Orders Inbox dono par dynamically link hota hai.
                 </p>
               </div>
 
@@ -757,7 +757,7 @@ return () => clearTimeout(timer);
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-3 pt-2 border-t border-emerald-200/60 text-xs">
                   <p className="text-slate-600">
-                    Always include international country code (e.g. <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+1</code> or <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+92</code>).
+                    Country code zaroor shamil karein (jaise <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+92</code> ya <code className="font-mono font-bold text-emerald-900 bg-emerald-100 px-1 py-0.5 rounded">+1</code>).
                   </p>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] text-slate-500 font-medium">Quick Preset:</span>
@@ -798,7 +798,7 @@ return () => clearTimeout(timer);
                   className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
-                  A backup copy of every newly submitted order is sent to this email address.
+                  Har new order ki backup copy is address par mail hogi.
                 </p>
               </div>
 
@@ -810,7 +810,7 @@ return () => clearTimeout(timer);
                 <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
                   <div>
                     <span className="text-xs font-bold text-slate-800 block">Auto-Open WhatsApp On Checkout</span>
-                    <span className="text-[11px] text-slate-500">Automatically open WhatsApp prompt on customer's device upon checkout completion</span>
+                    <span className="text-[11px] text-slate-500">Order submit hote hi customer ke device par WhatsApp prompt open karein</span>
                   </div>
                   <input
                     type="checkbox"
@@ -1418,7 +1418,7 @@ return () => clearTimeout(timer);
                 onChange={(e) => handleFieldChange('whatsappNumber', e.target.value)}
                 className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#25D366] focus:outline-none font-semibold text-slate-900"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Direct contact phone number for customer support and floating action button.</p>
+              <p className="text-[11px] text-slate-400 mt-1">Customer support floating button ke liye phone number.</p>
             </div>
 
             {/* Dedicated WhatsApp Order Dispatch & Alert Settings Card */}
@@ -1436,7 +1436,7 @@ return () => clearTimeout(timer);
                       </span>
                     </h4>
                     <p className="text-xs text-slate-600 mt-0.5">
-                      Whenever a customer submits an order on the storefront, this phone number receives a real-time WhatsApp alert.
+                      Jab bhi koi customer storefront par order submit karega, ye number real-time WhatsApp alert receive karega.
                     </p>
                   </div>
                 </div>
@@ -1475,7 +1475,7 @@ return () => clearTimeout(timer);
                   </div>
                   <div className="flex items-center justify-between mt-1.5">
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Format: <code className="font-mono text-emerald-800 font-bold">+92 332 8784015</code> (Country code required)
+                      Format: <code className="font-mono text-emerald-800 font-bold">+92 332 8784015</code> (Country code lazmi lagayein)
                     </p>
                     {formData.whatsappNumber && formData.whatsappNumber !== formData.orderNotifications?.whatsappNumber && (
                       <button
@@ -1501,7 +1501,7 @@ return () => clearTimeout(timer);
                     className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:border-[#166534] focus:outline-none"
                   />
                   <p className="text-[11px] text-slate-500 mt-1.5">
-                    A confirmation copy of each order will be dispatched to this email address.
+                    Order confirmation email copy is address par dispatch hogi.
                   </p>
                 </div>
 

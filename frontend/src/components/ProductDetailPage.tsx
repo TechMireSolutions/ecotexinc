@@ -855,7 +855,18 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
 
 
-
+              {/* Out of Stock Notice Banner */}
+              {isOutOfStock && (
+                <div className="mt-3 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold">Yeh item abhi out of stock ho chuka hai</p>
+                    <p className="mt-0.5 text-rose-700/90 leading-relaxed">
+                      {product.outOfStockNotice || 'Product specifications aur details check ki ja sakti hain, magar ordering filhal closed hai. Stock replenish hotay hi buy button dobara live ho jayega.'}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Validation Warning Alert */}
               {moqWarning && (

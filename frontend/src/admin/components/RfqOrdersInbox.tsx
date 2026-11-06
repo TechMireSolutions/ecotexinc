@@ -1648,7 +1648,7 @@ export const RfqOrdersInbox: React.FC = () => {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-900 leading-relaxed">
-                Whenever a customer places an order on the storefront, live order details and receipt links are dispatched to this WhatsApp phone number.
+                Jab bhi koi customer storefront se order place karega, is phone number par live order details aur link WhatsApp message ke through land hogi.
               </div>
 
               <div>

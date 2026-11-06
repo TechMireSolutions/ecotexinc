@@ -751,7 +751,7 @@ Notification automatically generated via EcoTex Storefront.`;
                                   <span>Cannot Checkout · Out of Stock Item</span>
                                 </button>
                                 <p className="text-[11px] text-rose-600 mt-1.5 text-center font-medium">
-                                  Please remove out-of-stock items before proceeding to checkout.
+                                  Barah-e-karam out of stock items ko remove karein phir checkout karein.
                                 </p>
                               </div>
                             );
@@ -765,7 +765,7 @@ Notification automatically generated via EcoTex Storefront.`;
                                   <span>Stock Limit Exceeded ({overStockItems.length} item{overStockItems.length > 1 ? 's' : ''})</span>
                                 </div>
                                 <p className="text-[11px] text-rose-700 mt-1 leading-relaxed">
-                                  Cart quantity exceeds available stock. Please reduce quantity or auto-adjust below.
+                                  Cart quantity available stock se zyada hai. Barah-e-karam quantity kam karein ya auto-adjust karein.
                                 </p>
                                 <button
                                   type="button"
