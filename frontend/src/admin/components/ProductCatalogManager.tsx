@@ -1098,7 +1098,7 @@ export const ProductCatalogManager: React.FC = () => {
                           <span>Master Packaging Spec (Pieces Per Box)</span>
                         </h4>
                         <p className="text-[11px] text-emerald-800/80 mt-0.5">
-                          Har 1 box mein kitne pieces pack hain. Yeh calculation Wholesale & Retail dono prices pr live apply hoti hai.
+                          Number of pieces packed per box. This pack spec dynamically applies to both wholesale and retail tier pricing.
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1221,7 +1221,7 @@ export const ProductCatalogManager: React.FC = () => {
                           value={formData.wholesalePolicyText}
                           onChange={(e) => setFormData({ ...formData, wholesalePolicyText: e.target.value })}
                           className="w-full p-2 rounded-xl border border-emerald-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-emerald-600"
-                          placeholder="Wholesale order: starting 5 boxes se hai aur sabhi orders 5 ke multiples mein place hote hain..."
+                          placeholder="Wholesale orders start at 5 boxes minimum and are placed in increments of 5 boxes (5, 10, 15, 20...)."
                         />
                       </div>
                     </div>
@@ -1331,7 +1331,7 @@ export const ProductCatalogManager: React.FC = () => {
                           value={formData.retailPolicyText}
                           onChange={(e) => setFormData({ ...formData, retailPolicyText: e.target.value })}
                           className="w-full p-2 rounded-xl border border-amber-200 text-xs bg-white text-slate-800 focus:outline-none focus:border-amber-600"
-                          placeholder="Retail order policy: Fixed 15 boxes per order. Isse kam ya zyada quantity ke liye barah-e-karam Wholesale Order select karein."
+                          placeholder="Retail order policy: Fixed 15 boxes per order. For lower or custom bulk volumes, please select Wholesale Order above."
                         />
                       </div>
                     </div>
@@ -1345,7 +1345,7 @@ export const ProductCatalogManager: React.FC = () => {
                           Available Stock (Boxes) *
                         </label>
                         <p className="text-[10px] text-slate-500">
-                          Jab stock 0 hoga toh single product page pr Out of Stock banner active ho jayega.
+                          When inventory reaches 0 boxes, the Out of Stock notification banner is automatically activated on the product page.
                         </p>
                       </div>
 
@@ -1417,7 +1417,7 @@ export const ProductCatalogManager: React.FC = () => {
                           <span>Dynamic Color Palette & Stock Inventory</span>
                         </h4>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Apni marzi se koi bhi naya colour add karein, color picker se shade chunein, aur har colour ka stock set karein (jaise Red mein 20 boxes).
+                          Add any custom color variant, select shade via color picker, and configure available inventory per variant (e.g., Red with 20 boxes).
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -1462,13 +1462,13 @@ export const ProductCatalogManager: React.FC = () => {
                     {/* Color items list */}
                     {(!formData.availableColors || formData.availableColors.length === 0) ? (
                       <div className="text-center py-6 bg-white rounded-xl border border-dashed border-slate-300 space-y-2">
-                        <p className="text-xs text-slate-500">Abhi koi colour add nahi hai.</p>
+                        <p className="text-xs text-slate-500">No color variants added yet.</p>
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, availableColors: DEFAULT_PALETTE.map(c => ({ ...c })) })}
                           className="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-xs font-bold rounded-xl cursor-pointer"
                         >
-                          Standard 10 Colors Load Karein
+                          Load Standard 10 Colors
                         </button>
                       </div>
                     ) : (
